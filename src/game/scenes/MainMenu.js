@@ -2,7 +2,8 @@ import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
 import gameState from '../GameState';
 import { TITLE_SCREEN_SUBTITLE, TITLE_SCREEN_TAGLINE, CHARACTER_TYPES, CHARACTER_CONTEXT_PLACEHOLDER, CHARACTER_CONTEXT_MAX_LENGTH } from '../../constants.js';
-// Google Maps removed — using preset map dropdown instead
+import { fetchLocationData } from '../../services/google-maps.js';
+import { generateTilemap } from '../MapGenerator.js';
 
 export class MainMenu extends Scene
 {
@@ -23,20 +24,13 @@ export class MainMenu extends Scene
         this.characterCards = [];
         this.characterCardBgs = [];
 
-        // Context input state
-        this.characterContext = '';
-        this.contextInputText = null;
-        this.contextInputBg = null;
-        this.contextInputCursor = null;
-        this.contextCursorBlinkTimer = null;
-        this.isContextFocused = false;
-
         // Location input state
         this.mapLocation = '';
         this.locationInputText = null;
         this.locationInputBg = null;
-        this.selectedMapIndex = 0;
-        this.mapOptions = [];
+        this.locationInputCursor = null;
+        this.locationBlinkTimer = null;
+        this.isLocationFocused = false;
     }
 
     create ()
@@ -247,20 +241,8 @@ export class MainMenu extends Scene
         // Create Phaser-based input for name
         this.createNameInput();
 
-        // Character class selection
-        this.add.text(this.scale.width / 2, 298, 'CHOOSE YOUR CLASS:', {
-            fontFamily: '"Press Start 2P"',
-            fontSize: '10px',
-            color: '#FFD700',
-            letterSpacing: 2,
-            stroke: '#2D5016',
-            strokeThickness: 3
-        }).setOrigin(0.5);
-
-        this.createCharacterSelection();
-
-        // Context input
-        this.add.text(this.scale.width / 2, 410, 'CHARACTER CONTEXT (OPTIONAL):', {
+        // Location input (optional — for Google Maps integration)
+        this.add.text(this.scale.width / 2, 310, 'MAP LOCATION (OPTIONAL):', {
             fontFamily: '"Press Start 2P"',
             fontSize: '8px',
             color: '#FFD700',
@@ -269,22 +251,10 @@ export class MainMenu extends Scene
             strokeThickness: 2
         }).setOrigin(0.5);
 
-        this.createContextInput();
-
-        // Map selection dropdown
-        this.add.text(this.scale.width / 2, 472, 'MAP STYLE:', {
-            fontFamily: '"Press Start 2P"',
-            fontSize: '8px',
-            color: '#FFD700',
-            letterSpacing: 1,
-            stroke: '#2D5016',
-            strokeThickness: 2
-        }).setOrigin(0.5);
-
-        this.createMapDropdown();
+        this.createLocationInput();
 
         // Start button - vibrant Pokemon-style
-        const buttonY = 545;
+        const buttonY = 400;
         const buttonWidth = 380;
         const buttonHeight = 58;
 
@@ -472,7 +442,7 @@ export class MainMenu extends Scene
             .setInteractive({ useHandCursor: true });
 
         inputZone.on('pointerdown', () => {
-            this.blurContextInput(); // Blur context input if focused
+            this.blurLocationInput();
             this.focusInput();
             const isMobile = this.sys.game.device.input.touch || window.innerWidth <= 1024;
             if (isMobile) {
@@ -488,24 +458,23 @@ export class MainMenu extends Scene
                 width: inputWidth,
                 height: inputHeight
             };
-            const contextBounds = {
-                x: this.scale.width / 2 - 250,
-                y: 438 - 14,
-                width: 500,
+            const locationBounds = {
+                x: this.scale.width / 2 - 210,
+                y: 340 - 14,
+                width: 420,
                 height: 28
             };
             const inName = pointer.x >= nameBounds.x && pointer.x <= nameBounds.x + nameBounds.width &&
                            pointer.y >= nameBounds.y && pointer.y <= nameBounds.y + nameBounds.height;
-            const inContext = pointer.x >= contextBounds.x && pointer.x <= contextBounds.x + contextBounds.width &&
-                             pointer.y >= contextBounds.y && pointer.y <= contextBounds.y + contextBounds.height;
+            const inLocation = pointer.x >= locationBounds.x && pointer.x <= locationBounds.x + locationBounds.width &&
+                               pointer.y >= locationBounds.y && pointer.y <= locationBounds.y + locationBounds.height;
 
             if (!inName && this.isInputFocused) {
                 this.blurInput();
             }
-            if (!inContext && this.isContextFocused) {
-                this.blurContextInput();
+            if (!inLocation && this.isLocationFocused) {
+                this.blurLocationInput();
             }
-            // Map dropdown doesn't need blur handling
         });
 
         // Keyboard input handling
@@ -683,9 +652,11 @@ export class MainMenu extends Scene
             event.preventDefault();
             if (this.isInputFocused) {
                 this.blurInput();
-                this.focusContextInput();
-            } else if (this.isContextFocused) {
-                this.blurContextInput();
+                this.focusLocationInput();
+            } else if (this.isLocationFocused) {
+                this.blurLocationInput();
+                this.focusInput();
+            } else {
                 this.focusInput();
             }
             return;
@@ -714,38 +685,24 @@ export class MainMenu extends Scene
             return;
         }
 
-        // Context input handling
-        if (this.isContextFocused) {
+        // Location input handling
+        if (this.isLocationFocused) {
             if (event.keyCode === 13) {
                 this.changeScene();
                 return;
             }
             if (event.keyCode === 8) {
-                if (this.characterContext.length > 0) {
-                    this.characterContext = this.characterContext.slice(0, -1);
-                    this.updateContextInputText();
+                if (this.mapLocation.length > 0) {
+                    this.mapLocation = this.mapLocation.slice(0, -1);
+                    this.updateLocationText();
                 }
                 return;
             }
             if (event.keyCode >= 32 && event.keyCode <= 126) {
-                const char = event.key;
-                if (this.characterContext.length < CHARACTER_CONTEXT_MAX_LENGTH) {
-                    this.characterContext += char;
-                    this.updateContextInputText();
+                if (this.mapLocation.length < 200) {
+                    this.mapLocation += event.key;
+                    this.updateLocationText();
                 }
-            }
-            return;
-        }
-
-        // Map dropdown: left/right arrows cycle options when no input focused
-        if (!this.isInputFocused && !this.isContextFocused) {
-            if (event.keyCode === 37) { // Left arrow
-                this.cycleMapOption(-1);
-                return;
-            }
-            if (event.keyCode === 39) { // Right arrow
-                this.cycleMapOption(1);
-                return;
             }
         }
     }
@@ -1063,94 +1020,122 @@ export class MainMenu extends Scene
         setTimeout(() => input.focus(), 100);
     }
 
-    // ─── Map Dropdown ───────────────────────────────────────────
-    createMapDropdown ()
+    // ─── Location Input (Google Maps) ──────────────────────────
+    createLocationInput ()
     {
         const inputX = this.scale.width / 2;
-        const inputY = 500;
-        const inputWidth = 500;
+        const inputY = 340;
+        const inputWidth = 420;
         const inputHeight = 28;
-
-        this.mapOptions = [
-            { label: 'Heartwell Village (Default)', value: '' },
-            { label: 'Desert Oasis', value: 'desert' },
-            { label: 'Coastal Town', value: 'coastal' },
-            { label: 'Mountain Pass', value: 'mountain' },
-            { label: 'Forest Glade', value: 'forest' },
-            { label: 'Castle Ruins', value: 'castle' },
-        ];
 
         const savedLocation = gameState.getMapLocation();
-        this.selectedMapIndex = Math.max(0,
-            this.mapOptions.findIndex(o => o.value === savedLocation));
-        this.mapLocation = this.mapOptions[this.selectedMapIndex].value;
+        this.mapLocation = savedLocation || '';
 
-        // Background
-        this.mapDropdownBg = this.add.graphics();
-        this.drawMapDropdownBg();
+        this.locationInputBg = this.add.graphics();
+        this.drawLocationBg(false);
 
-        // Label text
-        this.mapDropdownText = this.add.text(inputX, inputY,
-            this.mapOptions[this.selectedMapIndex].label, {
+        const placeholder = 'e.g. "Times Square, NYC" or "Tokyo Tower"';
+        this.locationInputText = this.add.text(inputX, inputY,
+            this.mapLocation || placeholder, {
             fontFamily: '"Press Start 2P"',
-            fontSize: '8px',
-            color: '#FFFFFF',
+            fontSize: '7px',
+            color: this.mapLocation ? '#FFFFFF' : '#888888',
             letterSpacing: 1,
-            align: 'center'
+            align: 'center',
+            wordWrap: { width: inputWidth - 20 }
         }).setOrigin(0.5);
 
-        // Left arrow
-        const arrowLeft = this.add.text(inputX - inputWidth / 2 + 16, inputY, '<', {
-            fontFamily: '"Press Start 2P"', fontSize: '12px', color: '#FFD700',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        this.locationInputCursor = this.add.text(inputX, inputY, '|', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '7px',
+            color: '#FFD700'
+        }).setOrigin(0.5, 0.5).setVisible(false);
 
-        // Right arrow
-        const arrowRight = this.add.text(inputX + inputWidth / 2 - 16, inputY, '>', {
-            fontFamily: '"Press Start 2P"', fontSize: '12px', color: '#FFD700',
-            stroke: '#000', strokeThickness: 2
-        }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-        arrowLeft.on('pointerdown', () => this.cycleMapOption(-1));
-        arrowRight.on('pointerdown', () => this.cycleMapOption(1));
-
-        // Also make the whole area clickable to cycle forward
-        const zone = this.add.rectangle(inputX, inputY, inputWidth - 60, inputHeight, 0x000000, 0)
+        const zone = this.add.rectangle(inputX, inputY, inputWidth, inputHeight, 0x000000, 0)
             .setInteractive({ useHandCursor: true });
-        zone.on('pointerdown', () => this.cycleMapOption(1));
+        zone.on('pointerdown', () => {
+            this.blurInput();
+            this.focusLocationInput();
+            const isMobile = this.sys.game.device.input.touch || window.innerWidth <= 1024;
+            if (isMobile) this.createMobileLocationInput();
+        });
     }
 
-    drawMapDropdownBg ()
+    drawLocationBg (focused)
     {
-        this.mapDropdownBg.clear();
+        this.locationInputBg.clear();
         const inputX = this.scale.width / 2;
-        const inputY = 500;
-        const inputWidth = 500;
-        const inputHeight = 28;
-        const borderRadius = 10;
+        const inputY = 340;
+        const w = 420, h = 28, r = 10;
 
-        this.mapDropdownBg.fillStyle(0x4A90E2, 0.8);
-        this.mapDropdownBg.fillRoundedRect(
-            inputX - inputWidth / 2, inputY - inputHeight / 2,
-            inputWidth, inputHeight, borderRadius
-        );
-        this.mapDropdownBg.lineStyle(2, 0x6EA8FE, 1);
-        this.mapDropdownBg.strokeRoundedRect(
-            inputX - inputWidth / 2, inputY - inputHeight / 2,
-            inputWidth, inputHeight, borderRadius
-        );
-        this.mapDropdownBg.fillStyle(0x1A3A5C, 0.3);
-        this.mapDropdownBg.fillRoundedRect(
-            inputX - inputWidth / 2 + 2, inputY - inputHeight / 2 + 2,
-            inputWidth - 4, inputHeight - 4, borderRadius - 2
-        );
+        if (focused) {
+            this.locationInputBg.fillStyle(0xFFD700, 0.3);
+            this.locationInputBg.fillRoundedRect(inputX - w/2 - 4, inputY - h/2 - 4, w + 8, h + 8, r + 2);
+        }
+        this.locationInputBg.fillStyle(0x4A90E2, focused ? 1 : 0.8);
+        this.locationInputBg.fillRoundedRect(inputX - w/2, inputY - h/2, w, h, r);
+        this.locationInputBg.lineStyle(2, focused ? 0xFFFFFF : 0x6EA8FE, 1);
+        this.locationInputBg.strokeRoundedRect(inputX - w/2, inputY - h/2, w, h, r);
     }
 
-    cycleMapOption (direction)
+    focusLocationInput ()
     {
-        this.selectedMapIndex = (this.selectedMapIndex + direction + this.mapOptions.length) % this.mapOptions.length;
-        this.mapLocation = this.mapOptions[this.selectedMapIndex].value;
-        this.mapDropdownText.setText(this.mapOptions[this.selectedMapIndex].label);
+        this.isLocationFocused = true;
+        this.drawLocationBg(true);
+        this.locationInputText.setColor('#FFD700');
+        if (!this.mapLocation) this.locationInputText.setText('');
+        this.locationInputCursor.setVisible(true);
+        this.updateLocationCursorPos();
+        if (this.locationBlinkTimer) this.locationBlinkTimer.remove();
+        this.locationBlinkTimer = this.time.addEvent({
+            delay: 500, loop: true,
+            callback: () => { if (this.locationInputCursor) this.locationInputCursor.setVisible(!this.locationInputCursor.visible); }
+        });
+    }
+
+    blurLocationInput ()
+    {
+        this.isLocationFocused = false;
+        this.drawLocationBg(false);
+        this.locationInputText.setColor(this.mapLocation ? '#FFFFFF' : '#888888');
+        if (!this.mapLocation) this.locationInputText.setText('e.g. "Times Square, NYC" or "Tokyo Tower"');
+        if (this.locationInputCursor) this.locationInputCursor.setVisible(false);
+        if (this.locationBlinkTimer) { this.locationBlinkTimer.remove(); this.locationBlinkTimer = null; }
+    }
+
+    updateLocationCursorPos ()
+    {
+        if (!this.locationInputText || !this.locationInputCursor) return;
+        this.locationInputCursor.setX(this.scale.width / 2 + this.locationInputText.width / 2 + 3);
+    }
+
+    updateLocationText ()
+    {
+        if (!this.mapLocation) {
+            this.locationInputText.setText('e.g. "Times Square, NYC" or "Tokyo Tower"');
+            this.locationInputText.setColor('#888888');
+        } else {
+            this.locationInputText.setText(this.mapLocation);
+            this.locationInputText.setColor(this.isLocationFocused ? '#FFD700' : '#FFFFFF');
+        }
+        this.updateLocationCursorPos();
+    }
+
+    createMobileLocationInput ()
+    {
+        const existing = document.getElementById('mobile-location-input');
+        if (existing) existing.remove();
+        const input = document.createElement('input');
+        input.id = 'mobile-location-input';
+        input.type = 'text';
+        input.value = this.mapLocation;
+        input.maxLength = 200;
+        input.placeholder = 'e.g. "Times Square, NYC"';
+        Object.assign(input.style, { position: 'fixed', top: '-100px', left: '-100px', opacity: '0' });
+        document.body.appendChild(input);
+        input.addEventListener('input', (e) => { this.mapLocation = e.target.value.substring(0, 200); this.updateLocationText(); });
+        input.addEventListener('blur', () => { setTimeout(() => { const el = document.getElementById('mobile-location-input'); if (el) el.remove(); }, 100); });
+        setTimeout(() => input.focus(), 100);
     }
 
     changeScene ()
@@ -1160,9 +1145,7 @@ export class MainMenu extends Scene
 
         // Save player name and character settings to game state
         gameState.setPlayerName(this.playerName);
-        gameState.setCharacterType(this.selectedCharacterType);
-        gameState.setCharacterContext(this.characterContext.trim());
-        gameState.setMapLocation(this.mapLocation.trim());
+        gameState.setMapLocation((this.mapLocation || '').trim());
         gameState.clearNPCPositions();
 
         // Generate new session ID for this game run
@@ -1172,14 +1155,63 @@ export class MainMenu extends Scene
         EventBus.emit('player-name-set', this.playerName);
         EventBus.emit('session-started', sessionId);
 
-        // Start overworld with selected map style
-        this.scene.stop('MainMenu');
-        this.scene.start('Overworld', {
-            playerName: this.playerName,
-            characterType: this.selectedCharacterType,
-            characterContext: this.characterContext.trim(),
-            mapLocation: this.mapLocation || ''
-        });
+        const location = (this.mapLocation || '').trim();
+        if (location) {
+            this.generateAndStartOverworld(location);
+        } else {
+            this.scene.stop('MainMenu');
+            this.scene.start('Overworld', {
+                playerName: this.playerName,
+                mapLocation: ''
+            });
+        }
     }
 
+    async generateAndStartOverworld (location)
+    {
+        const loadingText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 80, 'GENERATING MAP...', {
+            fontFamily: '"Press Start 2P"', fontSize: '10px', color: '#FFE066',
+            stroke: '#000000', strokeThickness: 3
+        }).setOrigin(0.5).setDepth(100);
+
+        const loadingDots = this.time.addEvent({
+            delay: 400, loop: true,
+            callback: () => { loadingText.setText('GENERATING MAP' + '.'.repeat((loadingText.text.match(/\./g) || []).length % 3 + 1)); }
+        });
+
+        try {
+            const locationData = await fetchLocationData(location);
+            const { tilemap, metadata } = generateTilemap(locationData);
+
+            if (this.cache.tilemap.exists('generated-map')) {
+                this.cache.tilemap.remove('generated-map');
+            }
+            this.cache.tilemap.add('generated-map', { format: 1, data: tilemap });
+
+            loadingDots.remove();
+            loadingText.destroy();
+
+            this.scene.stop('MainMenu');
+            this.scene.start('Overworld', {
+                playerName: this.playerName,
+                mapLocation: location,
+                useGeneratedMap: true,
+                generatedMapMetadata: metadata
+            });
+        } catch (error) {
+            console.error('[MapGen] Failed:', error);
+            loadingDots.remove();
+            loadingText.setText('MAP FAILED - USING DEFAULT');
+            loadingText.setColor('#FF6666');
+
+            this.time.delayedCall(1500, () => {
+                loadingText.destroy();
+                this.scene.stop('MainMenu');
+                this.scene.start('Overworld', {
+                    playerName: this.playerName,
+                    mapLocation: ''
+                });
+            });
+        }
+    }
 }

@@ -395,9 +395,10 @@ export class Overworld extends Scene
         const layers = [this.belowLayer, this.worldLayer, this.aboveLayer].filter(Boolean);
         for (const layer of layers) {
             if (tint) {
-                layer.setTint(tint);
+                if (layer.setTint) layer.setTint(tint);
             } else {
-                layer.clearTint();
+                if (layer.clearTint) layer.clearTint();
+                else if (layer.setTint) layer.setTint(0xffffff);
             }
         }
 
