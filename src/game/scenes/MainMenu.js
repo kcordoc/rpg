@@ -1,7 +1,7 @@
 import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
 import gameState from '../GameState';
-import { TITLE_SCREEN_SUBTITLE, TITLE_SCREEN_TAGLINE } from '../../constants.js';
+import { TITLE_SCREEN_SUBTITLE, TITLE_SCREEN_TAGLINE, CHARACTER_TYPES, CHARACTER_CONTEXT_PLACEHOLDER, CHARACTER_CONTEXT_MAX_LENGTH } from '../../constants.js';
 
 export class MainMenu extends Scene
 {
@@ -16,6 +16,19 @@ export class MainMenu extends Scene
         this.cursorBlinkTimer = null;
         this.music = null;
         this.isInputFocused = false;
+
+        // Character selection state
+        this.selectedCharacterType = null;
+        this.characterCards = [];
+        this.characterCardBgs = [];
+
+        // Context input state
+        this.characterContext = '';
+        this.contextInputText = null;
+        this.contextInputBg = null;
+        this.contextInputCursor = null;
+        this.contextCursorBlinkTimer = null;
+        this.isContextFocused = false;
     }
 
     create ()
@@ -53,6 +66,28 @@ export class MainMenu extends Scene
             this.cursorBlinkTimer = null;
         }
 
+        // Clean up context input elements
+        if (this.contextInputText) {
+            this.contextInputText.destroy();
+            this.contextInputText = null;
+        }
+        if (this.contextInputBg) {
+            this.contextInputBg.destroy();
+            this.contextInputBg = null;
+        }
+        if (this.contextInputCursor) {
+            this.contextInputCursor.destroy();
+            this.contextInputCursor = null;
+        }
+        if (this.contextCursorBlinkTimer) {
+            this.contextCursorBlinkTimer.remove();
+            this.contextCursorBlinkTimer = null;
+        }
+
+        // Clean up character card references
+        this.characterCards = [];
+        this.characterCardBgs = [];
+
         // Remove keyboard listeners
         this.input.keyboard.off('keydown', this.handleKeyDown, this);
 
@@ -66,6 +101,12 @@ export class MainMenu extends Scene
         const mobileInput = document.getElementById('mobile-name-input');
         if (mobileInput) {
             mobileInput.remove();
+        }
+
+        // Remove mobile context input if exists
+        const mobileContextInput = document.getElementById('mobile-context-input');
+        if (mobileContextInput) {
+            mobileContextInput.remove();
         }
 
         // Stop music
@@ -110,20 +151,21 @@ export class MainMenu extends Scene
         overlay.fillRect(0, 0, this.scale.width, this.scale.height);
 
         // Logo - reduced size and proper positioning
-        const logo = this.add.image(this.scale.width / 2, 140, 'logo');
-        logo.setScale(0.22);
+        const logoY = 80;
+        const logo = this.add.image(this.scale.width / 2, logoY, 'logo');
+        logo.setScale(0.17);
 
         // Logo glow effect - golden/sunny glow matching logo
-        const logoGlow = this.add.image(this.scale.width / 2, 140, 'logo');
-        logoGlow.setScale(0.24);
-        logoGlow.setTint(0xFFD700); // Gold color matching logo's warm tones
+        const logoGlow = this.add.image(this.scale.width / 2, logoY, 'logo');
+        logoGlow.setScale(0.19);
+        logoGlow.setTint(0xFFD700);
         logoGlow.setAlpha(0.3);
         logoGlow.setDepth(-1);
 
         // Logo floating animation
         this.tweens.add({
             targets: [logo, logoGlow],
-            y: { from: 140, to: 135 },
+            y: { from: logoY, to: logoY - 4 },
             duration: 2500,
             yoyo: true,
             repeat: -1,
@@ -134,7 +176,7 @@ export class MainMenu extends Scene
         this.tweens.add({
             targets: logoGlow,
             alpha: { from: 0.3, to: 0.5 },
-            scale: { from: 0.27, to: 0.29 },
+            scale: { from: 0.21, to: 0.23 },
             duration: 2000,
             yoyo: true,
             repeat: -1,
@@ -142,29 +184,29 @@ export class MainMenu extends Scene
         });
 
         // Info text - warm golden color matching logo (reduced sizes)
-        this.add.text(this.scale.width / 2, 250, TITLE_SCREEN_SUBTITLE, {
+        this.add.text(this.scale.width / 2, 160, TITLE_SCREEN_SUBTITLE, {
             fontFamily: '"Press Start 2P"',
-            fontSize: '16px',
-            color: '#FFE066', // Warm yellow from logo
+            fontSize: '12px',
+            color: '#FFE066',
             align: 'center',
-            stroke: '#8B4513', // Brown stroke matching logo's wood
-            strokeThickness: 4
-        }).setOrigin(0.5);
-
-        this.add.text(this.scale.width / 2, 280, TITLE_SCREEN_TAGLINE, {
-            fontFamily: '"Press Start 2P"',
-            fontSize: '13px',
-            color: '#FFFFFF',
-            align: 'center',
-            stroke: '#2D5016', // Dark green from logo
+            stroke: '#8B4513',
             strokeThickness: 3
         }).setOrigin(0.5);
 
-        // Name input label - bright green matching logo
-        this.add.text(this.scale.width / 2, 345, 'ENTER YOUR NAME:', {
+        this.add.text(this.scale.width / 2, 182, TITLE_SCREEN_TAGLINE, {
             fontFamily: '"Press Start 2P"',
-            fontSize: '12px',
-            color: '#FFD700', // Gold
+            fontSize: '10px',
+            color: '#FFFFFF',
+            align: 'center',
+            stroke: '#2D5016',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+
+        // Name input label
+        this.add.text(this.scale.width / 2, 218, 'ENTER YOUR NAME:', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '10px',
+            color: '#FFD700',
             letterSpacing: 2,
             stroke: '#2D5016',
             strokeThickness: 3
@@ -173,8 +215,32 @@ export class MainMenu extends Scene
         // Create Phaser-based input for name
         this.createNameInput();
 
+        // Character class selection
+        this.add.text(this.scale.width / 2, 298, 'CHOOSE YOUR CLASS:', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '10px',
+            color: '#FFD700',
+            letterSpacing: 2,
+            stroke: '#2D5016',
+            strokeThickness: 3
+        }).setOrigin(0.5);
+
+        this.createCharacterSelection();
+
+        // Context input
+        this.add.text(this.scale.width / 2, 418, 'CHARACTER CONTEXT (OPTIONAL):', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '8px',
+            color: '#FFD700',
+            letterSpacing: 1,
+            stroke: '#2D5016',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+
+        this.createContextInput();
+
         // Start button - vibrant Pokemon-style
-        const buttonY = 470;
+        const buttonY = 510;
         const buttonWidth = 380;
         const buttonHeight = 58;
 
@@ -238,7 +304,7 @@ export class MainMenu extends Scene
             this.changeScene();
         });
 
-        // Version text - properly separated below button
+        // Version text
         this.add.text(this.scale.width / 2, 610, 'v0.5 • BUILT WITH PHASER 3', {
             fontFamily: '"Press Start 2P"',
             fontSize: '8px',
@@ -327,9 +393,9 @@ export class MainMenu extends Scene
         }
 
         const inputX = this.scale.width / 2;
-        const inputY = 390;
+        const inputY = 255;
         const inputWidth = 340;
-        const inputHeight = 50;
+        const inputHeight = 36;
 
         // Create input background with glow effect
         this.nameInputBg = this.add.graphics();
@@ -342,18 +408,18 @@ export class MainMenu extends Scene
 
         this.nameInputText = this.add.text(inputX, inputY, initialText || 'TRAINER', {
             fontFamily: '"Press Start 2P"',
-            fontSize: '14px',
+            fontSize: '12px',
             color: initialText ? '#FFFFFF' : '#BBBBBB',
-            letterSpacing: 4,
+            letterSpacing: 3,
             align: 'center'
         }).setOrigin(0.5);
 
         // Create blinking cursor
         this.nameInputCursor = this.add.text(inputX, inputY, '|', {
             fontFamily: '"Press Start 2P"',
-            fontSize: '14px',
+            fontSize: '12px',
             color: '#FFD700',
-            letterSpacing: 4
+            letterSpacing: 3
         }).setOrigin(0.5, 0.5);
         this.nameInputCursor.setVisible(false);
 
@@ -362,28 +428,39 @@ export class MainMenu extends Scene
             .setInteractive({ useHandCursor: true });
 
         inputZone.on('pointerdown', () => {
+            this.blurContextInput(); // Blur context input if focused
             this.focusInput();
-            // On mobile, create and focus a hidden HTML input to trigger keyboard
             const isMobile = this.sys.game.device.input.touch || window.innerWidth <= 1024;
             if (isMobile) {
                 this.createAndFocusMobileInput();
             }
         });
 
-        // Make entire scene clickable to blur input when clicking outside
+        // Make entire scene clickable to blur inputs when clicking outside
         this.input.on('pointerdown', (pointer) => {
-            const inputBounds = {
+            const nameBounds = {
                 x: inputX - inputWidth / 2,
                 y: inputY - inputHeight / 2,
                 width: inputWidth,
                 height: inputHeight
             };
-            
-            if (pointer.x < inputBounds.x || 
-                pointer.x > inputBounds.x + inputBounds.width ||
-                pointer.y < inputBounds.y || 
-                pointer.y > inputBounds.y + inputBounds.height) {
+            const contextBounds = {
+                x: this.scale.width / 2 - 250,
+                y: 450 - 16,
+                width: 500,
+                height: 32
+            };
+
+            const inName = pointer.x >= nameBounds.x && pointer.x <= nameBounds.x + nameBounds.width &&
+                           pointer.y >= nameBounds.y && pointer.y <= nameBounds.y + nameBounds.height;
+            const inContext = pointer.x >= contextBounds.x && pointer.x <= contextBounds.x + contextBounds.width &&
+                             pointer.y >= contextBounds.y && pointer.y <= contextBounds.y + contextBounds.height;
+
+            if (!inName && this.isInputFocused) {
                 this.blurInput();
+            }
+            if (!inContext && this.isContextFocused) {
+                this.blurContextInput();
             }
         });
 
@@ -404,9 +481,9 @@ export class MainMenu extends Scene
         this.nameInputBg.clear();
 
         const inputX = this.scale.width / 2;
-        const inputY = 390;
+        const inputY = 255;
         const inputWidth = 340;
-        const inputHeight = 50;
+        const inputHeight = 36;
         const borderRadius = 14;
         const borderWidth = 4;
 
@@ -557,30 +634,61 @@ export class MainMenu extends Scene
 
     handleKeyDown (event)
     {
-        if (!this.isInputFocused) return;
-
-        // Handle Enter key
-        if (event.keyCode === 13) { // Enter
-            this.changeScene();
-            return;
-        }
-
-        // Handle Backspace
-        if (event.keyCode === 8) { // Backspace
-            if (this.playerName.length > 0) {
-                this.playerName = this.playerName.slice(0, -1);
-                this.updateInputText();
+        // Handle Tab to switch between inputs
+        if (event.keyCode === 9) { // Tab
+            event.preventDefault();
+            if (this.isInputFocused) {
+                this.blurInput();
+                this.focusContextInput();
+            } else if (this.isContextFocused) {
+                this.blurContextInput();
+                this.focusInput();
             }
             return;
         }
 
-        // Handle regular character input
-        if (event.keyCode >= 32 && event.keyCode <= 126) { // Printable characters
-            const char = event.key;
-            // Only allow alphanumeric and spaces
-            if (/^[A-Za-z0-9 ]$/.test(char) && this.playerName.length < 15) {
-                this.playerName += char.toUpperCase();
-                this.updateInputText();
+        // Name input handling
+        if (this.isInputFocused) {
+            if (event.keyCode === 13) {
+                this.changeScene();
+                return;
+            }
+            if (event.keyCode === 8) {
+                if (this.playerName.length > 0) {
+                    this.playerName = this.playerName.slice(0, -1);
+                    this.updateInputText();
+                }
+                return;
+            }
+            if (event.keyCode >= 32 && event.keyCode <= 126) {
+                const char = event.key;
+                if (/^[A-Za-z0-9 ]$/.test(char) && this.playerName.length < 15) {
+                    this.playerName += char.toUpperCase();
+                    this.updateInputText();
+                }
+            }
+            return;
+        }
+
+        // Context input handling
+        if (this.isContextFocused) {
+            if (event.keyCode === 13) {
+                this.changeScene();
+                return;
+            }
+            if (event.keyCode === 8) {
+                if (this.characterContext.length > 0) {
+                    this.characterContext = this.characterContext.slice(0, -1);
+                    this.updateContextInputText();
+                }
+                return;
+            }
+            if (event.keyCode >= 32 && event.keyCode <= 126) {
+                const char = event.key;
+                if (this.characterContext.length < CHARACTER_CONTEXT_MAX_LENGTH) {
+                    this.characterContext += char;
+                    this.updateContextInputText();
+                }
             }
         }
     }
@@ -597,13 +705,316 @@ export class MainMenu extends Scene
         this.updateCursorPosition();
     }
 
+    // ─── Character Selection ────────────────────────────────────
+    createCharacterSelection ()
+    {
+        const centerX = this.scale.width / 2;
+        const cardY = 348;
+        const cardWidth = 140;
+        const cardHeight = 52;
+        const gap = 12;
+        const totalWidth = CHARACTER_TYPES.length * cardWidth + (CHARACTER_TYPES.length - 1) * gap;
+        const startX = centerX - totalWidth / 2 + cardWidth / 2;
+
+        // Load saved character type
+        const savedType = gameState.getCharacterType();
+        this.selectedCharacterType = savedType;
+
+        CHARACTER_TYPES.forEach((charType, index) => {
+            const x = startX + index * (cardWidth + gap);
+            const isSelected = savedType === charType.id;
+
+            // Card background
+            const cardBg = this.add.graphics();
+            this.drawCharacterCard(cardBg, x, cardY, cardWidth, cardHeight, charType.tint, isSelected);
+
+            // Character name
+            const nameText = this.add.text(x, cardY - 8, charType.name.toUpperCase(), {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '8px',
+                color: isSelected ? '#FFFFFF' : '#DDDDDD',
+                align: 'center',
+                stroke: '#000000',
+                strokeThickness: 2
+            }).setOrigin(0.5);
+
+            // Description
+            const descText = this.add.text(x, cardY + 10, charType.description, {
+                fontFamily: '"Press Start 2P"',
+                fontSize: '6px',
+                color: isSelected ? '#FFE066' : '#AAAAAA',
+                align: 'center'
+            }).setOrigin(0.5);
+
+            // Interactive zone
+            const zone = this.add.rectangle(x, cardY, cardWidth, cardHeight, 0x000000, 0)
+                .setInteractive({ useHandCursor: true });
+
+            // Store references
+            this.characterCards.push({ zone, bg: cardBg, nameText, descText, type: charType });
+
+            zone.on('pointerover', () => {
+                if (this.selectedCharacterType !== charType.id) {
+                    this.drawCharacterCard(cardBg, x, cardY, cardWidth, cardHeight, charType.tint, false, true);
+                }
+            });
+
+            zone.on('pointerout', () => {
+                if (this.selectedCharacterType !== charType.id) {
+                    this.drawCharacterCard(cardBg, x, cardY, cardWidth, cardHeight, charType.tint, false, false);
+                }
+            });
+
+            zone.on('pointerdown', () => {
+                this.selectCharacter(charType.id);
+            });
+        });
+    }
+
+    drawCharacterCard (graphics, x, y, w, h, tint, isSelected, isHover = false)
+    {
+        graphics.clear();
+
+        // Glow for selected
+        if (isSelected) {
+            graphics.fillStyle(tint, 0.5);
+            graphics.fillRoundedRect(x - w / 2 - 4, y - h / 2 - 4, w + 8, h + 8, 12);
+        }
+
+        // Background
+        const alpha = isSelected ? 0.9 : (isHover ? 0.6 : 0.4);
+        graphics.fillStyle(tint, alpha);
+        graphics.fillRoundedRect(x - w / 2, y - h / 2, w, h, 8);
+
+        // Border
+        const borderColor = isSelected ? 0xFFFFFF : (isHover ? 0xFFD700 : 0x666666);
+        const borderWidth = isSelected ? 3 : 2;
+        graphics.lineStyle(borderWidth, borderColor, 1);
+        graphics.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 8);
+    }
+
+    selectCharacter (typeId)
+    {
+        // Toggle: clicking the same character deselects
+        if (this.selectedCharacterType === typeId) {
+            this.selectedCharacterType = null;
+        } else {
+            this.selectedCharacterType = typeId;
+        }
+
+        // Update all card visuals
+        this.characterCards.forEach(card => {
+            const isSelected = this.selectedCharacterType === card.type.id;
+            const centerX = this.scale.width / 2;
+            const cardWidth = 140;
+            const cardHeight = 52;
+            const gap = 12;
+            const totalWidth = CHARACTER_TYPES.length * cardWidth + (CHARACTER_TYPES.length - 1) * gap;
+            const startX = centerX - totalWidth / 2 + cardWidth / 2;
+            const idx = CHARACTER_TYPES.findIndex(t => t.id === card.type.id);
+            const x = startX + idx * (cardWidth + gap);
+
+            this.drawCharacterCard(card.bg, x, 348, cardWidth, cardHeight, card.type.tint, isSelected);
+            card.nameText.setColor(isSelected ? '#FFFFFF' : '#DDDDDD');
+            card.descText.setColor(isSelected ? '#FFE066' : '#AAAAAA');
+        });
+    }
+
+    // ─── Context Input ───────────────────────────────────────────
+    createContextInput ()
+    {
+        const inputX = this.scale.width / 2;
+        const inputY = 450;
+        const inputWidth = 500;
+        const inputHeight = 32;
+
+        // Load saved context
+        const savedContext = gameState.getCharacterContext();
+        this.characterContext = savedContext || '';
+
+        // Background
+        this.contextInputBg = this.add.graphics();
+        this.updateContextInputBackground(false);
+
+        // Text
+        this.contextInputText = this.add.text(inputX, inputY,
+            this.characterContext || CHARACTER_CONTEXT_PLACEHOLDER, {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '7px',
+            color: this.characterContext ? '#FFFFFF' : '#888888',
+            letterSpacing: 1,
+            align: 'center',
+            wordWrap: { width: inputWidth - 20 }
+        }).setOrigin(0.5);
+
+        // Cursor
+        this.contextInputCursor = this.add.text(inputX, inputY, '|', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '7px',
+            color: '#FFD700'
+        }).setOrigin(0.5, 0.5);
+        this.contextInputCursor.setVisible(false);
+
+        // Interactive zone
+        const zone = this.add.rectangle(inputX, inputY, inputWidth, inputHeight, 0x000000, 0)
+            .setInteractive({ useHandCursor: true });
+
+        zone.on('pointerdown', () => {
+            this.blurInput(); // Blur name input if focused
+            this.focusContextInput();
+            const isMobile = this.sys.game.device.input.touch || window.innerWidth <= 1024;
+            if (isMobile) {
+                this.createAndFocusMobileContextInput();
+            }
+        });
+    }
+
+    updateContextInputBackground (isFocused)
+    {
+        this.contextInputBg.clear();
+
+        const inputX = this.scale.width / 2;
+        const inputY = 450;
+        const inputWidth = 500;
+        const inputHeight = 32;
+        const borderRadius = 10;
+
+        if (isFocused) {
+            this.contextInputBg.fillStyle(0xFFD700, 0.3);
+            this.contextInputBg.fillRoundedRect(
+                inputX - inputWidth / 2 - 4, inputY - inputHeight / 2 - 4,
+                inputWidth + 8, inputHeight + 8, borderRadius + 2
+            );
+        }
+
+        this.contextInputBg.fillStyle(0x5FB859, isFocused ? 1 : 0.9);
+        this.contextInputBg.fillRoundedRect(
+            inputX - inputWidth / 2, inputY - inputHeight / 2,
+            inputWidth, inputHeight, borderRadius
+        );
+
+        this.contextInputBg.lineStyle(2, isFocused ? 0xFFFFFF : 0xFFD700, 1);
+        this.contextInputBg.strokeRoundedRect(
+            inputX - inputWidth / 2, inputY - inputHeight / 2,
+            inputWidth, inputHeight, borderRadius
+        );
+
+        this.contextInputBg.fillStyle(0x2D5016, isFocused ? 0.2 : 0.3);
+        this.contextInputBg.fillRoundedRect(
+            inputX - inputWidth / 2 + 2, inputY - inputHeight / 2 + 2,
+            inputWidth - 4, inputHeight - 4, borderRadius - 2
+        );
+    }
+
+    focusContextInput ()
+    {
+        this.isContextFocused = true;
+        this.updateContextInputBackground(true);
+        this.contextInputText.setColor('#FFD700');
+        if (this.characterContext === '') {
+            this.contextInputText.setText('');
+        }
+        this.startContextCursorBlink();
+    }
+
+    blurContextInput ()
+    {
+        this.isContextFocused = false;
+        this.updateContextInputBackground(false);
+        this.contextInputText.setColor(this.characterContext ? '#FFFFFF' : '#888888');
+        if (this.characterContext === '') {
+            this.contextInputText.setText(CHARACTER_CONTEXT_PLACEHOLDER);
+        }
+        if (this.contextInputCursor) {
+            this.contextInputCursor.setVisible(false);
+        }
+        if (this.contextCursorBlinkTimer) {
+            this.contextCursorBlinkTimer.remove();
+            this.contextCursorBlinkTimer = null;
+        }
+    }
+
+    startContextCursorBlink ()
+    {
+        if (!this.isContextFocused) return;
+        if (this.contextCursorBlinkTimer) {
+            this.contextCursorBlinkTimer.remove();
+        }
+        this.contextInputCursor.setVisible(true);
+        this.updateContextCursorPosition();
+        this.contextCursorBlinkTimer = this.time.addEvent({
+            delay: 500,
+            callback: () => {
+                if (this.contextInputCursor) {
+                    this.contextInputCursor.setVisible(!this.contextInputCursor.visible);
+                }
+            },
+            loop: true
+        });
+    }
+
+    updateContextCursorPosition ()
+    {
+        if (!this.contextInputText || !this.contextInputCursor) return;
+        const textWidth = this.contextInputText.width;
+        const inputX = this.scale.width / 2;
+        this.contextInputCursor.setX(inputX + textWidth / 2 + 3);
+    }
+
+    updateContextInputText ()
+    {
+        if (this.characterContext === '') {
+            this.contextInputText.setText(CHARACTER_CONTEXT_PLACEHOLDER);
+            this.contextInputText.setColor('#888888');
+        } else {
+            this.contextInputText.setText(this.characterContext);
+            this.contextInputText.setColor(this.isContextFocused ? '#FFD700' : '#FFFFFF');
+        }
+        this.updateContextCursorPosition();
+    }
+
+    createAndFocusMobileContextInput ()
+    {
+        const existing = document.getElementById('mobile-context-input');
+        if (existing) existing.remove();
+
+        const input = document.createElement('input');
+        input.id = 'mobile-context-input';
+        input.type = 'text';
+        input.value = this.characterContext;
+        input.maxLength = CHARACTER_CONTEXT_MAX_LENGTH;
+        input.placeholder = CHARACTER_CONTEXT_PLACEHOLDER;
+        input.style.position = 'fixed';
+        input.style.top = '-100px';
+        input.style.left = '-100px';
+        input.style.opacity = '0';
+        input.style.pointerEvents = 'none';
+        document.body.appendChild(input);
+
+        input.addEventListener('input', (e) => {
+            this.characterContext = e.target.value.substring(0, CHARACTER_CONTEXT_MAX_LENGTH);
+            this.updateContextInputText();
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                const el = document.getElementById('mobile-context-input');
+                if (el) el.remove();
+            }, 100);
+        });
+
+        setTimeout(() => input.focus(), 100);
+    }
+
     changeScene ()
     {
         // Get player name (already stored in this.playerName)
         this.playerName = this.playerName.trim() || 'Player';
 
-        // Save player name to game state
+        // Save player name and character settings to game state
         gameState.setPlayerName(this.playerName);
+        gameState.setCharacterType(this.selectedCharacterType);
+        gameState.setCharacterContext(this.characterContext.trim());
         gameState.clearNPCPositions();
 
         // Generate new session ID for this game run
@@ -615,6 +1026,10 @@ export class MainMenu extends Scene
 
         // Stop current scene (triggers cleanup) and start Overworld
         this.scene.stop('MainMenu');
-        this.scene.start('Overworld', { playerName: this.playerName });
+        this.scene.start('Overworld', {
+            playerName: this.playerName,
+            characterType: this.selectedCharacterType,
+            characterContext: this.characterContext.trim()
+        });
     }
 }

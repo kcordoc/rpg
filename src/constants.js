@@ -111,6 +111,41 @@ export const TUTORIAL_WALK = 'Walk around the village to find heart health NPCs.
 export const TITLE_SCREEN_SUBTITLE = 'EXPLORE THE VILLAGE OF HEARTWELL';
 export const TITLE_SCREEN_TAGLINE = 'Learn about heart health. Battle NPCs. Collect knowledge.';
 
+// ─── Character Classes ─────────────────────────────────────────
+export const CHARACTER_TYPES = [
+  {
+    id: 'scholar',
+    name: 'Scholar',
+    description: 'Wisdom seeker',
+    tint: 0x6EA8FE,  // Blue
+    icon: '\u{1F4D6}', // Open book emoji (rendered as text, not in-game)
+  },
+  {
+    id: 'healer',
+    name: 'Healer',
+    description: 'Heart guardian',
+    tint: 0x75D979,  // Green
+    icon: '\u{1F49A}',
+  },
+  {
+    id: 'knight',
+    name: 'Knight',
+    description: 'Brave protector',
+    tint: 0xFF7B7B,  // Red
+    icon: '\u{1F6E1}',
+  },
+  {
+    id: 'explorer',
+    name: 'Explorer',
+    description: 'Curious wanderer',
+    tint: 0xFFD700,  // Gold
+    icon: '\u{1F9ED}',
+  },
+];
+
+export const CHARACTER_CONTEXT_PLACEHOLDER = 'e.g. "A med student learning lipids"';
+export const CHARACTER_CONTEXT_MAX_LENGTH = 200;
+
 // ─── Mobile Warning ─────────────────────────────────────────────
 export const MOBILE_WARNING = `${GAME_NAME} is designed for desktop play. For the best experience, continue on a computer.`;
 

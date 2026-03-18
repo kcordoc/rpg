@@ -8,6 +8,7 @@ import { handleDebugKeys } from './overworld/debug';
 import { WORLD_CONFIGS, getMaxWorldLevel } from './overworld/worldConfig';
 import { createSegmentLabel, showLockedMessage, updateSegmentLabel, updateSegmentView } from './overworld/ui';
 import { MusicManager } from '../MusicManager';
+import { CHARACTER_TYPES } from '../../constants.js';
 
 export class Overworld extends Scene
 {
@@ -327,6 +328,15 @@ export class Overworld extends Scene
         this.player.sprite = this.add.sprite(px, py, 'main-front');
         this.player.sprite.setScale(0.15); // Smaller character to match zoom
         this.player.sprite.setDepth(10);
+
+        // Apply character class tint if selected
+        const characterType = gameState.getCharacterType();
+        if (characterType) {
+            const charDef = CHARACTER_TYPES.find(c => c.id === characterType);
+            if (charDef) {
+                this.player.sprite.setTint(charDef.tint);
+            }
+        }
 
         // Create player name text below sprite
         this.playerNameText = this.add.text(px, py + 35, this.playerName, {

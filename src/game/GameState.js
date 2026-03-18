@@ -10,6 +10,8 @@ export class GameState {
     constructor() {
         this.data = {
             playerName: 'Player',
+            characterType: null, // Selected character class (e.g. 'scholar', 'healer', 'knight', 'explorer')
+            characterContext: '', // Free-text backstory or learning context
             sessionId: null,
             anonymousToken: null, // Persistent cross-session token
             defeatedGuests: [],
@@ -90,6 +92,8 @@ export class GameState {
         localStorage.removeItem(SAVE_KEY);
         this.data = {
             playerName: 'Player',
+            characterType: null,
+            characterContext: '',
             sessionId: null,
             anonymousToken: token,
             defeatedGuests: [],
@@ -121,6 +125,36 @@ export class GameState {
     setPlayerName(name) {
         this.data.playerName = name || 'Player';
         this.save();
+    }
+
+    /**
+     * Set character type
+     */
+    setCharacterType(type) {
+        this.data.characterType = type || null;
+        this.save();
+    }
+
+    /**
+     * Get character type
+     */
+    getCharacterType() {
+        return this.data.characterType;
+    }
+
+    /**
+     * Set character context / backstory
+     */
+    setCharacterContext(context) {
+        this.data.characterContext = (context || '').substring(0, 200);
+        this.save();
+    }
+
+    /**
+     * Get character context / backstory
+     */
+    getCharacterContext() {
+        return this.data.characterContext || '';
     }
 
     /**
