@@ -19,6 +19,12 @@ const config = {
   url: 'https://lipiwiz.com',
   isPublic: true,
 
+  // ─── Route Mapping ──────────────────────────────────────────────
+  // URL paths that should load this game.
+  // When the platform is hosted at e.g. lipiwiz.com, visiting /play
+  // will resolve to this game. Creators can map custom routes to their game.
+  routes: ['/play', '/lipid-wizard'],
+
   // ─── Creator ───────────────────────────────────────────────────
   creator: {
     name: 'CORDOC LLC',

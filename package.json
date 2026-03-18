@@ -24,7 +24,9 @@
     ],
     "scripts": {
         "dev": "vite --config vite/config.dev.mjs",
-        "build": "vite build --config vite/config.prod.mjs"
+        "build": "vite build --config vite/config.prod.mjs",
+        "build:embed": "vite build --config vite/config.embed.mjs",
+        "build:all": "vite build --config vite/config.prod.mjs && vite build --config vite/config.embed.mjs"
     },
     "dependencies": {
         "@iconify/icons-pixelarticons": "^1.2.5",
