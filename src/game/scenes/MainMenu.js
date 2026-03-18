@@ -2,6 +2,8 @@ import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
 import gameState from '../GameState';
 import { TITLE_SCREEN_SUBTITLE, TITLE_SCREEN_TAGLINE, CHARACTER_TYPES, CHARACTER_CONTEXT_PLACEHOLDER, CHARACTER_CONTEXT_MAX_LENGTH } from '../../constants.js';
+import { fetchLocationData } from '../../services/google-maps.js';
+import { generateTilemap } from '../MapGenerator.js';
 
 export class MainMenu extends Scene
 {
@@ -29,6 +31,14 @@ export class MainMenu extends Scene
         this.contextInputCursor = null;
         this.contextCursorBlinkTimer = null;
         this.isContextFocused = false;
+
+        // Location input state
+        this.mapLocation = '';
+        this.locationInputText = null;
+        this.locationInputBg = null;
+        this.locationInputCursor = null;
+        this.locationCursorBlinkTimer = null;
+        this.isLocationFocused = false;
     }
 
     create ()
@@ -84,6 +94,24 @@ export class MainMenu extends Scene
             this.contextCursorBlinkTimer = null;
         }
 
+        // Clean up location input elements
+        if (this.locationInputText) {
+            this.locationInputText.destroy();
+            this.locationInputText = null;
+        }
+        if (this.locationInputBg) {
+            this.locationInputBg.destroy();
+            this.locationInputBg = null;
+        }
+        if (this.locationInputCursor) {
+            this.locationInputCursor.destroy();
+            this.locationInputCursor = null;
+        }
+        if (this.locationCursorBlinkTimer) {
+            this.locationCursorBlinkTimer.remove();
+            this.locationCursorBlinkTimer = null;
+        }
+
         // Clean up character card references
         this.characterCards = [];
         this.characterCardBgs = [];
@@ -107,6 +135,12 @@ export class MainMenu extends Scene
         const mobileContextInput = document.getElementById('mobile-context-input');
         if (mobileContextInput) {
             mobileContextInput.remove();
+        }
+
+        // Remove mobile location input if exists
+        const mobileLocationInput = document.getElementById('mobile-location-input');
+        if (mobileLocationInput) {
+            mobileLocationInput.remove();
         }
 
         // Stop music
@@ -228,7 +262,7 @@ export class MainMenu extends Scene
         this.createCharacterSelection();
 
         // Context input
-        this.add.text(this.scale.width / 2, 418, 'CHARACTER CONTEXT (OPTIONAL):', {
+        this.add.text(this.scale.width / 2, 410, 'CHARACTER CONTEXT (OPTIONAL):', {
             fontFamily: '"Press Start 2P"',
             fontSize: '8px',
             color: '#FFD700',
@@ -239,8 +273,20 @@ export class MainMenu extends Scene
 
         this.createContextInput();
 
+        // Location input for dynamic map generation
+        this.add.text(this.scale.width / 2, 472, 'MAP LOCATION (OPTIONAL):', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '8px',
+            color: '#FFD700',
+            letterSpacing: 1,
+            stroke: '#2D5016',
+            strokeThickness: 2
+        }).setOrigin(0.5);
+
+        this.createLocationInput();
+
         // Start button - vibrant Pokemon-style
-        const buttonY = 510;
+        const buttonY = 545;
         const buttonWidth = 380;
         const buttonHeight = 58;
 
@@ -446,21 +492,32 @@ export class MainMenu extends Scene
             };
             const contextBounds = {
                 x: this.scale.width / 2 - 250,
-                y: 450 - 16,
+                y: 438 - 14,
                 width: 500,
-                height: 32
+                height: 28
+            };
+            const locationBounds = {
+                x: this.scale.width / 2 - 250,
+                y: 500 - 14,
+                width: 500,
+                height: 28
             };
 
             const inName = pointer.x >= nameBounds.x && pointer.x <= nameBounds.x + nameBounds.width &&
                            pointer.y >= nameBounds.y && pointer.y <= nameBounds.y + nameBounds.height;
             const inContext = pointer.x >= contextBounds.x && pointer.x <= contextBounds.x + contextBounds.width &&
                              pointer.y >= contextBounds.y && pointer.y <= contextBounds.y + contextBounds.height;
+            const inLocation = pointer.x >= locationBounds.x && pointer.x <= locationBounds.x + locationBounds.width &&
+                               pointer.y >= locationBounds.y && pointer.y <= locationBounds.y + locationBounds.height;
 
             if (!inName && this.isInputFocused) {
                 this.blurInput();
             }
             if (!inContext && this.isContextFocused) {
                 this.blurContextInput();
+            }
+            if (!inLocation && this.isLocationFocused) {
+                this.blurLocationInput();
             }
         });
 
@@ -634,7 +691,7 @@ export class MainMenu extends Scene
 
     handleKeyDown (event)
     {
-        // Handle Tab to switch between inputs
+        // Handle Tab to cycle between inputs
         if (event.keyCode === 9) { // Tab
             event.preventDefault();
             if (this.isInputFocused) {
@@ -642,6 +699,9 @@ export class MainMenu extends Scene
                 this.focusContextInput();
             } else if (this.isContextFocused) {
                 this.blurContextInput();
+                this.focusLocationInput();
+            } else if (this.isLocationFocused) {
+                this.blurLocationInput();
                 this.focusInput();
             }
             return;
@@ -688,6 +748,29 @@ export class MainMenu extends Scene
                 if (this.characterContext.length < CHARACTER_CONTEXT_MAX_LENGTH) {
                     this.characterContext += char;
                     this.updateContextInputText();
+                }
+            }
+            return;
+        }
+
+        // Location input handling
+        if (this.isLocationFocused) {
+            if (event.keyCode === 13) {
+                this.changeScene();
+                return;
+            }
+            if (event.keyCode === 8) {
+                if (this.mapLocation.length > 0) {
+                    this.mapLocation = this.mapLocation.slice(0, -1);
+                    this.updateLocationInputText();
+                }
+                return;
+            }
+            if (event.keyCode >= 32 && event.keyCode <= 126) {
+                const char = event.key;
+                if (this.mapLocation.length < 200) {
+                    this.mapLocation += char;
+                    this.updateLocationInputText();
                 }
             }
         }
@@ -824,9 +907,9 @@ export class MainMenu extends Scene
     createContextInput ()
     {
         const inputX = this.scale.width / 2;
-        const inputY = 450;
+        const inputY = 438;
         const inputWidth = 500;
-        const inputHeight = 32;
+        const inputHeight = 28;
 
         // Load saved context
         const savedContext = gameState.getCharacterContext();
@@ -860,7 +943,8 @@ export class MainMenu extends Scene
             .setInteractive({ useHandCursor: true });
 
         zone.on('pointerdown', () => {
-            this.blurInput(); // Blur name input if focused
+            this.blurInput();
+            this.blurLocationInput();
             this.focusContextInput();
             const isMobile = this.sys.game.device.input.touch || window.innerWidth <= 1024;
             if (isMobile) {
@@ -1006,6 +1090,190 @@ export class MainMenu extends Scene
         setTimeout(() => input.focus(), 100);
     }
 
+    // ─── Location Input ───────────────────────────────────────────
+    createLocationInput ()
+    {
+        const inputX = this.scale.width / 2;
+        const inputY = 500;
+        const inputWidth = 500;
+        const inputHeight = 28;
+
+        const savedLocation = gameState.getMapLocation();
+        this.mapLocation = savedLocation || '';
+
+        this.locationInputBg = this.add.graphics();
+        this.updateLocationInputBackground(false);
+
+        const placeholder = 'e.g. "Times Square, NYC" or "Tokyo Tower"';
+        this.locationInputText = this.add.text(inputX, inputY,
+            this.mapLocation || placeholder, {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '7px',
+            color: this.mapLocation ? '#FFFFFF' : '#888888',
+            letterSpacing: 1,
+            align: 'center',
+            wordWrap: { width: inputWidth - 20 }
+        }).setOrigin(0.5);
+
+        this.locationInputCursor = this.add.text(inputX, inputY, '|', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '7px',
+            color: '#FFD700'
+        }).setOrigin(0.5, 0.5);
+        this.locationInputCursor.setVisible(false);
+
+        const zone = this.add.rectangle(inputX, inputY, inputWidth, inputHeight, 0x000000, 0)
+            .setInteractive({ useHandCursor: true });
+
+        zone.on('pointerdown', () => {
+            this.blurInput();
+            this.blurContextInput();
+            this.focusLocationInput();
+            const isMobile = this.sys.game.device.input.touch || window.innerWidth <= 1024;
+            if (isMobile) {
+                this.createAndFocusMobileLocationInput();
+            }
+        });
+    }
+
+    updateLocationInputBackground (isFocused)
+    {
+        this.locationInputBg.clear();
+
+        const inputX = this.scale.width / 2;
+        const inputY = 500;
+        const inputWidth = 500;
+        const inputHeight = 28;
+        const borderRadius = 10;
+
+        if (isFocused) {
+            this.locationInputBg.fillStyle(0xFFD700, 0.3);
+            this.locationInputBg.fillRoundedRect(
+                inputX - inputWidth / 2 - 4, inputY - inputHeight / 2 - 4,
+                inputWidth + 8, inputHeight + 8, borderRadius + 2
+            );
+        }
+
+        this.locationInputBg.fillStyle(0x4A90E2, isFocused ? 1 : 0.8);
+        this.locationInputBg.fillRoundedRect(
+            inputX - inputWidth / 2, inputY - inputHeight / 2,
+            inputWidth, inputHeight, borderRadius
+        );
+
+        this.locationInputBg.lineStyle(2, isFocused ? 0xFFFFFF : 0x6EA8FE, 1);
+        this.locationInputBg.strokeRoundedRect(
+            inputX - inputWidth / 2, inputY - inputHeight / 2,
+            inputWidth, inputHeight, borderRadius
+        );
+
+        this.locationInputBg.fillStyle(0x1A3A5C, isFocused ? 0.2 : 0.3);
+        this.locationInputBg.fillRoundedRect(
+            inputX - inputWidth / 2 + 2, inputY - inputHeight / 2 + 2,
+            inputWidth - 4, inputHeight - 4, borderRadius - 2
+        );
+    }
+
+    focusLocationInput ()
+    {
+        this.isLocationFocused = true;
+        this.updateLocationInputBackground(true);
+        this.locationInputText.setColor('#FFD700');
+        if (this.mapLocation === '') {
+            this.locationInputText.setText('');
+        }
+        this.startLocationCursorBlink();
+    }
+
+    blurLocationInput ()
+    {
+        this.isLocationFocused = false;
+        this.updateLocationInputBackground(false);
+        this.locationInputText.setColor(this.mapLocation ? '#FFFFFF' : '#888888');
+        if (this.mapLocation === '') {
+            this.locationInputText.setText('e.g. "Times Square, NYC" or "Tokyo Tower"');
+        }
+        if (this.locationInputCursor) {
+            this.locationInputCursor.setVisible(false);
+        }
+        if (this.locationCursorBlinkTimer) {
+            this.locationCursorBlinkTimer.remove();
+            this.locationCursorBlinkTimer = null;
+        }
+    }
+
+    startLocationCursorBlink ()
+    {
+        if (!this.isLocationFocused) return;
+        if (this.locationCursorBlinkTimer) {
+            this.locationCursorBlinkTimer.remove();
+        }
+        this.locationInputCursor.setVisible(true);
+        this.updateLocationCursorPosition();
+        this.locationCursorBlinkTimer = this.time.addEvent({
+            delay: 500,
+            callback: () => {
+                if (this.locationInputCursor) {
+                    this.locationInputCursor.setVisible(!this.locationInputCursor.visible);
+                }
+            },
+            loop: true
+        });
+    }
+
+    updateLocationCursorPosition ()
+    {
+        if (!this.locationInputText || !this.locationInputCursor) return;
+        const textWidth = this.locationInputText.width;
+        const inputX = this.scale.width / 2;
+        this.locationInputCursor.setX(inputX + textWidth / 2 + 3);
+    }
+
+    updateLocationInputText ()
+    {
+        const placeholder = 'e.g. "Times Square, NYC" or "Tokyo Tower"';
+        if (this.mapLocation === '') {
+            this.locationInputText.setText(placeholder);
+            this.locationInputText.setColor('#888888');
+        } else {
+            this.locationInputText.setText(this.mapLocation);
+            this.locationInputText.setColor(this.isLocationFocused ? '#FFD700' : '#FFFFFF');
+        }
+        this.updateLocationCursorPosition();
+    }
+
+    createAndFocusMobileLocationInput ()
+    {
+        const existing = document.getElementById('mobile-location-input');
+        if (existing) existing.remove();
+
+        const input = document.createElement('input');
+        input.id = 'mobile-location-input';
+        input.type = 'text';
+        input.value = this.mapLocation;
+        input.maxLength = 200;
+        input.placeholder = 'e.g. "Times Square, NYC"';
+        input.style.position = 'fixed';
+        input.style.top = '-100px';
+        input.style.left = '-100px';
+        input.style.opacity = '0';
+        input.style.pointerEvents = 'none';
+        document.body.appendChild(input);
+
+        input.addEventListener('input', (e) => {
+            this.mapLocation = e.target.value.substring(0, 200);
+            this.updateLocationInputText();
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                const el = document.getElementById('mobile-location-input');
+                if (el) el.remove();
+            }, 100);
+        });
+
+        setTimeout(() => input.focus(), 100);
+    }
+
     changeScene ()
     {
         // Get player name (already stored in this.playerName)
@@ -1015,6 +1283,7 @@ export class MainMenu extends Scene
         gameState.setPlayerName(this.playerName);
         gameState.setCharacterType(this.selectedCharacterType);
         gameState.setCharacterContext(this.characterContext.trim());
+        gameState.setMapLocation(this.mapLocation.trim());
         gameState.clearNPCPositions();
 
         // Generate new session ID for this game run
@@ -1024,12 +1293,94 @@ export class MainMenu extends Scene
         EventBus.emit('player-name-set', this.playerName);
         EventBus.emit('session-started', sessionId);
 
-        // Stop current scene (triggers cleanup) and start Overworld
-        this.scene.stop('MainMenu');
-        this.scene.start('Overworld', {
-            playerName: this.playerName,
-            characterType: this.selectedCharacterType,
-            characterContext: this.characterContext.trim()
+        const location = this.mapLocation.trim();
+        if (location) {
+            // Generate map from location data, then start Overworld
+            this.generateAndStartOverworld(location);
+        } else {
+            // No location — use default maps
+            this.scene.stop('MainMenu');
+            this.scene.start('Overworld', {
+                playerName: this.playerName,
+                characterType: this.selectedCharacterType,
+                characterContext: this.characterContext.trim(),
+                mapLocation: ''
+            });
+        }
+    }
+
+    async generateAndStartOverworld (location)
+    {
+        // Show loading text
+        const loadingText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 80, 'GENERATING MAP...', {
+            fontFamily: '"Press Start 2P"',
+            fontSize: '10px',
+            color: '#FFE066',
+            stroke: '#000000',
+            strokeThickness: 3
+        }).setOrigin(0.5).setDepth(100);
+
+        const loadingDots = this.time.addEvent({
+            delay: 400,
+            callback: () => {
+                const dots = '.'.repeat((loadingText.text.match(/\./g) || []).length % 3 + 1);
+                loadingText.setText('GENERATING MAP' + dots);
+            },
+            loop: true
         });
+
+        try {
+            // Fetch location data (uses Google Maps API or fallback)
+            const locationData = await fetchLocationData(location);
+
+            // Generate tilemap from location data
+            const { tilemap, metadata } = generateTilemap(locationData);
+
+            // Inject generated tilemap into Phaser's cache
+            // Phaser expects: { format, data } where data is the Tiled JSON
+            if (this.cache.tilemap.exists('generated-map')) {
+                this.cache.tilemap.remove('generated-map');
+            }
+            this.cache.tilemap.add('generated-map', {
+                format: 1, // Phaser.Tilemaps.Formats.TILED_JSON
+                data: tilemap
+            });
+
+            console.log('[MapGen] Generated map cached. Buildings:', metadata.buildings.length,
+                'Streets:', metadata.streetLabels.length);
+
+            // Clean up loading UI
+            loadingDots.remove();
+            loadingText.destroy();
+
+            // Start Overworld with generated map
+            this.scene.stop('MainMenu');
+            this.scene.start('Overworld', {
+                playerName: this.playerName,
+                characterType: this.selectedCharacterType,
+                characterContext: this.characterContext.trim(),
+                mapLocation: location,
+                useGeneratedMap: true,
+                generatedMapMetadata: metadata
+            });
+
+        } catch (error) {
+            console.error('[MapGen] Map generation failed:', error);
+            loadingDots.remove();
+            loadingText.setText('MAP GENERATION FAILED - USING DEFAULT');
+            loadingText.setColor('#FF6666');
+
+            // Fall back to default maps after a brief delay
+            this.time.delayedCall(1500, () => {
+                loadingText.destroy();
+                this.scene.stop('MainMenu');
+                this.scene.start('Overworld', {
+                    playerName: this.playerName,
+                    characterType: this.selectedCharacterType,
+                    characterContext: this.characterContext.trim(),
+                    mapLocation: ''
+                });
+            });
+        }
     }
 }

@@ -16,8 +16,8 @@ const config = {
     backgroundColor: '#000000',
     pixelArt: true,
     scale: {
-        mode: Phaser.Scale.NONE,
-        autoCenter: Phaser.Scale.NO_CENTER
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     },
     scene: [
         Boot,

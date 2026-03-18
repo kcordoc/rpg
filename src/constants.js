@@ -147,7 +147,7 @@ export const CHARACTER_CONTEXT_PLACEHOLDER = 'e.g. "A med student learning lipid
 export const CHARACTER_CONTEXT_MAX_LENGTH = 200;
 
 // ─── Mobile Warning ─────────────────────────────────────────────
-export const MOBILE_WARNING = `${GAME_NAME} is designed for desktop play. For the best experience, continue on a computer.`;
+export const MOBILE_WARNING = `${GAME_NAME} works best in landscape mode. Please rotate your device to play!`;
 
 // ─── Collection Screen ──────────────────────────────────────────
 export const COLLECTION_TITLE = `${GAME_NAME} Collection`;

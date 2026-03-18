@@ -12,6 +12,7 @@ export class GameState {
             playerName: 'Player',
             characterType: null, // Selected character class (e.g. 'scholar', 'healer', 'knight', 'explorer')
             characterContext: '', // Free-text backstory or learning context
+            mapLocation: '', // Google Maps location query for dynamic map generation
             sessionId: null,
             anonymousToken: null, // Persistent cross-session token
             defeatedGuests: [],
@@ -94,6 +95,7 @@ export class GameState {
             playerName: 'Player',
             characterType: null,
             characterContext: '',
+            mapLocation: '',
             sessionId: null,
             anonymousToken: token,
             defeatedGuests: [],
@@ -155,6 +157,21 @@ export class GameState {
      */
     getCharacterContext() {
         return this.data.characterContext || '';
+    }
+
+    /**
+     * Set map location query
+     */
+    setMapLocation(location) {
+        this.data.mapLocation = (location || '').substring(0, 200);
+        this.save();
+    }
+
+    /**
+     * Get map location query
+     */
+    getMapLocation() {
+        return this.data.mapLocation || '';
     }
 
     /**

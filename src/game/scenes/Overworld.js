@@ -5,10 +5,12 @@ import guestDataManager from '../GuestData';
 import { getStageOpponents } from '../StageConfig';
 import { bindOverworldEvents } from './overworld/events';
 import { handleDebugKeys } from './overworld/debug';
-import { WORLD_CONFIGS, getMaxWorldLevel } from './overworld/worldConfig';
+import { WORLD_CONFIGS, GENERATED_MAP_CONFIG, getMaxWorldLevel } from './overworld/worldConfig';
 import { createSegmentLabel, showLockedMessage, updateSegmentLabel, updateSegmentView } from './overworld/ui';
 import { MusicManager } from '../MusicManager';
 import { CHARACTER_TYPES } from '../../constants.js';
+import { fetchLocationData } from '../../services/google-maps.js';
+import { generateTilemap } from '../MapGenerator.js';
 
 export class Overworld extends Scene
 {
@@ -52,6 +54,13 @@ export class Overworld extends Scene
         if (data.playerName) {
             this.playerName = data.playerName;
         }
+
+        // Store map location for generated map support
+        if (data.mapLocation) {
+            this.mapLocation = data.mapLocation;
+        }
+        this.useGeneratedMap = data.useGeneratedMap || false;
+        this.generatedMapMetadata = data.generatedMapMetadata || null;
 
         // Handle map transitions
         if (typeof data.level === 'number') {
@@ -112,6 +121,18 @@ export class Overworld extends Scene
         this.currentSegment = derived.segmentIndex;
         this.currentMap = WORLD_CONFIGS[this.currentWorld]?.key || 'large-map';
 
+        // Check if we should use a generated map (location-based)
+        const mapLocation = this.mapLocation || gameState.getMapLocation();
+        if (mapLocation && this.useGeneratedMap && this.generatedMapMetadata) {
+            // Generated map is already cached (from async generation before scene start)
+            this.currentMap = GENERATED_MAP_CONFIG.key;
+            this.worldConfig = { ...GENERATED_MAP_CONFIG };
+            if (this.generatedMapMetadata.spawnableTileIds) {
+                this.worldConfig.spawnableTileIds = this.generatedMapMetadata.spawnableTileIds;
+            }
+            console.log('[MapGen] Using generated map for:', mapLocation);
+        }
+
         // Clean up any DOM elements from previous scenes
         const existingInput = document.getElementById('player-name-input');
         if (existingInput) {
@@ -128,7 +149,8 @@ export class Overworld extends Scene
             this.currentLevel = 1;
         }
         const map = this.make.tilemap({ key: this.currentMap });
-        const worldConfig = WORLD_CONFIGS[this.currentWorld] || WORLD_CONFIGS[0];
+        // Use generated map config if applicable, otherwise use standard world config
+        const worldConfig = this.useGeneratedMap ? (this.worldConfig || GENERATED_MAP_CONFIG) : (WORLD_CONFIGS[this.currentWorld] || WORLD_CONFIGS[0]);
         this.worldConfig = worldConfig;
 
         if (!this.textures.exists(worldConfig.tilesKey)) {
@@ -303,12 +325,38 @@ export class Overworld extends Scene
             padding: { x: 4, y: 2 }
         }).setScrollFactor(0).setDepth(1001);
 
+        // Show location name if using generated map
+        if (this.useGeneratedMap && this.generatedMapMetadata) {
+            const locName = this.generatedMapMetadata.locationName || this.mapLocation || '';
+            if (locName) {
+                const locText = this.add.text(this.scale.width / 2, 12, locName.toUpperCase(), {
+                    fontSize: '9px',
+                    fontFamily: 'Press Start 2P, monospace',
+                    color: '#FFE066',
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    padding: { x: 8, y: 4 },
+                    stroke: '#000000',
+                    strokeThickness: 2
+                }).setOrigin(0.5, 0).setScrollFactor(0).setDepth(1001);
+
+                // Fade out after 5 seconds
+                this.time.delayedCall(5000, () => {
+                    this.tweens.add({
+                        targets: locText,
+                        alpha: 0,
+                        duration: 1000,
+                        onComplete: () => locText.destroy()
+                    });
+                });
+            }
+        }
+
         // Controls
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keys = this.input.keyboard.addKeys('W,A,S,D,C,SPACE,ENTER,L,J');
 
-        // Mobile touch controls (disabled)
-        this.destroyMobileControls();
+        // Mobile touch controls
+        this.createMobileControls();
 
         // Initialize Music Manager
         this.musicManager = new MusicManager(this);
