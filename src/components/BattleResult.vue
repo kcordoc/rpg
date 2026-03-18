@@ -269,7 +269,7 @@ function handleContainerClick(event) {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9);
+  background: var(--theme-bg-overlay, rgba(0, 0, 0, 0.9));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -283,8 +283,8 @@ function handleContainerClick(event) {
 }
 
 .result-container {
-  background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
-  border: 8px solid #FFD700;
+  background: var(--theme-result-bg, linear-gradient(135deg, #2C3E50 0%, #34495E 100%));
+  border: 8px solid var(--theme-primary, #FFD700);
   border-radius: 20px;
   padding: 40px;
   max-width: 600px;
@@ -293,21 +293,21 @@ function handleContainerClick(event) {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow:
-    0 0 40px rgba(255, 215, 0, 0.6),
+    0 0 40px rgba(var(--theme-primary-rgb, 255, 215, 0), 0.6),
     inset 0 0 20px rgba(0, 0, 0, 0.3);
   animation: slideIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 .result-container.victory {
-  border-color: #4CAF50;
+  border-color: var(--theme-result-victory-border, #4CAF50);
   box-shadow:
     0 0 40px rgba(76, 175, 80, 0.8),
     inset 0 0 20px rgba(76, 175, 80, 0.1);
 }
 
 .result-container.defeat {
-  border-color: #FF6B6B;
-  background: linear-gradient(160deg, #3b1f2a 0%, #2a0f16 45%, #1f0b12 100%);
+  border-color: var(--theme-result-defeat-border, #FF6B6B);
+  background: var(--theme-result-defeat-bg, linear-gradient(160deg, #3b1f2a 0%, #2a0f16 45%, #1f0b12 100%));
   box-shadow:
     0 0 45px rgba(255, 107, 107, 0.6),
     inset 0 0 25px rgba(255, 107, 107, 0.12);
@@ -333,25 +333,25 @@ function handleContainerClick(event) {
 }
 
 .result-title {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--theme-font, 'Press Start 2P', monospace);
   font-size: 42px;
-  color: #FFD700;
+  color: var(--theme-primary, #FFD700);
   margin: 0 0 10px 0;
   text-shadow:
     3px 3px 0 #000,
-    0 0 20px rgba(255, 215, 0, 0.8);
+    0 0 20px rgba(var(--theme-primary-rgb, 255, 215, 0), 0.8);
   animation: pulse 2s ease-in-out infinite;
 }
 
 .victory .result-title {
-  color: #4CAF50;
+  color: var(--theme-success, #4CAF50);
   text-shadow:
     3px 3px 0 #000,
     0 0 20px rgba(76, 175, 80, 0.8);
 }
 
 .defeat .result-title {
-  color: #FF6B6B;
+  color: var(--theme-error, #FF6B6B);
   text-shadow:
     3px 3px 0 #000,
     0 0 24px rgba(255, 107, 107, 0.95);
@@ -363,16 +363,16 @@ function handleContainerClick(event) {
 }
 
 .result-subtitle {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--theme-font, 'Press Start 2P', monospace);
   font-size: 14px;
-  color: #ECF0F1;
+  color: var(--theme-text, #ECF0F1);
   text-shadow: 2px 2px 0 #000;
 }
 
 /* Stats */
 .stats-container {
   background: rgba(0, 0, 0, 0.4);
-  border: 4px solid rgba(255, 215, 0, 0.3);
+  border: 4px solid rgba(var(--theme-primary-rgb, 255, 215, 0), 0.3);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 30px;
@@ -413,15 +413,15 @@ function handleContainerClick(event) {
 }
 
 .stat-value.correct {
-  color: #4CAF50;
+  color: var(--theme-success, #4CAF50);
 }
 
 .stat-value.wrong {
-  color: #FF6B6B;
+  color: var(--theme-error, #FF6B6B);
 }
 
 .stat-value.xp {
-  color: #FFD700;
+  color: var(--theme-xp, #FFD700);
   font-size: 18px;
 }
 
@@ -431,14 +431,14 @@ function handleContainerClick(event) {
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--theme-font, 'Press Start 2P', monospace);
   font-size: 12px;
-  color: #FFD700;
+  color: var(--theme-xp, #FFD700);
   padding: 8px 18px;
   min-width: 85%;
-  background: linear-gradient(90deg, rgba(255,215,0,0.15) 0%, rgba(255,215,0,0.35) 50%, rgba(255,215,0,0.15) 100%);
+  background: linear-gradient(90deg, rgba(var(--theme-primary-rgb, 255, 215, 0), 0.15) 0%, rgba(var(--theme-primary-rgb, 255, 215, 0), 0.35) 50%, rgba(var(--theme-primary-rgb, 255, 215, 0), 0.15) 100%);
   border-radius: 8px;
-  border: 2px solid rgba(255, 215, 0, 0.6);
+  border: 2px solid rgba(var(--theme-primary-rgb, 255, 215, 0), 0.6);
   text-shadow: 1px 1px 0 #000;
   animation: sparkle 1.5s ease-in-out infinite;
 }
@@ -454,12 +454,12 @@ function handleContainerClick(event) {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 2px solid #FFD700;
+  border: 2px solid var(--theme-primary, #FFD700);
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.4);
   color: #fff;
   text-decoration: none;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--theme-font, 'Press Start 2P', monospace);
   font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -467,7 +467,7 @@ function handleContainerClick(event) {
 
 .episode-link:hover {
   border-color: #fff;
-  color: #FFD700;
+  color: var(--theme-primary, #FFD700);
 }
 
 .episode-link-icon {
@@ -479,14 +479,14 @@ function handleContainerClick(event) {
 .cliffhanger-box {
   margin: 10px 0;
   padding: 8px 12px;
-  border-left: 3px solid #FFD700;
-  background: rgba(255, 215, 0, 0.1);
+  border-left: 3px solid var(--theme-primary, #FFD700);
+  background: rgba(var(--theme-primary-rgb, 255, 215, 0), 0.1);
   border-radius: 0 6px 6px 0;
 }
 .cliffhanger-text {
   font-size: 10px;
   line-height: 1.5;
-  color: #FFD700;
+  color: var(--theme-primary, #FFD700);
   margin: 0;
   font-style: italic;
 }
@@ -501,7 +501,7 @@ function handleContainerClick(event) {
 }
 .kc-header {
   font-size: 9px;
-  color: #4CAF50;
+  color: var(--theme-success, #4CAF50);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 4px;
@@ -606,7 +606,7 @@ function handleContainerClick(event) {
 }
 
 .retry-btn {
-  background: #FF6B6B;
+  background: var(--theme-error, #FF6B6B);
   border-color: #C0392B;
   color: #FFF;
 }
@@ -618,7 +618,7 @@ function handleContainerClick(event) {
 }
 
 .continue-btn {
-  background: #4CAF50;
+  background: var(--theme-success, #4CAF50);
   border-color: #2E7D32;
   color: #FFF;
 }
@@ -632,8 +632,8 @@ function handleContainerClick(event) {
 /* Keyboard selected state */
 .result-btn.selected {
   transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 4px 0 currentColor;
-  border-color: #FFD700;
+  box-shadow: 0 0 20px rgba(var(--theme-primary-rgb, 255, 215, 0), 0.8), 0 4px 0 currentColor;
+  border-color: var(--theme-primary, #FFD700);
   animation: pulse 1s ease-in-out infinite;
 }
 
@@ -644,10 +644,10 @@ function handleContainerClick(event) {
 
 @keyframes pulse {
   0%, 100% {
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 4px 0 currentColor;
+    box-shadow: 0 0 20px rgba(var(--theme-primary-rgb, 255, 215, 0), 0.8), 0 4px 0 currentColor;
   }
   50% {
-    box-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 4px 0 currentColor;
+    box-shadow: 0 0 30px rgba(var(--theme-primary-rgb, 255, 215, 0), 1), 0 4px 0 currentColor;
   }
 }
 

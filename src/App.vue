@@ -26,6 +26,7 @@ import {
   GAME_NAME, GAME_URL, MUTE_KEY, TUTORIAL_SEEN_KEY,
   MOBILE_WARNING, CREDITS_LINK_URL, CREDITS_LINK_TEXT, CREDITS_TOOLTIP
 } from './constants.js';
+import themeManager from './themes/ThemeManager.js';
 
 // Game state
 const phaserRef = ref();
@@ -78,6 +79,13 @@ const showShareModal = ref(false);
 const isMuted = ref(false);
 const isMobile = ref(false);
 const isPortrait = ref(false);
+
+// Theme
+const currentThemeName = ref(themeManager.current.name);
+function cycleTheme() {
+  themeManager.cycleTheme();
+  currentThemeName.value = themeManager.current.name;
+}
 
 // Player stats
 const playerStats = ref({
@@ -495,6 +503,9 @@ const handleDebugKeys = (event) => {
 };
 
 onMounted(() => {
+  themeManager.init();
+  currentThemeName.value = themeManager.current.name;
+
   detectChallenge();
 
   updateViewportFlags();
@@ -707,6 +718,10 @@ onUnmounted(() => {
             <Icon class="btn-icon" :icon="isMuted ? volumeX : volume" />
             {{ isMuted ? 'Unmute' : 'Mute' }}
           </button>
+          <button class="action-btn theme-btn" @click="cycleTheme" title="Change visual theme">
+            <span class="btn-icon theme-icon">&#9788;</span>
+            {{ currentThemeName }}
+          </button>
         </div>
       </div>
       <div class="mobile-menu-section footer-container mobile-footer" style="width: 100%;">
@@ -802,6 +817,10 @@ onUnmounted(() => {
         <button class="action-btn mute-btn" @click="toggleMute" :title="isMuted ? 'Unmute' : 'Mute'">
           <Icon class="btn-icon" :icon="isMuted ? volumeX : volume" />
           {{ isMuted ? 'Unmute' : 'Mute' }}
+        </button>
+        <button class="action-btn theme-btn" @click="cycleTheme" title="Change visual theme">
+          <span class="btn-icon theme-icon">&#9788;</span>
+          {{ currentThemeName }}
         </button>
       </div>
     </div>
@@ -1352,6 +1371,20 @@ body {
 .mute-btn:hover {
   border-color: #f59e0b;
   box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(251, 191, 36, 0.4);
+}
+
+.theme-btn {
+  border-color: #c084fc;
+}
+
+.theme-btn:hover {
+  border-color: #a855f7;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(192, 132, 252, 0.4);
+}
+
+.theme-icon {
+  font-style: normal;
+  font-size: 14px;
 }
 
 /* Game Footer - Boxed container */

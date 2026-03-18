@@ -32,6 +32,7 @@ export const SAVE_KEY = 'heartquest_save_data';
 export const MUTE_KEY = 'heartquest-muted';
 export const TUTORIAL_SEEN_KEY = 'heartquest-tutorial-seen';
 export const LOCAL_LEADERBOARD_KEY = 'heartquest-leaderboard';
+export const THEME_KEY = 'heartquest-theme';
 
 // ─── NPC & Encounter Copy ───────────────────────────────────────
 export const ENCOUNTER_MESSAGES = [

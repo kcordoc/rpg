@@ -250,11 +250,11 @@ const socialProofText = computed(() => {
   height: min(640px, calc(95vw * 0.667));
   max-height: 90vh;
   z-index: 1000;
-  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-family: var(--theme-font, 'Press Start 2P', monospace, sans-serif);
   overflow: hidden;
-  background: #000;
-  border: 4px solid #FFD700;
-  box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 8px 32px rgba(0, 0, 0, 0.8);
+  background: var(--theme-battle-bg, #000);
+  border: 4px solid var(--theme-border, #FFD700);
+  box-shadow: 0 0 40px rgba(var(--theme-primary-rgb, 255, 215, 0), 0.6), 0 8px 32px rgba(0, 0, 0, 0.8);
   image-rendering: pixelated;
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
@@ -269,7 +269,7 @@ const socialProofText = computed(() => {
     width: 92vw;
     height: calc(92vw * 0.667);
     max-height: 85vh;
-    border: 3px solid #FFD700;
+    border: 3px solid var(--theme-border, #FFD700);
   }
 }
 
@@ -278,7 +278,7 @@ const socialProofText = computed(() => {
     width: 96vw;
     height: calc(96vw * 0.667);
     max-height: 85vh;
-    border: 2px solid #FFD700;
+    border: 2px solid var(--theme-border, #FFD700);
     top: 50%;
   }
 }
@@ -325,7 +325,7 @@ const socialProofText = computed(() => {
 .exit-battle-btn:hover {
   background: rgba(255, 59, 48, 0.95);
   transform: scale(1.1);
-  border-color: #FFD700;
+  border-color: var(--theme-border, #FFD700);
 }
 
 .exit-icon {
@@ -439,13 +439,13 @@ const socialProofText = computed(() => {
 /* === HP DISPLAYS === */
 .hp-display {
   position: relative;
-  background: #fff;
-  border: 4px solid #000;
+  background: var(--theme-battle-panel, #fff);
+  border: 4px solid var(--theme-battle-panel-border, #000);
   border-radius: 12px;
   padding: 16px 20px;
   width: 280px;
   box-shadow:
-    0 6px 0 #000,
+    var(--theme-battle-panel-shadow, 0 6px 0 #000),
     0 10px 20px rgba(0, 0, 0, 0.5);
   animation: slideDown 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s both;
   pointer-events: auto;
@@ -549,7 +549,7 @@ const socialProofText = computed(() => {
 
 .name-text {
   font-size: 16px;
-  color: #000;
+  color: var(--theme-text-dark, #000);
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: bold;
@@ -557,7 +557,7 @@ const socialProofText = computed(() => {
 
 .guest-title {
   font-size: 10px;
-  color: #666;
+  color: var(--theme-text-muted, #666);
   font-weight: normal;
   letter-spacing: 0.5px;
 }
@@ -607,7 +607,7 @@ const socialProofText = computed(() => {
 .hp-label-small {
   font-size: 11px;
   font-weight: bold;
-  color: #ef5350;
+  color: var(--theme-hp-label, #ef5350);
   letter-spacing: 1px;
 }
 
@@ -639,21 +639,21 @@ const socialProofText = computed(() => {
 }
 
 .hp-high {
-  background: linear-gradient(to right, #66bb6a, #4caf50);
+  background: var(--theme-hp-high, linear-gradient(to right, #66bb6a, #4caf50));
 }
 
 .hp-medium {
-  background: linear-gradient(to right, #ffee58, #fdd835);
+  background: var(--theme-hp-medium, linear-gradient(to right, #ffee58, #fdd835));
 }
 
 .hp-low {
-  background: linear-gradient(to right, #ef5350, #e53935);
+  background: var(--theme-hp-low, linear-gradient(to right, #ef5350, #e53935));
 }
 
 .hp-numeric {
   text-align: right;
   font-size: 13px;
-  color: #666;
+  color: var(--theme-text-muted, #666);
   margin-top: 6px;
   font-weight: 600;
 }
@@ -685,11 +685,11 @@ const socialProofText = computed(() => {
 /* Compact Battle Box */
 .pokemon-battle-box {
   position: relative;
-  background: #fff;
-  border: 6px solid #000;
-  box-shadow: 0 6px 0 #000, 0 10px 20px rgba(0, 0, 0, 0.4);
+  background: var(--theme-battle-panel, #fff);
+  border: 6px solid var(--theme-battle-panel-border, #000);
+  box-shadow: var(--theme-battle-panel-shadow, 0 6px 0 #000), 0 10px 20px rgba(0, 0, 0, 0.4);
   padding: 14px 18px;
-  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-family: var(--theme-font, 'Press Start 2P', monospace, sans-serif);
 }
 
 /* Horizontal Layout: 40% / 60% Split */
@@ -747,7 +747,7 @@ const socialProofText = computed(() => {
   flex: 1;
   font-size: 14px;
   line-height: 1.6;
-  color: #000;
+  color: var(--theme-text-dark, #000);
   display: flex;
   align-items: center;
 }
@@ -787,8 +787,8 @@ const socialProofText = computed(() => {
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  background: #f8f8f8;
-  border: 2px solid #d0d0d0;
+  background: var(--theme-answer-bg, #f8f8f8);
+  border: 2px solid var(--theme-answer-border, #d0d0d0);
   border-radius: 3px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -798,9 +798,9 @@ const socialProofText = computed(() => {
 }
 
 .answer-item.active {
-  background: #fffbea;
-  border-color: #000;
-  box-shadow: inset 0 0 0 2px #ffd700;
+  background: var(--theme-answer-active-bg, #fffbea);
+  border-color: var(--theme-battle-panel-border, #000);
+  box-shadow: inset 0 0 0 2px var(--theme-answer-active-shadow, #ffd700);
   transform: translateX(2px);
 }
 
@@ -829,7 +829,7 @@ const socialProofText = computed(() => {
   flex: 1;
   font-size: 10px;
   line-height: 1.4;
-  color: #000;
+  color: var(--theme-text-dark, #000);
 }
 
 /* Feedback Display */
@@ -859,13 +859,13 @@ const socialProofText = computed(() => {
 }
 
 .result-bar.correct {
-  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
-  border: 2px solid #2e7d32;
+  background: var(--theme-correct-bg, linear-gradient(135deg, #4caf50 0%, #66bb6a 100%));
+  border: 2px solid var(--theme-correct-border, #2e7d32);
 }
 
 .result-bar.wrong {
-  background: linear-gradient(135deg, #ef5350 0%, #f44336 100%);
-  border: 2px solid #c62828;
+  background: var(--theme-wrong-bg, linear-gradient(135deg, #ef5350 0%, #f44336 100%));
+  border: 2px solid var(--theme-wrong-border, #c62828);
 }
 
 .result-bar .icon {
@@ -884,10 +884,10 @@ const socialProofText = computed(() => {
 .explain-text {
   font-size: 10px;
   line-height: 1.6;
-  color: #333;
+  color: var(--theme-text-dark, #333);
   margin: 0 0 10px 0;
   padding: 8px;
-  background: #f8f8f8;
+  background: var(--theme-answer-bg, #f8f8f8);
   border-radius: 3px;
 }
 

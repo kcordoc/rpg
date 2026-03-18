@@ -11,6 +11,8 @@ import { MusicManager } from '../MusicManager';
 import { CHARACTER_TYPES } from '../../constants.js';
 import { fetchLocationData } from '../../services/google-maps.js';
 import { generateTilemap } from '../MapGenerator.js';
+import themeManager from '../../themes/ThemeManager.js';
+import { AmbientParticles } from '../../themes/AmbientParticles.js';
 
 export class Overworld extends Scene
 {
@@ -34,6 +36,7 @@ export class Overworld extends Scene
         this.victorySound = null;
         this.defeatSound = null;
         this.musicManager = null; // Centralized music management
+        this.ambientParticles = null; // Theme ambient particle system
         this.spawnedGuestIndices = []; // Track which guests have been spawned
         this.currentLevel = 1;
         this.unlockedLevel = 1;
@@ -366,6 +369,76 @@ export class Overworld extends Scene
         this.musicManager.play(musicTrack, true, 500); // 500ms fade in
 
         bindOverworldEvents(this);
+
+        // Apply current theme effects (tints, particles, UI colors)
+        this.applyTheme(themeManager.current);
+
+        // Listen for runtime theme changes
+        this._onThemeChanged = (theme) => this.applyTheme(theme);
+        EventBus.on('theme-changed', this._onThemeChanged);
+        this.events.on('shutdown', () => {
+            EventBus.off('theme-changed', this._onThemeChanged);
+            if (this.ambientParticles) this.ambientParticles.stop();
+        });
+    }
+
+    /**
+     * Apply theme visual effects to the Overworld scene.
+     * Called on create() and on runtime theme switches.
+     */
+    applyTheme(theme) {
+        if (!theme) return;
+
+        // 1. World layer tint
+        const phaser = theme.phaser || {};
+        const tint = phaser.worldTint;
+        const layers = [this.belowLayer, this.worldLayer, this.aboveLayer].filter(Boolean);
+        for (const layer of layers) {
+            if (tint) {
+                layer.setTint(tint);
+            } else {
+                layer.clearTint();
+            }
+        }
+
+        // 2. Ambient light (alpha on a dark overlay)
+        if (phaser.ambientLight != null && phaser.ambientLight < 1.0) {
+            if (!this._darkOverlay) {
+                this._darkOverlay = this.add.rectangle(
+                    0, 0,
+                    this.map.widthInPixels, this.map.heightInPixels,
+                    0x000020
+                ).setOrigin(0, 0).setDepth(9).setAlpha(1 - phaser.ambientLight);
+            } else {
+                this._darkOverlay.setAlpha(1 - phaser.ambientLight).setVisible(true);
+            }
+        } else if (this._darkOverlay) {
+            this._darkOverlay.setVisible(false);
+        }
+
+        // 3. Ambient particles
+        if (!this.ambientParticles) {
+            this.ambientParticles = new AmbientParticles(this);
+        }
+        this.ambientParticles.start(theme.particles);
+
+        // 4. Minimap + UI colors
+        const ui = theme.overworldUI || {};
+        if (this.minimapBorder && ui.minimapBorderColor != null) {
+            this.minimapBorder.clear();
+            const minimapSize = 200;
+            const minimapPadding = 10;
+            const minimapX = this.scale.width - minimapSize - minimapPadding;
+            const minimapY = this.scale.height - minimapSize - minimapPadding;
+            this.minimapBorder.lineStyle(4, ui.minimapBorderColor, 1);
+            this.minimapBorder.strokeRect(minimapX - 2, minimapY - 2, minimapSize + 4, minimapSize + 4);
+        }
+        if (this.minimap && ui.minimapBgColor != null) {
+            this.minimap.setBackgroundColor(ui.minimapBgColor);
+        }
+        if (this.segmentLabel && ui.segmentLabelColor) {
+            this.segmentLabel.setColor(ui.segmentLabelColor);
+        }
     }
 
     createPlayer ()
