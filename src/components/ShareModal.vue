@@ -229,7 +229,7 @@ async function downloadCard() {
       useCORS: true
     });
     const link = document.createElement('a');
-    link.download = `heartquest-${props.playerName || 'player'}-card.png`;
+    link.download = `${GAME_NAME.toLowerCase().replace(/\s+/g, '-')}-${props.playerName || 'player'}-card.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   } catch (error) {

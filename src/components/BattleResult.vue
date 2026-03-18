@@ -113,7 +113,7 @@ import externalLink from '@iconify/icons-pixelarticons/external-link';
 import redo from '@iconify/icons-pixelarticons/redo';
 import arrowRight from '@iconify/icons-pixelarticons/arrow-right';
 
-import { GAME_URL } from '../constants.js';
+import { GAME_NAME, GAME_URL } from '../constants.js';
 
 const props = defineProps({
   isActive: Boolean,
@@ -181,7 +181,7 @@ function shareDyk() {
 function challengeFriend() {
   const npcSlug = props.guestName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   const url = `${GAME_URL}?challenge=${npcSlug}&score=${accuracy.value}`;
-  const text = `I scored ${accuracy.value}% against ${props.guestName} in Heart Quest! Can you beat me? ${url}`;
+  const text = `I scored ${accuracy.value}% against ${props.guestName} in ${GAME_NAME}! Can you beat me? ${url}`;
   if (navigator.share) {
     navigator.share({ text }).catch(() => {});
   } else {

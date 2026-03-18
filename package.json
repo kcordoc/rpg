@@ -1,6 +1,6 @@
 {
-    "name": "heart-quest",
-    "description": "Heart Quest - An educational RPG about heart health. Explore the Village of Heartwell, battle NPCs, and learn about cholesterol, lipids, and cardiovascular disease prevention.",
+    "name": "questforge",
+    "description": "QuestForge — Educational RPG platform. First game: Lipid Wizard, a heart health adventure.",
     "version": "0.1.0",
     "type": "module",
     "author": {

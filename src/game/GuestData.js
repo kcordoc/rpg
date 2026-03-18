@@ -127,7 +127,7 @@ class GuestDataManager {
    * Top 20 most famous/popular guests that should always appear
    */
   getTopGuests() {
-    // For Heart Quest, all NPCs are equal — no top guests
+    // All NPCs are equal — no top guests
     return [];
   }
 

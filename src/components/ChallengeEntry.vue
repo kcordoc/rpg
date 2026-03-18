@@ -3,7 +3,7 @@
     <div class="challenge-container">
       <!-- Header -->
       <div class="challenge-header">
-        <h1 class="challenge-title">Heart Quest Challenge!</h1>
+        <h1 class="challenge-title">{{ GAME_NAME }} Challenge!</h1>
         <p v-if="senderName" class="sender-info">
           {{ senderName }} scored {{ senderScore }}% against <strong>{{ npcDisplayName }}</strong>
         </p>
@@ -71,7 +71,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { GAME_URL } from '../constants.js';
+import { GAME_NAME, GAME_URL } from '../constants.js';
 
 const props = defineProps({
   npcSlug: { type: String, default: '' },

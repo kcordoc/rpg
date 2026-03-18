@@ -26,6 +26,7 @@ import {
   GAME_NAME, GAME_URL, MUTE_KEY, TUTORIAL_SEEN_KEY,
   MOBILE_WARNING, CREDITS_LINK_URL, CREDITS_LINK_TEXT, CREDITS_TOOLTIP
 } from './constants.js';
+import { getActiveGame } from './platform/GameConfig.js';
 import themeManager from './themes/ThemeManager.js';
 
 // Game state
@@ -56,8 +57,8 @@ function detectChallenge() {
     challengeNpcSlug.value = challenge;
     challengeSenderName.value = params.get('from') || '';
     challengeSenderScore.value = parseInt(params.get('score') || '0', 10);
-    // Load questions.json for challenge
-    fetch('/assets/questions.json')
+    // Load questions for challenge mode
+    fetch(getActiveGame().questionsPath)
       .then(r => r.json())
       .then(data => { questionsJsonData.value = data; })
       .catch(() => { challengeMode.value = false; });
@@ -748,7 +749,7 @@ onUnmounted(() => {
             <div class="credits-line credits-inspiration">
               <span>Powered by</span>
               <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-avatar-link" :data-tooltip="CREDITS_TOOLTIP">
-                <img class="credits-avatar" src="/assets/favicon.png" alt="Heart Quest" />
+                <img class="credits-avatar" src="/assets/favicon.png" :alt="GAME_NAME" />
               </a>
               <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-lenny" :data-tooltip="CREDITS_TOOLTIP">{{ CREDITS_LINK_TEXT }}</a>
             </div>
@@ -850,7 +851,7 @@ onUnmounted(() => {
             <div class="credits-line credits-inspiration">
               <span>Powered by</span>
               <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-avatar-link" :data-tooltip="CREDITS_TOOLTIP">
-                <img class="credits-avatar" src="/assets/favicon.png" alt="Heart Quest" />
+                <img class="credits-avatar" src="/assets/favicon.png" :alt="GAME_NAME" />
               </a>
               <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-lenny" :data-tooltip="CREDITS_TOOLTIP">{{ CREDITS_LINK_TEXT }}</a>
             </div>

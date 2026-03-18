@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { GAME_URL } from '../constants.js';
+import { GAME_NAME, GAME_URL } from '../constants.js';
 
 const props = defineProps({
   isActive: Boolean,
@@ -64,7 +64,7 @@ defineEmits(['continue']);
 function shareProgress() {
   const npcCount = props.npcsThisSession.length;
   const captured = props.npcsThisSession.filter(n => n.captured).length;
-  const text = `I explored Heart Quest and encountered ${npcCount} NPCs (captured ${captured})! ${props.streak > 1 ? `${props.streak}-day streak! ` : ''}${GAME_URL}`;
+  const text = `I explored ${GAME_NAME} and encountered ${npcCount} NPCs (captured ${captured})! ${props.streak > 1 ? `${props.streak}-day streak! ` : ''}${GAME_URL}`;
   if (navigator.share) {
     navigator.share({ text }).catch(() => {});
   } else {
