@@ -16,7 +16,7 @@ export const GAME_DESCRIPTION =
   'Explore the Village of Heartwell and learn about heart disease prevention through an RPG adventure.';
 export const COMPANY_NAME = 'CORDOC LLC';
 export const GAME_THEME = 'heart-health';
-export const GITHUB_URL = 'https://github.com/cordoc/heart-quest';
+export const GITHUB_URL = ''; // No public repo yet
 
 // ─── Meta / SEO ─────────────────────────────────────────────────
 export const META_TITLE = `${GAME_NAME} - Learn Heart Health | Educational RPG`;
