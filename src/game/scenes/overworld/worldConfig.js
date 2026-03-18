@@ -12,21 +12,11 @@ export const WORLD_CONFIGS = [
         // Spawn NPCs on path/road tiles only (Tuxemon map). Values are Tiled GIDs.
         spawnableTileIds: [149, 150, 151, 173, 175, 198],
         segmentWidth: 40,
-        music: 'overworld' // Main overworld theme
-    },
-    {
-        key: 'desert-map',
-        tilesetName: 'Desert',
-        tilesKey: 'desert-tiles',
-        layers: {
-            below: 'Ground',
-            world: 'Ground',
-            above: null
-        },
-        segmentWidth: null,
-        music: 'desert' // Desert theme music
+        music: 'overworld'
     }
-    // Maps will cycle: Tuxemon -> Desert -> Tuxemon -> Desert...
+    // Desert map removed — was broken (no proper tilemap).
+    // All 6 chapters use the village map with 3 segments per world,
+    // cycling the same map for levels 4-6.
 ];
 
 /**
