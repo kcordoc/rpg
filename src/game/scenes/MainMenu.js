@@ -459,10 +459,10 @@ export class MainMenu extends Scene
                 height: inputHeight
             };
             const locationBounds = {
-                x: this.scale.width / 2 - 210,
-                y: 340 - 14,
-                width: 420,
-                height: 28
+                x: this.scale.width / 2 - 250,
+                y: 340 - 18,
+                width: 500,
+                height: 36
             };
             const inName = pointer.x >= nameBounds.x && pointer.x <= nameBounds.x + nameBounds.width &&
                            pointer.y >= nameBounds.y && pointer.y <= nameBounds.y + nameBounds.height;
@@ -1025,8 +1025,8 @@ export class MainMenu extends Scene
     {
         const inputX = this.scale.width / 2;
         const inputY = 340;
-        const inputWidth = 420;
-        const inputHeight = 28;
+        const inputWidth = 500;
+        const inputHeight = 36;
 
         const savedLocation = gameState.getMapLocation();
         this.mapLocation = savedLocation || '';
@@ -1038,20 +1038,20 @@ export class MainMenu extends Scene
         this.locationInputText = this.add.text(inputX, inputY,
             this.mapLocation || placeholder, {
             fontFamily: '"Press Start 2P"',
-            fontSize: '7px',
+            fontSize: '10px',
             color: this.mapLocation ? '#FFFFFF' : '#888888',
-            letterSpacing: 1,
+            letterSpacing: 2,
             align: 'center',
             wordWrap: { width: inputWidth - 20 }
         }).setOrigin(0.5);
 
         this.locationInputCursor = this.add.text(inputX, inputY, '|', {
             fontFamily: '"Press Start 2P"',
-            fontSize: '7px',
+            fontSize: '10px',
             color: '#FFD700'
         }).setOrigin(0.5, 0.5).setVisible(false);
 
-        const zone = this.add.rectangle(inputX, inputY, inputWidth, inputHeight, 0x000000, 0)
+        const zone = this.add.rectangle(inputX, inputY, 500, 36, 0x000000, 0)
             .setInteractive({ useHandCursor: true });
         zone.on('pointerdown', () => {
             this.blurInput();
@@ -1066,7 +1066,7 @@ export class MainMenu extends Scene
         this.locationInputBg.clear();
         const inputX = this.scale.width / 2;
         const inputY = 340;
-        const w = 420, h = 28, r = 10;
+        const w = 500, h = 36, r = 12;
 
         if (focused) {
             this.locationInputBg.fillStyle(0xFFD700, 0.3);
@@ -1180,13 +1180,23 @@ export class MainMenu extends Scene
         });
 
         try {
-            const locationData = await fetchLocationData(location);
+            console.log('[MapGen] Fetching location data for:', location);
+            // Timeout after 10 seconds
+            const locationData = await Promise.race([
+                fetchLocationData(location),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Location fetch timed out after 10s')), 10000))
+            ]);
+            console.log('[MapGen] Location data received:', locationData.location?.formattedAddress, '- Places:', locationData.places?.length);
+
+            console.log('[MapGen] Generating tilemap...');
             const { tilemap, metadata } = generateTilemap(locationData);
+            console.log('[MapGen] Tilemap generated:', tilemap.width, 'x', tilemap.height, '- Buildings:', metadata.buildings?.length, '- Streets:', metadata.streetLabels?.length);
 
             if (this.cache.tilemap.exists('generated-map')) {
                 this.cache.tilemap.remove('generated-map');
             }
             this.cache.tilemap.add('generated-map', { format: 1, data: tilemap });
+            console.log('[MapGen] Map cached. Starting Overworld...');
 
             loadingDots.remove();
             loadingText.destroy();
