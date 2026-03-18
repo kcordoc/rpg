@@ -1,0 +1,44 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+.env
+.env.local
+
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+*.tsbuildinfo
+
+# Internal development docs
+AUDIO_SYSTEM.md
+BATTLE_INTEGRATION.md
+GUEST_ROSTER_LOG.md
+HANDOFF.md
+INTEGRATION_LOG.md
+MAP_EXTENSION_TODO.md
+NPC_PRIORITY_STAGES.md
+SIMPLE_GAMIFICATION.md
+SUPABASE_SETUP.md
+TODO.md

@@ -1,0 +1,3140 @@
+{
+  "episodes": [
+    {
+      "title": "Lipidus the Wise",
+      "guest": "Lipidus the Wise",
+      "category": "Cholesterol Basics",
+      "chapter": 1,
+      "role": "quizmaster",
+      "greeting": "Welcome to the Library of Heartwell. I am Lipidus, keeper of the ancient lipid scrolls.",
+      "cliffhanger": "You understand the basics now, but Nurse Heartwell knows something about where cholesterol truly comes from...",
+      "knowledgeCard": "Cholesterol is a waxy substance essential for building cells, making vitamins, and producing hormones.",
+      "dialogue": [
+        {
+          "text": "The village is falling ill, and I believe the answer lies in understanding a substance called cholesterol."
+        },
+        {
+          "text": "Despite its bad reputation, cholesterol is actually essential for life. Every cell needs it."
+        },
+        {
+          "text": "Let me test your knowledge of this misunderstood molecule. Ready?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/cholesterol",
+      "questions": [
+        {
+          "question": "What is cholesterol?",
+          "choices": [
+            "A type of sugar",
+            "A waxy, fat-like substance found in every cell",
+            "A vitamin",
+            "A mineral"
+          ],
+          "answer": "A waxy, fat-like substance found in every cell",
+          "explanation": "Cholesterol is a waxy, fat-like substance found in every cell of your body. It's essential for building cells, making vitamins, and producing hormones.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Cholesterol is found in every single cell in your body — it's essential for life.",
+          "shareText": "TIL cholesterol isn't just bad — it's in every cell and essential for life!",
+          "correctPct": 65
+        },
+        {
+          "question": "What percentage of your body's cholesterol is produced by the liver?",
+          "choices": [
+            "20%",
+            "50%",
+            "80%",
+            "100%"
+          ],
+          "answer": "80%",
+          "explanation": "Your liver produces about 80% of the cholesterol in your body. Only about 20% comes from food.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Your liver makes 80% of your cholesterol. Only 20% comes from what you eat.",
+          "shareText": "TIL your liver makes 80% of your cholesterol. Diet is only 20%!",
+          "correctPct": 32
+        },
+        {
+          "question": "What does LDL cholesterol do?",
+          "choices": [
+            "Carries cholesterol from arteries to liver",
+            "Carries cholesterol from liver to cells",
+            "Breaks down fat",
+            "Produces hormones"
+          ],
+          "answer": "Carries cholesterol from liver to cells",
+          "explanation": "LDL carries cholesterol FROM the liver TO your cells. Too much LDL can build up in artery walls.",
+          "difficulty": "Easy",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "LDL is like a delivery truck carrying cholesterol from the liver to your cells.",
+          "shareText": "LDL = delivery trucks for cholesterol. Too many trucks = traffic jam in your arteries.",
+          "correctPct": 55
+        },
+        {
+          "question": "What is HDL cholesterol often called?",
+          "choices": [
+            "Bad cholesterol",
+            "Good cholesterol",
+            "Neutral cholesterol",
+            "Total cholesterol"
+          ],
+          "answer": "Good cholesterol",
+          "explanation": "HDL is the 'good' cholesterol because it works like a cleanup crew, picking up excess cholesterol and returning it to the liver.",
+          "difficulty": "Easy",
+          "surpriseFactor": 2,
+          "didYouKnowFact": "HDL acts as a cleanup crew, removing excess cholesterol from your arteries.",
+          "shareText": "HDL cholesterol is your body's cleanup crew for arteries!",
+          "correctPct": 78
+        },
+        {
+          "question": "What is a normal triglyceride level?",
+          "choices": [
+            "Below 100 mg/dL",
+            "Below 150 mg/dL",
+            "Below 200 mg/dL",
+            "Below 250 mg/dL"
+          ],
+          "answer": "Below 150 mg/dL",
+          "explanation": "Normal triglyceride levels are below 150 mg/dL. High triglycerides combined with high LDL increase heart disease risk.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Your body converts excess calories, sugar, and alcohol into triglycerides.",
+          "shareText": "Excess calories, sugar, and alcohol all get converted to triglycerides.",
+          "correctPct": 41
+        },
+        {
+          "question": "What is considered an optimal total cholesterol to HDL ratio?",
+          "choices": [
+            "1:1",
+            "3.5:1",
+            "7:1",
+            "10:1"
+          ],
+          "answer": "3.5:1",
+          "explanation": "A ratio of 3.5:1 is optimal. Below 5:1 is considered good. This ratio is increasingly seen as more important than individual numbers.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "The ratio of total cholesterol to HDL matters more than individual numbers.",
+          "shareText": "Doctors now look at your cholesterol RATIO, not just total numbers.",
+          "correctPct": 28
+        }
+      ]
+    },
+    {
+      "title": "Nurse Heartwell",
+      "guest": "Nurse Heartwell",
+      "category": "Cholesterol Basics",
+      "chapter": 1,
+      "role": "healer",
+      "greeting": "I've been treating villagers for years, but this illness is unlike anything I've seen.",
+      "cliffhanger": "The Cholesterol Sage has been studying old myths about cholesterol. Some might surprise you...",
+      "knowledgeCard": "The liver is a 24/7 cholesterol factory that adjusts production based on dietary intake.",
+      "dialogue": [
+        {
+          "text": "I've noticed something strange. The sickest villagers all have something in common in their blood."
+        },
+        {
+          "text": "Their livers seem to be working overtime, producing something waxy..."
+        },
+        {
+          "text": "Do you know how the body actually makes and uses cholesterol?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/cholesterol",
+      "questions": [
+        {
+          "question": "How does the liver respond when you eat more cholesterol?",
+          "choices": [
+            "It produces more",
+            "It produces less",
+            "It stays the same",
+            "It shuts down"
+          ],
+          "answer": "It produces less",
+          "explanation": "The liver adjusts production based on dietary intake — eat more cholesterol, liver produces less. But this regulation isn't perfect.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Your liver adjusts cholesterol production based on what you eat — but not perfectly.",
+          "shareText": "Your liver is smart: eat more cholesterol, it makes less. But it's not perfect.",
+          "correctPct": 38
+        },
+        {
+          "question": "How does cholesterol travel through the bloodstream?",
+          "choices": [
+            "Dissolved in blood",
+            "In small packages called lipoproteins",
+            "Attached to red blood cells",
+            "Through the lymphatic system"
+          ],
+          "answer": "In small packages called lipoproteins",
+          "explanation": "Cholesterol travels through blood in small packages called lipoproteins, since it's waxy and can't dissolve in blood directly.",
+          "difficulty": "Easy",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Cholesterol can't dissolve in blood, so it rides in tiny lipoprotein packages.",
+          "shareText": "Cholesterol needs a ride through your blood — it travels in lipoprotein packages!",
+          "correctPct": 52
+        },
+        {
+          "question": "What is the minimum recommended HDL level for men?",
+          "choices": [
+            "30 mg/dL",
+            "40 mg/dL",
+            "50 mg/dL",
+            "60 mg/dL"
+          ],
+          "answer": "40 mg/dL",
+          "explanation": "You want HDL of at least 40 mg/dL for men and 50 mg/dL for women. Above 60 mg/dL is considered protective.",
+          "difficulty": "Medium",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Women need higher HDL than men — at least 50 vs 40 mg/dL.",
+          "shareText": "Women need higher HDL cholesterol than men for the same protection.",
+          "correctPct": 44
+        },
+        {
+          "question": "What does the body use cholesterol for?",
+          "choices": [
+            "Only energy production",
+            "Building cells, making vitamins, producing hormones",
+            "Only digesting food",
+            "Fighting infections"
+          ],
+          "answer": "Building cells, making vitamins, producing hormones",
+          "explanation": "Your body needs cholesterol to build cells, make vitamins, and produce hormones. It's essential for life.",
+          "difficulty": "Easy",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Without cholesterol, you couldn't build cells, make vitamin D, or produce hormones.",
+          "shareText": "Without cholesterol you'd have no cells, no vitamin D, no hormones. It's essential!",
+          "correctPct": 61
+        },
+        {
+          "question": "What happens when there is too much LDL in the blood?",
+          "choices": [
+            "It gets absorbed by muscles",
+            "It builds up in artery walls forming plaque",
+            "It's excreted by kidneys",
+            "It converts to HDL"
+          ],
+          "answer": "It builds up in artery walls forming plaque",
+          "explanation": "Excess LDL builds up in artery walls, forming plaque that narrows arteries and can lead to heart attacks and strokes.",
+          "difficulty": "Easy",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "LDL buildup in artery walls is the root cause of most heart attacks.",
+          "shareText": "Too much LDL = plaque in your arteries = the root cause of heart attacks.",
+          "correctPct": 72
+        }
+      ]
+    },
+    {
+      "title": "The Cholesterol Sage",
+      "guest": "The Cholesterol Sage",
+      "category": "Cholesterol Basics",
+      "chapter": 1,
+      "role": "scholar",
+      "greeting": "Ah, a seeker of truth! Many myths surround cholesterol. Let me set the record straight.",
+      "cliffhanger": "Fatty the Friendly can tell you about the different types of fats in your blood...",
+      "knowledgeCard": "Most cholesterol myths are wrong: eggs are fine for most people, young people DO need to worry, and you can't feel high cholesterol.",
+      "dialogue": [
+        {
+          "text": "I've spent my life debunking myths. Did you know most people believe things about cholesterol that simply aren't true?"
+        },
+        {
+          "text": "Eggs, youth, symptoms — the myths run deep in this village."
+        },
+        {
+          "text": "Let's see if you can separate fact from fiction!"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/cholesterol",
+      "questions": [
+        {
+          "question": "Is it true that eating eggs dangerously raises your cholesterol?",
+          "choices": [
+            "Yes, always",
+            "No, for most people eggs have a modest effect",
+            "Only scrambled eggs",
+            "Only if you eat the yolk"
+          ],
+          "answer": "No, for most people eggs have a modest effect",
+          "explanation": "For most people, dietary cholesterol has a modest effect on blood cholesterol. The liver compensates. Most studies show 1-3 eggs/day is safe.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Most studies show eating 1-3 eggs per day is safe for healthy people.",
+          "shareText": "Good news: 1-3 eggs a day is totally fine for most people! The egg myth is busted.",
+          "correctPct": 45
+        },
+        {
+          "question": "Can you feel when your cholesterol is high?",
+          "choices": [
+            "Yes, you feel tired",
+            "Yes, you get headaches",
+            "No, high cholesterol has no symptoms",
+            "Yes, your skin turns yellow"
+          ],
+          "answer": "No, high cholesterol has no symptoms",
+          "explanation": "High cholesterol has NO symptoms. The only way to know is a blood test. This is why it's called a 'silent' risk factor.",
+          "difficulty": "Easy",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "High cholesterol is completely silent — zero symptoms until something goes wrong.",
+          "shareText": "High cholesterol has ZERO symptoms. The only way to know is a blood test.",
+          "correctPct": 58
+        },
+        {
+          "question": "At what age should you first get your cholesterol tested?",
+          "choices": [
+            "Age 10",
+            "Age 20",
+            "Age 40",
+            "Age 50"
+          ],
+          "answer": "Age 20",
+          "explanation": "Getting tested by age 20 and every 4-6 years after is recommended. Atherosclerosis begins in childhood and progresses silently.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Plaque buildup starts in childhood and builds silently for decades.",
+          "shareText": "Plaque buildup starts in CHILDHOOD. Get tested by age 20!",
+          "correctPct": 35
+        },
+        {
+          "question": "If your cholesterol is normal, are you safe from heart disease?",
+          "choices": [
+            "Yes, completely",
+            "No, other risk factors also matter",
+            "Yes, if you exercise",
+            "Only if you're under 50"
+          ],
+          "answer": "No, other risk factors also matter",
+          "explanation": "Cholesterol is just one risk factor. Blood pressure, smoking, diabetes, family history, and inflammation all play roles.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Some people have heart attacks with 'normal' cholesterol levels.",
+          "shareText": "Normal cholesterol doesn't mean you're safe. Heart disease has many risk factors.",
+          "correctPct": 49
+        },
+        {
+          "question": "What is a normal LDL cholesterol level?",
+          "choices": [
+            "Below 70 mg/dL",
+            "Below 100 mg/dL",
+            "Below 150 mg/dL",
+            "Below 200 mg/dL"
+          ],
+          "answer": "Below 100 mg/dL",
+          "explanation": "A normal LDL level is below 100 mg/dL. For people at high risk, optimal is below 70 mg/dL.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "For high-risk people, doctors aim for LDL below 70 mg/dL.",
+          "shareText": "Normal LDL is under 100. High-risk patients should aim for under 70!",
+          "correctPct": 55
+        }
+      ]
+    },
+    {
+      "title": "Fatty the Friendly",
+      "guest": "Fatty the Friendly",
+      "category": "Cholesterol Basics",
+      "chapter": 1,
+      "role": "guide",
+      "greeting": "Don't be scared by my name! Not all fats are bad. Let me explain.",
+      "cliffhanger": "Elder Plaque guards the exit to the Library. Defeat him to prove your knowledge!",
+      "knowledgeCard": "Triglycerides are fats made from excess calories, sugar, and alcohol. HDL is the body's cleanup crew.",
+      "dialogue": [
+        {
+          "text": "Everyone blames fat for the village curse, but they don't understand — there are good fats and bad fats."
+        },
+        {
+          "text": "The real question is which ones are helping and which ones are hurting."
+        },
+        {
+          "text": "Can you tell the difference?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/cholesterol",
+      "questions": [
+        {
+          "question": "What does your body convert into triglycerides?",
+          "choices": [
+            "Protein only",
+            "Excess calories, sugar, and alcohol",
+            "Vitamins",
+            "Water and minerals"
+          ],
+          "answer": "Excess calories, sugar, and alcohol",
+          "explanation": "Your body converts excess calories, sugar, and alcohol into triglycerides, which are stored in fat cells.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Alcohol gets converted directly into triglycerides — not just fatty foods.",
+          "shareText": "It's not just fat! Sugar and alcohol also get turned into triglycerides.",
+          "correctPct": 40
+        },
+        {
+          "question": "Where are triglycerides stored?",
+          "choices": [
+            "In the liver",
+            "In fat cells",
+            "In the heart",
+            "In bones"
+          ],
+          "answer": "In fat cells",
+          "explanation": "Triglycerides are stored in fat cells throughout the body and released for energy between meals.",
+          "difficulty": "Easy",
+          "surpriseFactor": 2,
+          "didYouKnowFact": "Triglycerides are stored in fat cells and released for energy between meals.",
+          "shareText": "Triglycerides are your body's energy reserves, stored in fat cells.",
+          "correctPct": 68
+        },
+        {
+          "question": "What increases heart disease risk alongside high LDL?",
+          "choices": [
+            "High HDL",
+            "High triglycerides combined with low HDL",
+            "Low triglycerides",
+            "High total cholesterol alone"
+          ],
+          "answer": "High triglycerides combined with low HDL",
+          "explanation": "High triglycerides combined with high LDL or low HDL significantly increases heart disease risk.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "The deadly combo: high triglycerides + low HDL + high LDL.",
+          "shareText": "The triple threat: high triglycerides + low HDL + high LDL = danger zone.",
+          "correctPct": 36
+        },
+        {
+          "question": "How does HDL help protect against heart disease?",
+          "choices": [
+            "It blocks LDL production",
+            "It picks up excess cholesterol from arteries",
+            "It lowers blood pressure",
+            "It thins the blood"
+          ],
+          "answer": "It picks up excess cholesterol from arteries",
+          "explanation": "HDL works like a cleanup crew, picking up excess cholesterol from arteries and carrying it back to the liver for removal.",
+          "difficulty": "Easy",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "HDL physically picks up cholesterol from your artery walls and trucks it to the liver.",
+          "shareText": "HDL is your artery's cleanup crew — it physically removes cholesterol buildup!",
+          "correctPct": 62
+        },
+        {
+          "question": "Every 1 mg/dL increase in HDL is linked to what decrease in heart disease risk?",
+          "choices": [
+            "1%",
+            "2-3%",
+            "5-10%",
+            "15%"
+          ],
+          "answer": "2-3%",
+          "explanation": "Every 1 mg/dL increase in HDL is associated with a 2-3% decrease in heart disease risk.",
+          "difficulty": "Hard",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Even small increases in HDL make a real difference — 1 mg/dL = 2-3% less risk.",
+          "shareText": "Every tiny bump in HDL reduces heart disease risk by 2-3%. Small changes matter!",
+          "correctPct": 25
+        }
+      ]
+    },
+    {
+      "title": "Elder Plaque",
+      "guest": "Elder Plaque",
+      "category": "Cholesterol Basics",
+      "chapter": 1,
+      "role": "boss",
+      "greeting": "I am Elder Plaque, guardian of the Library. Prove you've mastered the basics!",
+      "cliffhanger": "But there's more to learn... the Clinic holds secrets about what your blood numbers really mean.",
+      "knowledgeCard": "Cholesterol basics: liver makes 80%, LDL delivers, HDL cleans up, triglycerides store energy. The ratio matters most.",
+      "dialogue": [
+        {
+          "text": "So you think you understand cholesterol? Many have tried to pass my test and failed."
+        },
+        {
+          "text": "The villagers' illness starts with what they don't understand about their own blood."
+        },
+        {
+          "text": "Show me everything you've learned!"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/cholesterol",
+      "questions": [
+        {
+          "question": "If you ate zero cholesterol, would your body still have cholesterol?",
+          "choices": [
+            "No, you'd have none",
+            "Yes, the liver would still make it",
+            "Only a tiny amount",
+            "Only if you take supplements"
+          ],
+          "answer": "Yes, the liver would still make it",
+          "explanation": "Even with zero dietary cholesterol, your liver would still produce plenty — it makes about 80% of your body's cholesterol.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Eat zero cholesterol and your body STILL makes plenty. Your liver runs 24/7.",
+          "shareText": "Even if you ate zero cholesterol, your liver would still make plenty. It runs 24/7!",
+          "correctPct": 42
+        },
+        {
+          "question": "What is the optimal LDL level for high-risk patients?",
+          "choices": [
+            "Below 100 mg/dL",
+            "Below 70 mg/dL",
+            "Below 130 mg/dL",
+            "Below 50 mg/dL"
+          ],
+          "answer": "Below 70 mg/dL",
+          "explanation": "For people with heart disease or diabetes, doctors aim for LDL below 70 mg/dL.",
+          "difficulty": "Hard",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "High-risk patients should aim for LDL under 70 — much lower than 'normal'.",
+          "shareText": "If you're high-risk, your LDL target is under 70 — not the usual 100.",
+          "correctPct": 33
+        },
+        {
+          "question": "What level of HDL is considered protective?",
+          "choices": [
+            "30 mg/dL",
+            "40 mg/dL",
+            "50 mg/dL",
+            "60 mg/dL and above"
+          ],
+          "answer": "60 mg/dL and above",
+          "explanation": "HDL of 60 mg/dL and above is considered protective against heart disease.",
+          "difficulty": "Medium",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "HDL above 60 mg/dL actively protects your heart.",
+          "shareText": "HDL above 60 = active heart protection. How's yours?",
+          "correctPct": 48
+        },
+        {
+          "question": "What do we call cholesterol at high levels because it shows no symptoms?",
+          "choices": [
+            "The loud killer",
+            "A silent risk factor",
+            "The obvious danger",
+            "A visible threat"
+          ],
+          "answer": "A silent risk factor",
+          "explanation": "High cholesterol has no symptoms — you can't feel it. It's called a 'silent' risk factor.",
+          "difficulty": "Easy",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "High cholesterol is completely invisible until a heart attack or stroke happens.",
+          "shareText": "You can't feel high cholesterol. It's completely silent until disaster strikes.",
+          "correctPct": 70
+        },
+        {
+          "question": "When does atherosclerosis (plaque buildup) actually begin?",
+          "choices": [
+            "At age 40",
+            "At age 60",
+            "In childhood",
+            "Only after high cholesterol diagnosis"
+          ],
+          "answer": "In childhood",
+          "explanation": "Atherosclerosis begins in childhood and teens, progressing silently for decades before symptoms appear.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "Plaque buildup in arteries starts in CHILDHOOD — decades before any symptoms.",
+          "shareText": "Plaque buildup starts in CHILDHOOD. By the time you feel it, it's been decades.",
+          "correctPct": 22
+        }
+      ]
+    },
+    {
+      "title": "Dr. Panela",
+      "guest": "Dr. Panela",
+      "category": "Lab Results",
+      "chapter": 2,
+      "role": "quizmaster",
+      "greeting": "Welcome to the Clinic. Your blood tells a story — let me teach you to read it.",
+      "cliffhanger": "Lab Tech Luna can explain the details of each measurement...",
+      "knowledgeCard": "A lipid panel measures total cholesterol, LDL, HDL, and triglycerides — the four key numbers for heart risk.",
+      "dialogue": [
+        {
+          "text": "The villagers have been getting blood tests, but nobody understands what the numbers mean."
+        },
+        {
+          "text": "A lipid panel has four key measurements. Each tells part of the story."
+        },
+        {
+          "text": "Let me see if you can interpret these results!"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/labs",
+      "questions": [
+        {
+          "question": "What does a standard lipid panel measure?",
+          "choices": [
+            "Only LDL",
+            "Total cholesterol, LDL, HDL, and triglycerides",
+            "Blood sugar and cholesterol",
+            "Only triglycerides"
+          ],
+          "answer": "Total cholesterol, LDL, HDL, and triglycerides",
+          "explanation": "A lipid panel typically includes four measurements: total cholesterol, LDL, HDL, and triglycerides.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "A lipid panel gives you four key numbers that together paint your heart risk picture.",
+          "shareText": "Know your four numbers: total cholesterol, LDL, HDL, and triglycerides.",
+          "correctPct": 62
+        },
+        {
+          "question": "What is considered a desirable total cholesterol level?",
+          "choices": [
+            "Below 150 mg/dL",
+            "Below 200 mg/dL",
+            "Below 250 mg/dL",
+            "Below 300 mg/dL"
+          ],
+          "answer": "Below 200 mg/dL",
+          "explanation": "Total cholesterol below 200 mg/dL is desirable. 200-239 is borderline high, and 240+ is high.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Total cholesterol under 200 is the target, but the breakdown matters more than the total.",
+          "shareText": "Total cholesterol under 200 is good, but it's the LDL/HDL split that really matters.",
+          "correctPct": 58
+        },
+        {
+          "question": "Why can a high total cholesterol number be misleading?",
+          "choices": [
+            "It's always accurate",
+            "It could be high because of high HDL, which is actually good",
+            "It doesn't include LDL",
+            "Triglycerides aren't counted"
+          ],
+          "answer": "It could be high because of high HDL, which is actually good",
+          "explanation": "Total cholesterol includes HDL. High total cholesterol caused by high HDL is actually good — that's why the breakdown matters.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "High total cholesterol from high HDL is actually protective — the breakdown matters.",
+          "shareText": "High cholesterol could mean HIGH HDL (good!). Always look at the breakdown.",
+          "correctPct": 38
+        },
+        {
+          "question": "What LDL level is considered 'very high'?",
+          "choices": [
+            "Above 100 mg/dL",
+            "Above 130 mg/dL",
+            "Above 160 mg/dL",
+            "Above 190 mg/dL"
+          ],
+          "answer": "Above 190 mg/dL",
+          "explanation": "LDL above 190 mg/dL is considered very high and almost always requires treatment.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "LDL above 190 nearly always requires medication — it's the danger zone.",
+          "shareText": "LDL above 190 = danger zone. Nearly always needs treatment.",
+          "correctPct": 44
+        },
+        {
+          "question": "What triglyceride level is considered 'very high' and risks pancreatitis?",
+          "choices": [
+            "Above 200 mg/dL",
+            "Above 300 mg/dL",
+            "Above 500 mg/dL",
+            "Above 1000 mg/dL"
+          ],
+          "answer": "Above 500 mg/dL",
+          "explanation": "Triglycerides above 500 mg/dL are very high and can cause pancreatitis, a dangerous inflammation of the pancreas.",
+          "difficulty": "Hard",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Triglycerides above 500 can cause pancreatitis — a medical emergency.",
+          "shareText": "Triglycerides above 500 don't just hurt your heart — they can inflame your pancreas.",
+          "correctPct": 30
+        }
+      ]
+    },
+    {
+      "title": "Lab Tech Luna",
+      "guest": "Lab Tech Luna",
+      "category": "Lab Results",
+      "chapter": 2,
+      "role": "healer",
+      "greeting": "I run the lab here. Let me show you what most doctors don't explain.",
+      "cliffhanger": "The Number Cruncher knows about advanced tests that go beyond the standard panel...",
+      "knowledgeCard": "Non-fasting lipid panels are nearly as accurate as fasting ones, except for triglycerides.",
+      "dialogue": [
+        {
+          "text": "Most people are confused about fasting before blood tests. Let me clear things up."
+        },
+        {
+          "text": "And there are factors that can throw off your results that nobody warns you about."
+        },
+        {
+          "text": "Ready to learn the secrets of accurate lab results?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/labs",
+      "questions": [
+        {
+          "question": "How long were patients traditionally told to fast before a lipid panel?",
+          "choices": [
+            "4-6 hours",
+            "9-12 hours",
+            "24 hours",
+            "No fasting needed"
+          ],
+          "answer": "9-12 hours",
+          "explanation": "Traditionally, lipid panels required 9-12 hours of fasting. Recent research shows non-fasting tests are nearly as accurate.",
+          "difficulty": "Easy",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Modern research shows you may not need to fast for a cholesterol test anymore.",
+          "shareText": "You might not need to fast for cholesterol tests anymore! Science has evolved.",
+          "correctPct": 55
+        },
+        {
+          "question": "Which lipid measurement is most affected by eating before the test?",
+          "choices": [
+            "LDL",
+            "HDL",
+            "Triglycerides",
+            "Total cholesterol"
+          ],
+          "answer": "Triglycerides",
+          "explanation": "Triglycerides can spike after meals. If non-fasting triglycerides are high, doctors usually repeat with fasting.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Triglycerides spike after meals, which is why fasting matters most for that number.",
+          "shareText": "Of all cholesterol numbers, triglycerides are most affected by what you just ate.",
+          "correctPct": 48
+        },
+        {
+          "question": "Which of these can temporarily affect your lipid panel results?",
+          "choices": [
+            "Recent illness or surgery",
+            "Hair color",
+            "Blood type",
+            "Height"
+          ],
+          "answer": "Recent illness or surgery",
+          "explanation": "Recent illness or surgery can temporarily lower LDL. Other factors: pregnancy, medications, rapid weight loss, even time of year.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Cholesterol is higher in winter than summer! And illness temporarily lowers LDL.",
+          "shareText": "Wild: your cholesterol is higher in WINTER. And sickness temporarily lowers LDL.",
+          "correctPct": 42
+        },
+        {
+          "question": "How does pregnancy affect cholesterol?",
+          "choices": [
+            "Lowers it",
+            "Raises it",
+            "No effect",
+            "Only affects HDL"
+          ],
+          "answer": "Raises it",
+          "explanation": "Pregnancy raises cholesterol. Doctors recommend testing 6 weeks postpartum for accurate results.",
+          "difficulty": "Hard",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Pregnancy naturally raises cholesterol — test 6 weeks after delivery for true levels.",
+          "shareText": "Pregnancy raises cholesterol naturally. Wait 6 weeks postpartum for accurate testing.",
+          "correctPct": 35
+        },
+        {
+          "question": "How often should low-risk adults over 20 get a lipid panel?",
+          "choices": [
+            "Every year",
+            "Every 4-6 years",
+            "Every 10 years",
+            "Only once"
+          ],
+          "answer": "Every 4-6 years",
+          "explanation": "Low-risk adults 20+ should test every 4-6 years. Higher-risk people and those on medication need more frequent testing.",
+          "difficulty": "Medium",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Starting at age 20, you should check cholesterol every 4-6 years minimum.",
+          "shareText": "Over 20? Get your cholesterol checked every 4-6 years. It's silent and sneaky.",
+          "correctPct": 50
+        }
+      ]
+    },
+    {
+      "title": "The Number Cruncher",
+      "guest": "The Number Cruncher",
+      "category": "Lab Results",
+      "chapter": 2,
+      "role": "scholar",
+      "greeting": "Numbers don't lie — but they can mislead if you don't know which ones to trust.",
+      "cliffhanger": "Range Ranger can explain what makes a number 'normal' or 'abnormal'...",
+      "knowledgeCard": "ApoB counts dangerous particles. Non-HDL captures all bad cholesterol. Both are better than LDL-C alone.",
+      "dialogue": [
+        {
+          "text": "The standard panel misses critical information. There are advanced tests most people never get."
+        },
+        {
+          "text": "ApoB and Lp(a) could save lives — but they're not on the standard panel."
+        },
+        {
+          "text": "Let me quiz you on the numbers that really matter!"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/labs",
+      "questions": [
+        {
+          "question": "What does ApoB measure?",
+          "choices": [
+            "Cholesterol in LDL",
+            "The number of dangerous lipoprotein particles",
+            "Blood sugar",
+            "HDL function"
+          ],
+          "answer": "The number of dangerous lipoprotein particles",
+          "explanation": "Each LDL particle has exactly one ApoB molecule, so ApoB count = LDL particle count. More particles = more risk.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "ApoB counts the actual dangerous particles, not just cholesterol cargo. It's a better test.",
+          "shareText": "ApoB counts dangerous particles, not just cholesterol. It's a better predictor than LDL.",
+          "correctPct": 28
+        },
+        {
+          "question": "What is an optimal ApoB level?",
+          "choices": [
+            "Below 50 mg/dL",
+            "Below 90 mg/dL",
+            "Below 130 mg/dL",
+            "Below 200 mg/dL"
+          ],
+          "answer": "Below 90 mg/dL",
+          "explanation": "Optimal ApoB is below 90 mg/dL. For high-risk patients, below 80 mg/dL. Very high risk: below 65 mg/dL.",
+          "difficulty": "Hard",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Optimal ApoB is under 90 — and very high-risk patients should aim for under 65.",
+          "shareText": "Know your ApoB! Under 90 is optimal, under 65 for very high risk.",
+          "correctPct": 22
+        },
+        {
+          "question": "What is non-HDL cholesterol?",
+          "choices": [
+            "HDL minus LDL",
+            "Total cholesterol minus HDL",
+            "Only VLDL",
+            "LDL plus triglycerides"
+          ],
+          "answer": "Total cholesterol minus HDL",
+          "explanation": "Non-HDL = Total Cholesterol minus HDL. It captures ALL bad cholesterol-carrying particles (LDL + VLDL + IDL + Lp(a)).",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Non-HDL cholesterol is a simple subtraction that captures ALL your dangerous particles.",
+          "shareText": "Non-HDL cholesterol = total minus HDL. It captures ALL the bad stuff in one number.",
+          "correctPct": 35
+        },
+        {
+          "question": "What is an optimal non-HDL cholesterol level?",
+          "choices": [
+            "Below 100 mg/dL",
+            "Below 130 mg/dL",
+            "Below 160 mg/dL",
+            "Below 200 mg/dL"
+          ],
+          "answer": "Below 130 mg/dL",
+          "explanation": "Optimal non-HDL is below 130 mg/dL. For high-risk patients, below 100 mg/dL.",
+          "difficulty": "Medium",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Non-HDL under 130 is optimal — it captures more risk than LDL alone.",
+          "shareText": "Non-HDL under 130 is the target. For high risk, aim for under 100.",
+          "correctPct": 40
+        },
+        {
+          "question": "Why is ApoB considered better than LDL cholesterol for predicting heart risk?",
+          "choices": [
+            "It's cheaper to test",
+            "It counts particles, not just cholesterol cargo",
+            "It includes HDL",
+            "It measures triglycerides"
+          ],
+          "answer": "It counts particles, not just cholesterol cargo",
+          "explanation": "LDL-C measures cholesterol cargo; ApoB counts delivery trucks. Two people with same LDL-C can have very different particle counts.",
+          "difficulty": "Hard",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "LDL measures cargo. ApoB counts trucks. More trucks = more crashes into artery walls.",
+          "shareText": "LDL counts cargo, ApoB counts trucks. More trucks = more heart risk. Game changer.",
+          "correctPct": 25
+        }
+      ]
+    },
+    {
+      "title": "Range Ranger",
+      "guest": "Range Ranger",
+      "category": "Lab Results",
+      "chapter": 2,
+      "role": "guide",
+      "greeting": "I patrol the ranges of normal and abnormal. Let me show you where the danger zones are.",
+      "cliffhanger": "Fasting Frank guards the Clinic exit. He'll test everything you've learned here!",
+      "knowledgeCard": "Lp(a) is genetically determined, not in standard panels, and elevated in 20% of people — test once in your lifetime.",
+      "dialogue": [
+        {
+          "text": "The boundaries between 'normal' and 'dangerous' aren't as clear as people think."
+        },
+        {
+          "text": "And there's a hidden test most doctors don't order — but it could save your life."
+        },
+        {
+          "text": "Do you know about Lp(a)?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/labs",
+      "questions": [
+        {
+          "question": "What is Lp(a) — lipoprotein(a)?",
+          "choices": [
+            "A type of HDL",
+            "A special type of LDL that's particularly dangerous",
+            "A triglyceride variant",
+            "A liver enzyme"
+          ],
+          "answer": "A special type of LDL that's particularly dangerous",
+          "explanation": "Lp(a) is a special LDL particle that's a strong independent risk factor for heart disease, genetically determined.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Lp(a) is a hidden killer — a dangerous LDL variant that 20% of people have elevated.",
+          "shareText": "Lp(a): the hidden heart risk factor that 20% of people have. Most have never been tested.",
+          "correctPct": 32
+        },
+        {
+          "question": "What determines your Lp(a) level?",
+          "choices": [
+            "Diet",
+            "Exercise",
+            "Genetics (DNA)",
+            "Medications"
+          ],
+          "answer": "Genetics (DNA)",
+          "explanation": "Lp(a) levels are largely determined by genetics. Diet, exercise, and most medications don't change them.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Your Lp(a) level is set by your DNA. No diet or exercise can change it.",
+          "shareText": "Lp(a) levels are written in your DNA. Diet and exercise can't touch them.",
+          "correctPct": 38
+        },
+        {
+          "question": "What Lp(a) level is considered high?",
+          "choices": [
+            "Above 10 mg/dL",
+            "Above 30 mg/dL",
+            "Above 50 mg/dL",
+            "Above 100 mg/dL"
+          ],
+          "answer": "Above 50 mg/dL",
+          "explanation": "Lp(a) above 50 mg/dL (or above 125 nmol/L) is considered high. About 20% of people have elevated levels.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "1 in 5 people has elevated Lp(a) and most don't know it.",
+          "shareText": "1 in 5 people has dangerously high Lp(a). Most have never been tested.",
+          "correctPct": 28
+        },
+        {
+          "question": "How many times should you get tested for Lp(a)?",
+          "choices": [
+            "Every year",
+            "At least once in your lifetime",
+            "Only if you have symptoms",
+            "Never, it's not important"
+          ],
+          "answer": "At least once in your lifetime",
+          "explanation": "The European Atherosclerosis Society recommends testing Lp(a) at least once. Since levels are genetic and stable, one test tells you your lifelong level.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "One Lp(a) test tells you your lifelong level — it doesn't change.",
+          "shareText": "One Lp(a) test tells you your risk FOR LIFE. The level never changes. Get tested.",
+          "correctPct": 35
+        },
+        {
+          "question": "Is Lp(a) included in a standard lipid panel?",
+          "choices": [
+            "Yes, always",
+            "No, you must request it separately",
+            "Only in fasting panels",
+            "Only for diabetics"
+          ],
+          "answer": "No, you must request it separately",
+          "explanation": "Despite being a major risk factor, Lp(a) is NOT included in standard lipid panels. You must specifically ask for it.",
+          "difficulty": "Easy",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Lp(a) is a major risk factor but NOT in standard blood tests. You have to ask.",
+          "shareText": "Major heart risk factor Lp(a) is NOT in standard blood tests. You MUST ask for it.",
+          "correctPct": 45
+        }
+      ]
+    },
+    {
+      "title": "Fasting Frank",
+      "guest": "Fasting Frank",
+      "category": "Lab Results",
+      "chapter": 2,
+      "role": "boss",
+      "greeting": "I've been fasting for 12 hours for this test. Time to see if YOUR knowledge is ready!",
+      "cliffhanger": "You've learned the basics, but numbers can be deceiving. Head to the Lab to discover what's really in your blood.",
+      "knowledgeCard": "Lab mastery: standard panel has 4 numbers, ApoB counts particles, Lp(a) is genetic. Advanced tests reveal hidden risk.",
+      "dialogue": [
+        {
+          "text": "The Clinic has taught you to read blood numbers. But can you put it all together?"
+        },
+        {
+          "text": "Understanding labs is the first step to understanding the village curse."
+        },
+        {
+          "text": "Final test — show me what you've learned!"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/labs",
+      "questions": [
+        {
+          "question": "How often should people on cholesterol medication get tested?",
+          "choices": [
+            "Once a year",
+            "Every 3-12 months",
+            "Every 5 years",
+            "Only at the start"
+          ],
+          "answer": "Every 3-12 months",
+          "explanation": "People on cholesterol medications should get tested every 3-12 months to monitor treatment effectiveness.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "If you're on cholesterol meds, you need testing every 3-12 months.",
+          "shareText": "On cholesterol meds? Get tested every 3-12 months to make sure they're working.",
+          "correctPct": 45
+        },
+        {
+          "question": "What happens to cholesterol levels during rapid weight loss?",
+          "choices": [
+            "They drop immediately",
+            "They can temporarily rise",
+            "They stay the same",
+            "Only HDL changes"
+          ],
+          "answer": "They can temporarily rise",
+          "explanation": "Rapid weight loss can temporarily raise cholesterol as fat stores release cholesterol into the bloodstream.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "Losing weight fast can RAISE your cholesterol temporarily. Counterintuitive but true.",
+          "shareText": "Mind-blown: rapid weight loss can temporarily RAISE your cholesterol!",
+          "correctPct": 20
+        },
+        {
+          "question": "In what season does cholesterol tend to be higher?",
+          "choices": [
+            "Summer",
+            "Spring",
+            "Winter",
+            "Fall"
+          ],
+          "answer": "Winter",
+          "explanation": "Cholesterol tends to be higher in winter, possibly due to dietary changes, less activity, and hormonal shifts.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "Your cholesterol actually fluctuates with the seasons — higher in winter.",
+          "shareText": "Your cholesterol changes with the seasons! It's highest in winter.",
+          "correctPct": 18
+        },
+        {
+          "question": "What does a low HDL level mean for heart disease risk?",
+          "choices": [
+            "Lower risk",
+            "Higher risk",
+            "No effect",
+            "Only matters for women"
+          ],
+          "answer": "Higher risk",
+          "explanation": "Low HDL (below 40 for men, 50 for women) means higher risk because there's less cleanup of cholesterol from arteries.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Low HDL means less cleanup of cholesterol from your arteries — higher risk.",
+          "shareText": "Low HDL = less arterial cleanup = higher heart risk. Get yours checked.",
+          "correctPct": 65
+        },
+        {
+          "question": "How often should adults aged 45+ (men) or 55+ (women) get tested?",
+          "choices": [
+            "Every 6 months",
+            "Every 1-2 years",
+            "Every 4-6 years",
+            "Every 10 years"
+          ],
+          "answer": "Every 1-2 years",
+          "explanation": "Men 45+ and women 55+ should get lipid panels every 1-2 years due to increased age-related risk.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "After 45 (men) or 55 (women), you should get cholesterol checked every 1-2 years.",
+          "shareText": "Over 45 (men) or 55 (women)? Check cholesterol every 1-2 years.",
+          "correctPct": 42
+        }
+      ]
+    },
+    {
+      "title": "Professor Particle",
+      "guest": "Professor Particle",
+      "category": "Advanced Lipids",
+      "chapter": 3,
+      "role": "quizmaster",
+      "greeting": "Welcome to my laboratory! I've been studying tiny particles in the blood...",
+      "cliffhanger": "Apolipora has discovered a way to count these dangerous particles...",
+      "knowledgeCard": "LDL particles come in different sizes. Small dense LDL is more dangerous than large buoyant LDL.",
+      "dialogue": [
+        {
+          "text": "I've been analyzing blood samples from the village. Something strange is happening."
+        },
+        {
+          "text": "Tiny particles are clogging the waterways. Some are harmless. Some are deadly."
+        },
+        {
+          "text": "Let me test if you can tell the difference. Ready?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/ldl-apob",
+      "questions": [
+        {
+          "question": "Which type of LDL particle is more dangerous?",
+          "choices": [
+            "Large buoyant LDL",
+            "Small dense LDL",
+            "They're equally dangerous",
+            "Neither is dangerous"
+          ],
+          "answer": "Small dense LDL",
+          "explanation": "Small, dense LDL particles are more likely to slip into artery walls and cause damage. Think golf balls vs beach balls.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Small dense LDL slips through artery walls like golf balls. Large LDL bounces off like beach balls.",
+          "shareText": "Not all LDL is equal! Small dense LDL is way more dangerous than large buoyant LDL.",
+          "correctPct": 35
+        },
+        {
+          "question": "What is 'discordance' in cholesterol testing?",
+          "choices": [
+            "When LDL and HDL are both high",
+            "When LDL cholesterol and particle number don't match",
+            "When results differ between labs",
+            "When fasting and non-fasting results differ"
+          ],
+          "answer": "When LDL cholesterol and particle number don't match",
+          "explanation": "A person can have 'normal' LDL cholesterol but many small dense particles — putting them at HIGH risk despite normal numbers.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "You can have 'normal' LDL but be at HIGH risk if you have many small dense particles.",
+          "shareText": "'Normal' cholesterol can hide HIGH risk. It's the particle COUNT that matters.",
+          "correctPct": 20
+        },
+        {
+          "question": "What is the first step in atherosclerosis development?",
+          "choices": [
+            "Blood clot formation",
+            "LDL particles entering the artery wall",
+            "Calcium buildup",
+            "Inflammation of the heart"
+          ],
+          "answer": "LDL particles entering the artery wall",
+          "explanation": "Atherosclerosis starts when LDL particles enter the artery wall through gaps in the endothelium, get trapped, and oxidize.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Heart disease starts when LDL sneaks through tiny gaps in artery walls and gets trapped.",
+          "shareText": "Heart disease begins when LDL particles sneak through artery walls and get stuck.",
+          "correctPct": 40
+        },
+        {
+          "question": "What are foam cells?",
+          "choices": [
+            "A type of red blood cell",
+            "Macrophages stuffed with cholesterol",
+            "Fat cells in the liver",
+            "Cells that produce cholesterol"
+          ],
+          "answer": "Macrophages stuffed with cholesterol",
+          "explanation": "White blood cells (macrophages) try to clean up oxidized LDL but become 'foam cells' — stuffed with cholesterol, forming fatty streaks.",
+          "difficulty": "Hard",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Your immune cells try to eat bad cholesterol but get stuffed and stuck — becoming foam cells.",
+          "shareText": "Your immune cells try to clean up LDL but get stuffed and stuck. They become foam cells.",
+          "correctPct": 25
+        },
+        {
+          "question": "How long does atherosclerosis take to develop?",
+          "choices": [
+            "Weeks",
+            "Months",
+            "Years",
+            "Decades"
+          ],
+          "answer": "Decades",
+          "explanation": "Atherosclerosis takes DECADES. It starts in teenagers and young adults. By the time symptoms appear, significant damage has occurred.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Atherosclerosis starts in your TEENS and builds for decades before any symptoms.",
+          "shareText": "Heart disease starts building in your TEENS. Decades before you feel anything.",
+          "correctPct": 38
+        }
+      ]
+    },
+    {
+      "title": "Apolipora",
+      "guest": "Apolipora",
+      "category": "Advanced Lipids",
+      "chapter": 3,
+      "role": "healer",
+      "greeting": "I am Apolipora. I've learned to count the enemies in your blood.",
+      "cliffhanger": "The LDL Hunter tracks these particles to where they do the most damage...",
+      "knowledgeCard": "ApoB = one protein per dangerous particle. Counting ApoB counts ALL atherogenic particles, not just LDL.",
+      "dialogue": [
+        {
+          "text": "Everyone focuses on cholesterol amounts. But I've discovered it's the NUMBER of particles that matters."
+        },
+        {
+          "text": "One protein wraps around each dangerous particle. If we count those proteins..."
+        },
+        {
+          "text": "We can count the true enemy. Do you understand?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/ldl-apob",
+      "questions": [
+        {
+          "question": "What is Apolipoprotein B (ApoB)?",
+          "choices": [
+            "A type of cholesterol",
+            "A protein on each atherogenic lipoprotein particle",
+            "An enzyme in the liver",
+            "A hormone"
+          ],
+          "answer": "A protein on each atherogenic lipoprotein particle",
+          "explanation": "ApoB wraps around each dangerous particle. One ApoB = one atherogenic particle. It counts LDL, VLDL, IDL, and Lp(a).",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "ApoB is like a name tag — exactly one per dangerous particle. Count ApoB, count the enemy.",
+          "shareText": "ApoB: one protein per dangerous particle. It's the true count of heart disease risk.",
+          "correctPct": 30
+        },
+        {
+          "question": "Which particles does ApoB counting include?",
+          "choices": [
+            "Only LDL",
+            "Only LDL and HDL",
+            "LDL, VLDL, IDL, and Lp(a)",
+            "All lipoproteins including HDL"
+          ],
+          "answer": "LDL, VLDL, IDL, and Lp(a)",
+          "explanation": "ApoB counts ALL atherogenic particles: LDL, VLDL, IDL, and Lp(a) — giving a complete picture of risk.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "ApoB captures four types of dangerous particles that LDL-C misses.",
+          "shareText": "LDL testing misses 3 other dangerous particles. ApoB catches ALL of them.",
+          "correctPct": 22
+        },
+        {
+          "question": "Which study showed ApoB predicts heart attacks better than LDL-C?",
+          "choices": [
+            "The PREDIMED trial",
+            "The Framingham Offspring Study",
+            "The DASH study",
+            "The WHO Global Study"
+          ],
+          "answer": "The Framingham Offspring Study",
+          "explanation": "The Framingham Offspring Study showed ApoB was a better predictor of heart attacks than LDL cholesterol.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "The famous Framingham study proved ApoB predicts heart attacks better than standard LDL.",
+          "shareText": "Framingham study proved: ApoB predicts heart attacks BETTER than LDL cholesterol.",
+          "correctPct": 18
+        },
+        {
+          "question": "What country has included ApoB in guidelines since 2009?",
+          "choices": [
+            "USA",
+            "UK",
+            "Canada",
+            "Australia"
+          ],
+          "answer": "Canada",
+          "explanation": "Canadian guidelines have included ApoB since 2009. The European Atherosclerosis Society now recommends it as the primary target.",
+          "difficulty": "Hard",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Canada has been using ApoB in guidelines since 2009 — others are still catching up.",
+          "shareText": "Canada added ApoB to heart guidelines in 2009. The US still hasn't caught up.",
+          "correctPct": 15
+        },
+        {
+          "question": "What is the ApoB target for very high risk patients?",
+          "choices": [
+            "Below 90 mg/dL",
+            "Below 80 mg/dL",
+            "Below 65 mg/dL",
+            "Below 50 mg/dL"
+          ],
+          "answer": "Below 65 mg/dL",
+          "explanation": "Very high risk patients should target ApoB below 65 mg/dL. High risk: below 80. Optimal for general population: below 90.",
+          "difficulty": "Hard",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Very high risk patients need ApoB under 65 — much lower than the general target of 90.",
+          "shareText": "Very high risk? Your ApoB target is under 65 mg/dL.",
+          "correctPct": 20
+        }
+      ]
+    },
+    {
+      "title": "The LDL Hunter",
+      "guest": "The LDL Hunter",
+      "category": "Advanced Lipids",
+      "chapter": 3,
+      "role": "scholar",
+      "greeting": "I hunt LDL particles where they hide — inside your artery walls.",
+      "cliffhanger": "Dense Debbie knows why some particles are more dangerous than others...",
+      "knowledgeCard": "Atherosclerosis: LDL enters artery wall → gets oxidized → macrophages eat it → foam cells → plaque → decades later, rupture.",
+      "dialogue": [
+        {
+          "text": "I track these particles from the moment they enter the artery wall."
+        },
+        {
+          "text": "What happens inside is a slow-motion disaster that takes decades."
+        },
+        {
+          "text": "Let me show you the timeline of destruction."
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/ldl-apob",
+      "questions": [
+        {
+          "question": "What happens to LDL after it enters the artery wall?",
+          "choices": [
+            "It's immediately removed",
+            "It gets trapped and oxidized",
+            "It dissolves naturally",
+            "It converts to HDL"
+          ],
+          "answer": "It gets trapped and oxidized",
+          "explanation": "Once inside the artery wall, LDL gets trapped and oxidized (chemically damaged), triggering an immune response.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "LDL doesn't just pass through artery walls — it gets trapped and chemically damaged inside.",
+          "shareText": "LDL gets TRAPPED inside artery walls and chemically damaged. That's how plaque starts.",
+          "correctPct": 40
+        },
+        {
+          "question": "What accumulates to form a fatty streak in arteries?",
+          "choices": [
+            "Red blood cells",
+            "Foam cells",
+            "Calcium crystals",
+            "Platelets"
+          ],
+          "answer": "Foam cells",
+          "explanation": "Foam cells — macrophages stuffed with cholesterol — accumulate and form fatty streaks, the earliest visible sign of atherosclerosis.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Fatty streaks in arteries are piles of immune cells that ate too much cholesterol.",
+          "shareText": "The first sign of heart disease: immune cells gorged on cholesterol piling up in your arteries.",
+          "correctPct": 35
+        },
+        {
+          "question": "What causes a heart attack when plaque ruptures?",
+          "choices": [
+            "The plaque blocks blood flow directly",
+            "A blood clot forms at the rupture site",
+            "The artery collapses",
+            "Cholesterol leaks into the heart"
+          ],
+          "answer": "A blood clot forms at the rupture site",
+          "explanation": "When plaque ruptures, a blood clot forms at the site. This clot can completely block blood flow, causing a heart attack.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Most heart attacks happen when plaque RUPTURES and a blood clot forms — not gradual blockage.",
+          "shareText": "Heart attacks aren't usually from slow blockage. Plaque RUPTURES and a clot blocks everything.",
+          "correctPct": 32
+        },
+        {
+          "question": "At what life stage does atherosclerosis typically begin?",
+          "choices": [
+            "Middle age",
+            "After retirement",
+            "Teenagers and young adults",
+            "Only after diagnosis"
+          ],
+          "answer": "Teenagers and young adults",
+          "explanation": "Atherosclerosis starts in teenagers and young adults, progressing silently for decades before symptoms appear.",
+          "difficulty": "Medium",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "Plaque buildup starts in your TEENS. By the time symptoms show, decades of damage exist.",
+          "shareText": "Atherosclerosis starts in TEENS. You've been building plaque since high school.",
+          "correctPct": 28
+        },
+        {
+          "question": "What does LDL enter artery walls through?",
+          "choices": [
+            "Large tears",
+            "Tiny gaps in the endothelium",
+            "Pores in the muscle",
+            "The lymphatic system"
+          ],
+          "answer": "Tiny gaps in the endothelium",
+          "explanation": "LDL particles enter through tiny gaps in the endothelium (inner lining of arteries). Smaller particles slip through more easily.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "LDL sneaks through microscopic gaps in your artery lining — smaller particles slip through easier.",
+          "shareText": "LDL particles sneak through tiny gaps in artery walls. Smaller = more dangerous.",
+          "correctPct": 30
+        }
+      ]
+    },
+    {
+      "title": "Dense Debbie",
+      "guest": "Dense Debbie",
+      "category": "Advanced Lipids",
+      "chapter": 3,
+      "role": "guide",
+      "greeting": "They call me Dense Debbie because I know ALL about small dense particles.",
+      "cliffhanger": "But the most terrifying particle of all? Lp(a) the Ghost. Even I fear that one...",
+      "knowledgeCard": "Cumulative LDL exposure matters: slightly elevated LDL for 30 years is worse than very high LDL for 1 year.",
+      "dialogue": [
+        {
+          "text": "Size matters when it comes to LDL. The small ones are the real troublemakers."
+        },
+        {
+          "text": "And here's what nobody tells you — it's not just about levels TODAY, but LIFETIME exposure."
+        },
+        {
+          "text": "Let me test your understanding of the long game."
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/ldl-apob",
+      "questions": [
+        {
+          "question": "What analogy describes cumulative cholesterol exposure?",
+          "choices": [
+            "A flood",
+            "Sun damage over time",
+            "A lightning strike",
+            "An earthquake"
+          ],
+          "answer": "Sun damage over time",
+          "explanation": "Like sun damage, a little LDL every day for 30 years causes more damage than very high LDL for 1 year. Cumulative exposure matters.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "LDL damage works like sun damage: a little every day for decades is worse than a lot for a short time.",
+          "shareText": "LDL works like sun damage: a little daily exposure for 30 years > intense short burst.",
+          "correctPct": 35
+        },
+        {
+          "question": "For every 38.7 mg/dL reduction in LDL maintained over time, heart attack risk drops by about how much?",
+          "choices": [
+            "10%",
+            "25%",
+            "50%",
+            "75%"
+          ],
+          "answer": "50%",
+          "explanation": "Studies show a ~50% drop in heart attack risk for every 38.7 mg/dL reduction in LDL maintained consistently over time.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "Dropping LDL by ~39 points and KEEPING it there cuts heart attack risk in HALF.",
+          "shareText": "Drop your LDL by 39 points permanently = 50% less heart attacks. Consistency is key.",
+          "correctPct": 18
+        },
+        {
+          "question": "Why is reducing LDL at age 40 better than at age 60?",
+          "choices": [
+            "The liver works better at 40",
+            "Less cumulative exposure over remaining lifetime",
+            "Medications work better in younger people",
+            "HDL is higher at 40"
+          ],
+          "answer": "Less cumulative exposure over remaining lifetime",
+          "explanation": "Early intervention means decades less cumulative LDL exposure. Reducing LDL at 40 has dramatically larger benefit than at 60.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Starting LDL reduction at 40 vs 60 gives you 20 extra years of protection.",
+          "shareText": "Reducing LDL at 40 is DRAMATICALLY better than at 60. Every year of exposure counts.",
+          "correctPct": 40
+        },
+        {
+          "question": "What is 'Pattern B' in LDL classification?",
+          "choices": [
+            "Large buoyant particles",
+            "Small dense particles",
+            "A mix of both",
+            "Only VLDL particles"
+          ],
+          "answer": "Small dense particles",
+          "explanation": "Pattern B means predominantly small, dense LDL particles — more likely to penetrate artery walls. Pattern A is large, buoyant.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Pattern B LDL (small, dense) is the dangerous pattern — like golf balls vs beach balls.",
+          "shareText": "LDL Pattern B = small dense particles = the dangerous kind. Get your pattern tested.",
+          "correctPct": 22
+        },
+        {
+          "question": "What is the key word regarding LDL reduction for maximum benefit?",
+          "choices": [
+            "Dramatic",
+            "Temporary",
+            "Maintained",
+            "Rapid"
+          ],
+          "answer": "Maintained",
+          "explanation": "Consistency matters more than dramatic short-term drops. The key is MAINTAINED reduction over time.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "LDL consistency beats intensity: maintained low levels matter more than dramatic short drops.",
+          "shareText": "With LDL, consistency beats intensity. Maintain low levels — don't yo-yo.",
+          "correctPct": 45
+        }
+      ]
+    },
+    {
+      "title": "Lp(a) the Ghost",
+      "guest": "Lp(a) the Ghost",
+      "category": "Advanced Lipids",
+      "chapter": 3,
+      "role": "boss",
+      "greeting": "They can't see me. They can't feel me. But I'm in 20% of your blood. I am Lp(a).",
+      "cliffhanger": "The particles tell a story, but can you change it? The Garden holds answers about food and movement.",
+      "knowledgeCard": "Lp(a): genetically determined, promotes clotting, causes inflammation, resistant to clearance. 20% of people have it elevated. Test once.",
+      "dialogue": [
+        {
+          "text": "I am the particle that most healers don't even know exists."
+        },
+        {
+          "text": "I'm set by your DNA at birth. No diet or exercise can touch me. I promote clotting and inflammation."
+        },
+        {
+          "text": "Can you learn enough about me to warn others?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/ldl-apob",
+      "questions": [
+        {
+          "question": "What makes Lp(a) different from regular LDL?",
+          "choices": [
+            "It's smaller",
+            "It has an extra protein — apolipoprotein(a) — attached",
+            "It carries more triglycerides",
+            "It's made in the intestines"
+          ],
+          "answer": "It has an extra protein — apolipoprotein(a) — attached",
+          "explanation": "Lp(a) is an LDL particle with an extra protein (apolipoprotein(a)) that makes it stickier, pro-clotting, and pro-inflammatory.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Lp(a) is LDL with an evil sidekick protein that promotes clotting and inflammation.",
+          "shareText": "Lp(a) is regular LDL with a nasty extra protein that promotes blood clots.",
+          "correctPct": 30
+        },
+        {
+          "question": "How does Lp(a) promote blood clotting?",
+          "choices": [
+            "It thickens the blood",
+            "Its apo(a) resembles plasminogen and blocks clot dissolving",
+            "It damages platelets",
+            "It increases red blood cells"
+          ],
+          "answer": "Its apo(a) resembles plasminogen and blocks clot dissolving",
+          "explanation": "Apo(a) resembles plasminogen, which normally dissolves clots. Lp(a) blocks this process, promoting dangerous clotting.",
+          "difficulty": "Hard",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Lp(a) mimics a clot-dissolving protein but BLOCKS it instead. Molecular sabotage.",
+          "shareText": "Lp(a) disguises itself as a clot dissolver but actually BLOCKS clot dissolving. Sneaky.",
+          "correctPct": 15
+        },
+        {
+          "question": "At what age are Lp(a) levels set?",
+          "choices": [
+            "Age 5",
+            "Age 20",
+            "Age 40",
+            "They change throughout life"
+          ],
+          "answer": "Age 5",
+          "explanation": "Lp(a) levels are set by age 5 and remain stable throughout life. They're 90% genetically determined.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "Your Lp(a) level is locked in by age 5 and stays the same your whole life.",
+          "shareText": "Your Lp(a) level is set by age 5. It never changes. One test = lifetime knowledge.",
+          "correctPct": 12
+        },
+        {
+          "question": "Which populations tend to have higher Lp(a) levels?",
+          "choices": [
+            "European Americans",
+            "African Americans and South Asians",
+            "East Asians",
+            "Indigenous peoples"
+          ],
+          "answer": "African Americans and South Asians",
+          "explanation": "African Americans and South Asians tend to have higher average Lp(a) levels, making testing especially important.",
+          "difficulty": "Hard",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "African Americans and South Asians have higher genetic Lp(a) levels on average.",
+          "shareText": "African Americans and South Asians are genetically more likely to have high Lp(a).",
+          "correctPct": 25
+        },
+        {
+          "question": "What drugs in clinical trials could reduce Lp(a) by up to 96-101%?",
+          "choices": [
+            "Stronger statins",
+            "Olpasiran and Lepodisiran",
+            "New PCSK9 drugs",
+            "Gene therapy only"
+          ],
+          "answer": "Olpasiran and Lepodisiran",
+          "explanation": "Olpasiran (Amgen) reduced Lp(a) up to 101% and Lepodisiran (Eli Lilly) up to 96% in Phase 2 trials. Could be available by 2026-2027.",
+          "difficulty": "Hard",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "New drugs in trials can reduce Lp(a) by over 96% — a game changer for 20% of people.",
+          "shareText": "Breakthrough: new drugs reduce Lp(a) by 96-101%. Could be available by 2026-2027.",
+          "correctPct": 10
+        }
+      ]
+    },
+    {
+      "title": "Chef Olive",
+      "guest": "Chef Olive",
+      "category": "Lifestyle",
+      "chapter": 4,
+      "role": "quizmaster",
+      "greeting": "Welcome to my kitchen! Food is medicine — when you know the right recipes.",
+      "cliffhanger": "Cardio Kate knows another powerful tool against heart disease — movement...",
+      "knowledgeCard": "Saturated fat raises LDL more than dietary cholesterol. Replace with unsaturated fat to lower LDL by 10-15%.",
+      "dialogue": [
+        {
+          "text": "The village has been eating the wrong things. I've been studying which foods help and which hurt."
+        },
+        {
+          "text": "Saturated fat is the real dietary villain — not cholesterol from eggs!"
+        },
+        {
+          "text": "Let me test your food knowledge."
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/diet",
+      "questions": [
+        {
+          "question": "What dietary factor raises LDL cholesterol the most?",
+          "choices": [
+            "Dietary cholesterol",
+            "Saturated fat",
+            "Sugar",
+            "Salt"
+          ],
+          "answer": "Saturated fat",
+          "explanation": "Saturated fat raises LDL more than any other dietary factor. It reduces LDL receptors on liver cells.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Saturated fat raises LDL MORE than eating cholesterol itself.",
+          "shareText": "Saturated fat is worse for LDL than dietary cholesterol. Butter > eggs for raising LDL.",
+          "correctPct": 38
+        },
+        {
+          "question": "How does saturated fat raise LDL?",
+          "choices": [
+            "It produces more cholesterol",
+            "It reduces LDL receptors on liver cells",
+            "It blocks HDL",
+            "It increases triglycerides only"
+          ],
+          "answer": "It reduces LDL receptors on liver cells",
+          "explanation": "Saturated fat reduces the number of LDL receptors on liver cells, so less LDL gets cleared from the blood.",
+          "difficulty": "Hard",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Saturated fat literally removes the receptors that clean LDL from your blood.",
+          "shareText": "Saturated fat destroys the liver receptors that remove LDL. Less cleanup = more LDL.",
+          "correctPct": 22
+        },
+        {
+          "question": "What happened to artificial trans fats in the US?",
+          "choices": [
+            "They were promoted",
+            "The FDA banned them in 2018",
+            "They were reclassified as safe",
+            "Nothing changed"
+          ],
+          "answer": "The FDA banned them in 2018",
+          "explanation": "Artificial trans fats simultaneously raise LDL and lower HDL — the worst combo. The FDA banned them in 2018.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Trans fats are so bad they RAISE LDL and LOWER HDL at the same time. Banned by FDA.",
+          "shareText": "Trans fats are so dangerous the FDA banned them. They raise bad AND lower good cholesterol.",
+          "correctPct": 45
+        },
+        {
+          "question": "How much can replacing saturated fat with unsaturated fat lower LDL?",
+          "choices": [
+            "1-5%",
+            "10-15%",
+            "25-30%",
+            "50%"
+          ],
+          "answer": "10-15%",
+          "explanation": "Replacing saturated fat with unsaturated fat can lower LDL by 10-15% — a significant dietary impact.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Simple swap: unsaturated for saturated fat = 10-15% LDL drop. No medication needed.",
+          "shareText": "Swap saturated for unsaturated fat = 10-15% LDL drop. Diet IS medicine.",
+          "correctPct": 35
+        },
+        {
+          "question": "Which trial showed Mediterranean diet reduced cardiovascular events by ~30%?",
+          "choices": [
+            "Framingham",
+            "PREDIMED",
+            "DASH",
+            "INTERHEART"
+          ],
+          "answer": "PREDIMED",
+          "explanation": "The PREDIMED trial showed Mediterranean diet with extra olive oil or nuts reduced heart attacks, strokes, and CV death by ~30%.",
+          "difficulty": "Hard",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "PREDIMED proved: Mediterranean diet with olive oil/nuts cuts heart events by 30%.",
+          "shareText": "The PREDIMED trial: Mediterranean diet = 30% fewer heart attacks. That's huge.",
+          "correctPct": 20
+        }
+      ]
+    },
+    {
+      "title": "Cardio Kate",
+      "guest": "Cardio Kate",
+      "category": "Lifestyle",
+      "chapter": 4,
+      "role": "healer",
+      "greeting": "Get moving! Exercise is the best medicine nobody takes enough of.",
+      "cliffhanger": "The Mediterranean Monk has perfected the diet that science says works best...",
+      "knowledgeCard": "Exercise raises HDL 5-10%, lowers triglycerides 15-30%. AHA recommends 150 min/week moderate activity.",
+      "dialogue": [
+        {
+          "text": "I've been training the villagers, and the active ones are getting better!"
+        },
+        {
+          "text": "Exercise mainly boosts HDL and lowers triglycerides. The effect on LDL is modest but real."
+        },
+        {
+          "text": "How well do you know the exercise prescription?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/diet",
+      "questions": [
+        {
+          "question": "What is exercise's primary effect on cholesterol?",
+          "choices": [
+            "Dramatically lowers LDL",
+            "Raises HDL and lowers triglycerides",
+            "Only affects total cholesterol",
+            "No effect on lipids"
+          ],
+          "answer": "Raises HDL and lowers triglycerides",
+          "explanation": "Exercise primarily raises HDL (5-10%) and lowers triglycerides (15-30%). Its effect on LDL is modest (5-10%).",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Exercise helps HDL and triglycerides more than LDL. But all three improve.",
+          "shareText": "Exercise boosts HDL 5-10% and drops triglycerides 15-30%. Move more!",
+          "correctPct": 42
+        },
+        {
+          "question": "How much moderate aerobic exercise per week does the AHA recommend?",
+          "choices": [
+            "60 minutes",
+            "90 minutes",
+            "150 minutes",
+            "300 minutes"
+          ],
+          "answer": "150 minutes",
+          "explanation": "The AHA recommends 150 minutes/week of moderate aerobic activity (brisk walking, cycling) or 75 minutes vigorous.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "150 minutes per week = about 22 minutes a day. That's all you need.",
+          "shareText": "AHA says 150 min/week of moderate exercise. That's just 22 min/day!",
+          "correctPct": 55
+        },
+        {
+          "question": "What happens to HDL within weeks of quitting smoking?",
+          "choices": [
+            "It drops",
+            "It rises",
+            "No change",
+            "It fluctuates"
+          ],
+          "answer": "It rises",
+          "explanation": "Quitting smoking raises HDL within weeks. Smoking lowers HDL by 5-9 mg/dL on average.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Quit smoking and your HDL starts rising within WEEKS.",
+          "shareText": "Quit smoking → HDL rises within weeks. Your body starts healing immediately.",
+          "correctPct": 48
+        },
+        {
+          "question": "How much does smoking lower HDL on average?",
+          "choices": [
+            "1-2 mg/dL",
+            "5-9 mg/dL",
+            "15-20 mg/dL",
+            "30+ mg/dL"
+          ],
+          "answer": "5-9 mg/dL",
+          "explanation": "Smoking lowers HDL by 5-9 mg/dL on average, plus damages artery linings making it easier for LDL to penetrate.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Smoking doesn't just damage lungs — it lowers your good cholesterol by 5-9 points.",
+          "shareText": "Smoking lowers HDL by 5-9 points AND damages artery walls. Double whammy.",
+          "correctPct": 35
+        },
+        {
+          "question": "How quickly can quitting smoking reduce heart disease risk by 50%?",
+          "choices": [
+            "1 month",
+            "6 months",
+            "1 year",
+            "5 years"
+          ],
+          "answer": "1 year",
+          "explanation": "Quitting smoking reduces heart disease risk by 50% within just one year.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "One year after quitting smoking, your heart disease risk is CUT IN HALF.",
+          "shareText": "Quit smoking today → 50% less heart disease risk in just ONE year.",
+          "correctPct": 38
+        }
+      ]
+    },
+    {
+      "title": "The Mediterranean Monk",
+      "guest": "The Mediterranean Monk",
+      "category": "Lifestyle",
+      "chapter": 4,
+      "role": "scholar",
+      "greeting": "Peace, traveler. I've spent decades perfecting the diet that heals.",
+      "cliffhanger": "Fiber the Fox knows specific foods that lower cholesterol naturally...",
+      "knowledgeCard": "Mediterranean diet: olive oil, nuts, fish, fruits, vegetables, whole grains. Strongest evidence for heart disease prevention.",
+      "dialogue": [
+        {
+          "text": "The ancient Mediterranean monks knew something modern science has confirmed."
+        },
+        {
+          "text": "A diet rich in olive oil, nuts, fish, and vegetables protects the heart."
+        },
+        {
+          "text": "But do you know WHY these foods work?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/diet",
+      "questions": [
+        {
+          "question": "What are the key components of the Mediterranean diet?",
+          "choices": [
+            "Low fat, high protein",
+            "Olive oil, nuts, fish, fruits, vegetables, whole grains",
+            "Meat-heavy with supplements",
+            "Zero carbohydrate"
+          ],
+          "answer": "Olive oil, nuts, fish, fruits, vegetables, whole grains",
+          "explanation": "The Mediterranean diet emphasizes olive oil, nuts, fish, fruits, vegetables, and whole grains with limited red meat.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "The Mediterranean diet has the STRONGEST evidence for heart disease prevention.",
+          "shareText": "Mediterranean diet has the strongest evidence for preventing heart disease.",
+          "correctPct": 65
+        },
+        {
+          "question": "How much can nuts lower LDL?",
+          "choices": [
+            "1-2%",
+            "5-10%",
+            "20-25%",
+            "40-50%"
+          ],
+          "answer": "5-10%",
+          "explanation": "Walnuts and almonds can lower LDL by 5-10%. They're a key part of the Mediterranean diet.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "A handful of walnuts or almonds daily can lower your LDL by 5-10%.",
+          "shareText": "A daily handful of nuts can drop your LDL by 5-10%. Tasty medicine!",
+          "correctPct": 40
+        },
+        {
+          "question": "How much can omega-3 fatty acids from fish lower triglycerides?",
+          "choices": [
+            "5-10%",
+            "15-30%",
+            "40-50%",
+            "60-80%"
+          ],
+          "answer": "15-30%",
+          "explanation": "Omega-3 fatty acids from fatty fish can lower triglycerides by 15-30%.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Eating fatty fish regularly can cut your triglycerides by 15-30%.",
+          "shareText": "Fatty fish: nature's triglyceride medicine. Drops them 15-30%.",
+          "correctPct": 38
+        },
+        {
+          "question": "How does poor sleep affect cholesterol?",
+          "choices": [
+            "No effect",
+            "Less than 6 hours raises triglycerides and lowers HDL",
+            "Only affects LDL",
+            "Improves all numbers"
+          ],
+          "answer": "Less than 6 hours raises triglycerides and lowers HDL",
+          "explanation": "Sleeping less than 6 hours per night is linked to higher triglycerides and lower HDL.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Less than 6 hours of sleep raises triglycerides and lowers HDL. Sleep IS heart medicine.",
+          "shareText": "Under 6 hours of sleep = higher triglycerides + lower HDL. Sleep protects your heart.",
+          "correctPct": 32
+        },
+        {
+          "question": "How much LDL reduction can 10g/day of psyllium fiber achieve?",
+          "choices": [
+            "2%",
+            "7%",
+            "15%",
+            "25%"
+          ],
+          "answer": "7%",
+          "explanation": "10 grams per day of psyllium fiber can lower LDL by 7%. Fiber binds cholesterol in the gut.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Psyllium fiber physically binds cholesterol in your gut and removes it. 7% LDL drop.",
+          "shareText": "Psyllium fiber binds cholesterol and drags it out. 10g/day = 7% LDL drop.",
+          "correctPct": 25
+        }
+      ]
+    },
+    {
+      "title": "Fiber the Fox",
+      "guest": "Fiber the Fox",
+      "category": "Lifestyle",
+      "chapter": 4,
+      "role": "guide",
+      "greeting": "I'm Fiber! I know which specific foods lower cholesterol — and by how much!",
+      "cliffhanger": "Coach Vitale is the guardian of this Garden. Prove your lifestyle knowledge to him!",
+      "knowledgeCard": "Specific cholesterol-lowering foods: oats (beta-glucan), nuts (5-10% LDL drop), plant sterols (6-15% LDL drop), soy (3-5%).",
+      "dialogue": [
+        {
+          "text": "Every food has a number — how much it can move your cholesterol."
+        },
+        {
+          "text": "Oats, nuts, plant sterols... they all work through different mechanisms."
+        },
+        {
+          "text": "Let me see if you know your cholesterol-lowering superfoods!"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/diet",
+      "questions": [
+        {
+          "question": "What compound in oats and barley helps lower cholesterol?",
+          "choices": [
+            "Omega-3",
+            "Beta-glucan fiber",
+            "Vitamin C",
+            "Iron"
+          ],
+          "answer": "Beta-glucan fiber",
+          "explanation": "Oats and barley contain beta-glucan fiber that binds cholesterol in the gut, preventing absorption.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Beta-glucan in oats physically traps cholesterol in your gut and flushes it out.",
+          "shareText": "Oats contain beta-glucan that physically traps cholesterol in your gut. Eat your oatmeal!",
+          "correctPct": 35
+        },
+        {
+          "question": "How much can plant sterols/stanols lower LDL?",
+          "choices": [
+            "1-3%",
+            "6-15%",
+            "20-30%",
+            "40-50%"
+          ],
+          "answer": "6-15%",
+          "explanation": "Plant sterols and stanols found in fortified foods can lower LDL by 6-15% by blocking cholesterol absorption.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Plant sterols can lower LDL by up to 15% — as much as some low-dose medications.",
+          "shareText": "Plant sterols lower LDL by up to 15%. Almost as good as some medications!",
+          "correctPct": 28
+        },
+        {
+          "question": "How does weight loss affect LDL per 10 pounds lost?",
+          "choices": [
+            "No change",
+            "LDL drops 5-8 mg/dL",
+            "LDL drops 20-30 mg/dL",
+            "LDL drops 50 mg/dL"
+          ],
+          "answer": "LDL drops 5-8 mg/dL",
+          "explanation": "Every 10 pounds lost drops LDL by about 5-8 mg/dL. Weight loss also raises HDL and dramatically lowers triglycerides.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Every 10 pounds lost = 5-8 point LDL drop + better HDL + much lower triglycerides.",
+          "shareText": "Lose 10 lbs = LDL drops 5-8 points. Plus better HDL and triglycerides.",
+          "correctPct": 40
+        },
+        {
+          "question": "How much body weight reduction shows meaningful cholesterol improvement?",
+          "choices": [
+            "1-2%",
+            "5-10%",
+            "20-25%",
+            "30%+"
+          ],
+          "answer": "5-10%",
+          "explanation": "Even a 5-10% body weight reduction shows meaningful improvement in all lipid numbers.",
+          "difficulty": "Easy",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Just 5-10% weight loss dramatically improves cholesterol. For 200 lbs, that's only 10-20 lbs.",
+          "shareText": "You don't need to lose 50 lbs. Just 5-10% of your weight transforms your cholesterol.",
+          "correctPct": 48
+        },
+        {
+          "question": "How does chronic stress affect cholesterol?",
+          "choices": [
+            "Lowers all levels",
+            "Raises triglycerides and LDL via cortisol",
+            "Only affects HDL",
+            "No measurable effect"
+          ],
+          "answer": "Raises triglycerides and LDL via cortisol",
+          "explanation": "Chronic stress raises cortisol, which increases triglycerides and LDL through stress-eating, less exercise, and direct hormonal effects.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Stress hormone cortisol directly raises triglycerides and LDL. Chill out for your heart.",
+          "shareText": "Chronic stress raises cortisol → higher triglycerides and LDL. Meditation is heart medicine.",
+          "correctPct": 38
+        }
+      ]
+    },
+    {
+      "title": "Coach Vitale",
+      "guest": "Coach Vitale",
+      "category": "Lifestyle",
+      "chapter": 4,
+      "role": "boss",
+      "greeting": "I am Coach Vitale, guardian of the Garden. Show me your total lifestyle mastery!",
+      "cliffhanger": "Diet helps, but sometimes the body needs more. The Apothecary has powerful remedies waiting.",
+      "knowledgeCard": "Lifestyle power: Mediterranean diet (-30% events), exercise (HDL+10%, TG-30%), weight loss (5-8 LDL per 10lbs), quit smoking (50% risk cut in 1yr).",
+      "dialogue": [
+        {
+          "text": "You've explored the Garden and learned about food, exercise, sleep, and stress."
+        },
+        {
+          "text": "Lifestyle changes can be as powerful as medication — sometimes more."
+        },
+        {
+          "text": "Final challenge — prove you understand the full picture!"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/diet",
+      "questions": [
+        {
+          "question": "What is the latest research finding about moderate alcohol consumption?",
+          "choices": [
+            "It's very beneficial",
+            "Benefits may be fewer than previously thought",
+            "It cures heart disease",
+            "It has zero effect"
+          ],
+          "answer": "Benefits may be fewer than previously thought",
+          "explanation": "While moderate drinking was linked to higher HDL, the latest research suggests benefits may be fewer than thought. Alcohol raises triglycerides.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "The 'red wine is good for your heart' story is falling apart. Latest research is skeptical.",
+          "shareText": "Bad news for wine lovers: latest research says alcohol benefits may be overstated.",
+          "correctPct": 35
+        },
+        {
+          "question": "What percentage of people are 'hyper-responders' to dietary cholesterol?",
+          "choices": [
+            "5%",
+            "10%",
+            "25%",
+            "50%"
+          ],
+          "answer": "25%",
+          "explanation": "About 25% of people are hyper-responders whose blood cholesterol rises significantly with dietary cholesterol. No easy way to know which group you're in.",
+          "difficulty": "Hard",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "1 in 4 people's cholesterol skyrockets from dietary cholesterol. You might be one.",
+          "shareText": "25% of people are cholesterol hyper-responders. No easy way to know if you are!",
+          "correctPct": 20
+        },
+        {
+          "question": "What can treating sleep apnea with CPAP improve?",
+          "choices": [
+            "Only snoring",
+            "Cholesterol numbers",
+            "Only blood pressure",
+            "Only energy levels"
+          ],
+          "answer": "Cholesterol numbers",
+          "explanation": "Treating sleep apnea with CPAP can improve cholesterol numbers. Poor sleep quality is directly linked to worse lipid profiles.",
+          "difficulty": "Hard",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Fixing sleep apnea with CPAP literally improves your cholesterol numbers.",
+          "shareText": "CPAP for sleep apnea doesn't just fix snoring — it improves your cholesterol!",
+          "correctPct": 18
+        },
+        {
+          "question": "Which specific type of body fat is most metabolically dangerous?",
+          "choices": [
+            "Subcutaneous fat (under skin)",
+            "Visceral fat (belly fat)",
+            "Muscle fat",
+            "Brown fat"
+          ],
+          "answer": "Visceral fat (belly fat)",
+          "explanation": "Visceral fat (belly fat) is metabolically active and especially dangerous for cholesterol and heart disease risk.",
+          "difficulty": "Easy",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Belly fat is metabolically active and directly worsens cholesterol. Location matters.",
+          "shareText": "Not all fat is equal. Belly fat (visceral) is metabolically active and the most dangerous.",
+          "correctPct": 62
+        },
+        {
+          "question": "How much can soy protein modestly lower LDL?",
+          "choices": [
+            "3-5%",
+            "10-15%",
+            "20-25%",
+            "30%+"
+          ],
+          "answer": "3-5%",
+          "explanation": "Soy protein can modestly lower LDL by 3-5%. Every small reduction adds up.",
+          "difficulty": "Hard",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Soy protein's LDL effect is modest (3-5%) but every point counts over a lifetime.",
+          "shareText": "Soy lowers LDL by 3-5%. Small, but over decades, every point of LDL matters.",
+          "correctPct": 30
+        }
+      ]
+    },
+    {
+      "title": "Dr. Statina",
+      "guest": "Dr. Statina",
+      "category": "Treatment",
+      "chapter": 5,
+      "role": "quizmaster",
+      "greeting": "I am Dr. Statina, master of the most prescribed heart medicine in history.",
+      "cliffhanger": "Eze the Absorber knows a drug that works in a completely different way...",
+      "knowledgeCard": "Statins block HMG-CoA reductase in the liver, reducing cholesterol production and pulling more LDL from blood. 200M+ users worldwide.",
+      "dialogue": [
+        {
+          "text": "Over 200 million people take the medicine I specialize in."
+        },
+        {
+          "text": "Statins are one of the most studied drugs in history — over 170,000 patients in trials."
+        },
+        {
+          "text": "But myths and fear surround them. Let me separate fact from fiction."
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/medications",
+      "questions": [
+        {
+          "question": "How do statins lower LDL cholesterol?",
+          "choices": [
+            "Block cholesterol absorption in gut",
+            "Block HMG-CoA reductase enzyme in liver",
+            "Increase HDL production",
+            "Break down existing plaque"
+          ],
+          "answer": "Block HMG-CoA reductase enzyme in liver",
+          "explanation": "Statins block HMG-CoA reductase, reducing liver cholesterol production. The liver then pulls more LDL from blood to compensate.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Statins trick the liver into pulling MORE LDL out of your blood. Clever mechanism.",
+          "shareText": "Statins block a liver enzyme, forcing the liver to vacuum up more LDL from blood.",
+          "correctPct": 38
+        },
+        {
+          "question": "How much can high-intensity statins lower LDL?",
+          "choices": [
+            "10-20%",
+            "30-40%",
+            "50% or more",
+            "70-80%"
+          ],
+          "answer": "50% or more",
+          "explanation": "High-intensity statins (atorvastatin 40-80mg, rosuvastatin 20-40mg) can lower LDL by 50% or more.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "High-intensity statins can cut your LDL in HALF. That's a powerful drug.",
+          "shareText": "High-intensity statins cut LDL by 50%+. One of the most effective drugs ever.",
+          "correctPct": 35
+        },
+        {
+          "question": "What percentage of statin muscle pain is likely the 'nocebo effect'?",
+          "choices": [
+            "10%",
+            "50%",
+            "70%",
+            "90%"
+          ],
+          "answer": "90%",
+          "explanation": "The SAMSON trial found 90% of statin side effects were nocebo — people felt side effects because they expected them.",
+          "difficulty": "Hard",
+          "surpriseFactor": 10,
+          "didYouKnowFact": "90% of statin muscle pain is NOCEBO — you feel it because you expect it, not the drug.",
+          "shareText": "Mind-blowing: 90% of statin side effects are nocebo. You feel them because you EXPECT them.",
+          "correctPct": 12
+        },
+        {
+          "question": "By how much do statins reduce heart attacks?",
+          "choices": [
+            "5-10%",
+            "15-20%",
+            "25-35%",
+            "50-60%"
+          ],
+          "answer": "25-35%",
+          "explanation": "Statins reduce heart attacks by about 25-35%, strokes by 15-25%, and cardiovascular death by 15-20%.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Statins reduce heart attacks by 25-35%. One of the most proven treatments in medicine.",
+          "shareText": "Statins cut heart attacks by 25-35%. Among the most proven treatments in all of medicine.",
+          "correctPct": 40
+        },
+        {
+          "question": "Do statins cause memory loss according to large studies?",
+          "choices": [
+            "Yes, significantly",
+            "No, large studies show no cognitive decline",
+            "Only in elderly",
+            "Only at high doses"
+          ],
+          "answer": "No, large studies show no cognitive decline",
+          "explanation": "Despite an FDA warning label, large randomized studies show no cognitive decline from statins. Memory complaints are not supported by trial data.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Despite popular belief, large studies show statins do NOT cause memory loss.",
+          "shareText": "Myth busted: large studies show statins do NOT cause memory loss or cognitive decline.",
+          "correctPct": 30
+        }
+      ]
+    },
+    {
+      "title": "Eze the Absorber",
+      "guest": "Eze the Absorber",
+      "category": "Treatment",
+      "chapter": 5,
+      "role": "healer",
+      "greeting": "I work in the gut, not the liver. Different approach, same goal — less cholesterol.",
+      "cliffhanger": "PCSK9 the Guardian uses an entirely different weapon — antibodies...",
+      "knowledgeCard": "Ezetimibe blocks cholesterol absorption in intestines. Adds 15-20% LDL reduction on top of statins. Few side effects.",
+      "dialogue": [
+        {
+          "text": "Statins work in the liver. But I work in the intestines — blocking cholesterol from being absorbed."
+        },
+        {
+          "text": "When statins alone aren't enough, I'm usually the first addition."
+        },
+        {
+          "text": "Do you know how combination therapy works?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/medications",
+      "questions": [
+        {
+          "question": "Where does ezetimibe (Zetia) work?",
+          "choices": [
+            "In the liver",
+            "In the intestine",
+            "In the bloodstream",
+            "In the heart"
+          ],
+          "answer": "In the intestine",
+          "explanation": "Ezetimibe works in the intestine to block cholesterol absorption, complementing statins which work in the liver.",
+          "difficulty": "Easy",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Ezetimibe blocks cholesterol at the gut level — a completely different approach from statins.",
+          "shareText": "Statins work in the liver, ezetimibe in the gut. Two different attack points.",
+          "correctPct": 52
+        },
+        {
+          "question": "How much additional LDL reduction does ezetimibe provide on top of a statin?",
+          "choices": [
+            "5-10%",
+            "15-20%",
+            "30-40%",
+            "50-60%"
+          ],
+          "answer": "15-20%",
+          "explanation": "Ezetimibe adds 15-20% LDL reduction when combined with a statin. Few side effects make it an easy addition.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Adding ezetimibe to a statin squeezes out another 15-20% LDL reduction.",
+          "shareText": "Statin + ezetimibe = extra 15-20% LDL drop. Two mechanisms, better results.",
+          "correctPct": 35
+        },
+        {
+          "question": "What is bempedoic acid (Nexletol) particularly useful for?",
+          "choices": [
+            "Raising HDL",
+            "Statin-intolerant patients",
+            "Lowering triglycerides",
+            "Preventing diabetes"
+          ],
+          "answer": "Statin-intolerant patients",
+          "explanation": "Bempedoic acid works similarly to statins but doesn't affect muscles, making it ideal for statin-intolerant patients.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "Bempedoic acid works like a statin but skips the muscles — perfect for statin-intolerant people.",
+          "shareText": "Can't tolerate statins? Bempedoic acid works the same way but doesn't affect muscles.",
+          "correctPct": 28
+        },
+        {
+          "question": "When was bempedoic acid (Nexletol) FDA approved?",
+          "choices": [
+            "2010",
+            "2015",
+            "2020",
+            "2023"
+          ],
+          "answer": "2020",
+          "explanation": "Bempedoic acid received FDA approval in 2020, providing a new option for statin-intolerant patients.",
+          "difficulty": "Hard",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Bempedoic acid is a newer cholesterol drug, FDA approved in 2020.",
+          "shareText": "New cholesterol option since 2020: bempedoic acid. Works like statins minus muscle pain.",
+          "correctPct": 22
+        },
+        {
+          "question": "How much does bempedoic acid lower LDL when combined with ezetimibe?",
+          "choices": [
+            "10%",
+            "20%",
+            "38%",
+            "55%"
+          ],
+          "answer": "38%",
+          "explanation": "Bempedoic acid lowers LDL by ~18% alone, and ~38% when combined with ezetimibe.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "Bempedoic acid + ezetimibe = 38% LDL drop without a statin.",
+          "shareText": "Can't take statins? Bempedoic acid + ezetimibe drops LDL by 38%.",
+          "correctPct": 18
+        }
+      ]
+    },
+    {
+      "title": "PCSK9 the Guardian",
+      "guest": "PCSK9 the Guardian",
+      "category": "Treatment",
+      "chapter": 5,
+      "role": "scholar",
+      "greeting": "I am the Guardian — an antibody that destroys what destroys your LDL receptors.",
+      "cliffhanger": "Inclisiran the Whisperer uses an even more revolutionary approach — silencing genes...",
+      "knowledgeCard": "PCSK9 inhibitors are injectable antibodies that lower LDL 50-60% on top of statins by preventing LDL receptor destruction.",
+      "dialogue": [
+        {
+          "text": "There's a protein called PCSK9 that DESTROYS the receptors your liver uses to remove LDL."
+        },
+        {
+          "text": "I block that protein. More receptors survive. More LDL gets cleared."
+        },
+        {
+          "text": "The result is dramatic. Let me show you."
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/medications",
+      "questions": [
+        {
+          "question": "What does PCSK9 protein normally do?",
+          "choices": [
+            "Produces cholesterol",
+            "Destroys LDL receptors on the liver",
+            "Creates HDL",
+            "Breaks down triglycerides"
+          ],
+          "answer": "Destroys LDL receptors on the liver",
+          "explanation": "PCSK9 destroys LDL receptors on the liver. By blocking PCSK9, more receptors survive to pull LDL from blood.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Your body has a protein (PCSK9) that destroys its own LDL receptors. Blocking it = more cleanup.",
+          "shareText": "Your body destroys its own LDL receptors via PCSK9. New drugs block this. Game changer.",
+          "correctPct": 25
+        },
+        {
+          "question": "How much can PCSK9 inhibitors lower LDL on top of statin therapy?",
+          "choices": [
+            "10-20%",
+            "30-40%",
+            "50-60%",
+            "80-90%"
+          ],
+          "answer": "50-60%",
+          "explanation": "PCSK9 inhibitors lower LDL by 50-60% ON TOP of statin therapy. They can bring LDL below 25 mg/dL.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "PCSK9 inhibitors can lower LDL by 50-60% even if you're already on a statin.",
+          "shareText": "PCSK9 inhibitors: 50-60% MORE LDL reduction on top of statins. LDL can go below 25!",
+          "correctPct": 28
+        },
+        {
+          "question": "How are PCSK9 inhibitors administered?",
+          "choices": [
+            "Daily pill",
+            "Injection every 2-4 weeks",
+            "IV infusion monthly",
+            "Skin patch"
+          ],
+          "answer": "Injection every 2-4 weeks",
+          "explanation": "PCSK9 inhibitors (evolocumab/Repatha, alirocumab/Praluent) are given by injection every 2-4 weeks.",
+          "difficulty": "Easy",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "PCSK9 inhibitors are injections every 2-4 weeks — not daily pills.",
+          "shareText": "PCSK9 inhibitors: one injection every 2-4 weeks instead of daily pills.",
+          "correctPct": 45
+        },
+        {
+          "question": "How low can PCSK9 inhibitors bring LDL?",
+          "choices": [
+            "Below 70 mg/dL",
+            "Below 50 mg/dL",
+            "Below 25 mg/dL",
+            "Below 10 mg/dL"
+          ],
+          "answer": "Below 25 mg/dL",
+          "explanation": "PCSK9 inhibitors can bring LDL below 25 mg/dL — extremely low levels with no adverse effects seen in trials.",
+          "difficulty": "Hard",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "LDL below 25 mg/dL is achievable and SAFE. Your body makes all the cholesterol cells need.",
+          "shareText": "LDL below 25 is achievable and safe. The myth of 'too low cholesterol' is busted.",
+          "correctPct": 20
+        },
+        {
+          "question": "Is the concept of 'too low' cholesterol supported by evidence?",
+          "choices": [
+            "Yes, very dangerous",
+            "No, it's a myth",
+            "Only below 10 mg/dL",
+            "Depends on age"
+          ],
+          "answer": "No, it's a myth",
+          "explanation": "People with genetic mutations causing LDL of 15-30 from birth are extremely healthy. No adverse effects at very low levels in trials.",
+          "difficulty": "Medium",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "People BORN with LDL of 15-30 are extremely healthy. 'Too low cholesterol' is a myth.",
+          "shareText": "People born with ultra-low LDL (15-30) are super healthy. 'Too low' is a myth.",
+          "correctPct": 25
+        }
+      ]
+    },
+    {
+      "title": "Inclisiran the Whisperer",
+      "guest": "Inclisiran the Whisperer",
+      "category": "Treatment",
+      "chapter": 5,
+      "role": "guide",
+      "greeting": "I whisper to your genes... and they stop making PCSK9. Twice a year.",
+      "cliffhanger": "Omega Rex guards the Apothecary exit. He knows about the power of omega-3s...",
+      "knowledgeCard": "Inclisiran: siRNA that silences PCSK9 gene. Two injections per year. 50% LDL reduction. FDA approved 2021.",
+      "dialogue": [
+        {
+          "text": "Forget blocking PCSK9 protein. I SILENCE the gene that makes it."
+        },
+        {
+          "text": "Small interfering RNA — injected just twice a year in a doctor's office."
+        },
+        {
+          "text": "The future of cholesterol treatment is gene silencing. Can you keep up?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/medications",
+      "questions": [
+        {
+          "question": "How does inclisiran (Leqvio) work?",
+          "choices": [
+            "Blocks an enzyme",
+            "Silences the PCSK9 gene using siRNA",
+            "Absorbs cholesterol in gut",
+            "Increases HDL production"
+          ],
+          "answer": "Silences the PCSK9 gene using siRNA",
+          "explanation": "Inclisiran uses small interfering RNA (siRNA) to silence the PCSK9 gene, preventing PCSK9 protein from being made.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "Inclisiran literally silences a gene. It's RNA interference medicine for cholesterol.",
+          "shareText": "Gene silencing for cholesterol: inclisiran uses siRNA to shut down PCSK9 production.",
+          "correctPct": 15
+        },
+        {
+          "question": "How often is inclisiran administered?",
+          "choices": [
+            "Daily",
+            "Weekly",
+            "Monthly",
+            "Twice a year"
+          ],
+          "answer": "Twice a year",
+          "explanation": "After initial doses, inclisiran is given by injection just twice a year in the doctor's office.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Two injections per year to control cholesterol. That's the future of medicine.",
+          "shareText": "Inclisiran: TWO shots per year to control cholesterol. We're living in the future.",
+          "correctPct": 30
+        },
+        {
+          "question": "When was inclisiran FDA approved?",
+          "choices": [
+            "2018",
+            "2019",
+            "2020",
+            "2021"
+          ],
+          "answer": "2021",
+          "explanation": "Inclisiran received FDA approval in 2021, representing a revolutionary approach to cholesterol management.",
+          "difficulty": "Hard",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Inclisiran was FDA approved in 2021 — gene silencing therapy for cholesterol.",
+          "shareText": "Since 2021, we can silence cholesterol genes with an injection. Medicine is wild.",
+          "correctPct": 22
+        },
+        {
+          "question": "What is the primary use of fibrates?",
+          "choices": [
+            "Lowering LDL",
+            "Lowering triglycerides",
+            "Raising HDL only",
+            "Preventing diabetes"
+          ],
+          "answer": "Lowering triglycerides",
+          "explanation": "Fibrates primarily lower triglycerides by 20-50%. Most useful for very high triglycerides (above 500) to prevent pancreatitis.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Fibrates can lower triglycerides by 20-50% — crucial when levels are above 500.",
+          "shareText": "Fibrates: the triglyceride specialists. Can cut them by 20-50%.",
+          "correctPct": 40
+        },
+        {
+          "question": "By how much can inclisiran lower LDL?",
+          "choices": [
+            "10%",
+            "25%",
+            "50%",
+            "80%"
+          ],
+          "answer": "50%",
+          "explanation": "Inclisiran lowers LDL by about 50%, comparable to PCSK9 antibodies but with far less frequent dosing.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "50% LDL reduction from just two shots a year. Inclisiran is remarkably effective.",
+          "shareText": "50% LDL drop from 2 injections per year. Inclisiran might be the best cholesterol innovation.",
+          "correctPct": 28
+        }
+      ]
+    },
+    {
+      "title": "Omega Rex",
+      "guest": "Omega Rex",
+      "category": "Treatment",
+      "chapter": 5,
+      "role": "boss",
+      "greeting": "I am Omega Rex. The ocean holds powerful medicine — but only at the right dose.",
+      "cliffhanger": "Medicines are tools, but the real power is prevention. The Temple holds the final secrets.",
+      "knowledgeCard": "Rx omega-3 (icosapent ethyl 4g/day) reduced CV events 25%. OTC fish oil at lower doses does NOT show the same benefit.",
+      "dialogue": [
+        {
+          "text": "Everyone takes fish oil supplements. But most are wasting their money."
+        },
+        {
+          "text": "Only prescription-strength omega-3 at the right dose has proven benefits."
+        },
+        {
+          "text": "And the decision to start ANY medication depends on more than just your numbers."
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/medications",
+      "questions": [
+        {
+          "question": "What prescription omega-3 reduced cardiovascular events by 25%?",
+          "choices": [
+            "Regular fish oil",
+            "Icosapent ethyl (Vascepa) at 4g/day",
+            "Cod liver oil",
+            "Krill oil supplements"
+          ],
+          "answer": "Icosapent ethyl (Vascepa) at 4g/day",
+          "explanation": "Icosapent ethyl at 4g/day reduced CV events by 25% in the REDUCE-IT trial. Regular fish oil at lower doses has NOT shown the same benefit.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "Regular fish oil supplements DON'T work like Rx omega-3. Only high-dose Vascepa proved benefit.",
+          "shareText": "Your fish oil supplements might be useless. Only Rx-strength Vascepa (4g/day) proved benefit.",
+          "correctPct": 15
+        },
+        {
+          "question": "At what 10-year risk level do guidelines strongly recommend statin therapy?",
+          "choices": [
+            "Above 5%",
+            "Above 7.5%",
+            "Above 10%",
+            "Above 20%"
+          ],
+          "answer": "Above 20%",
+          "explanation": "If 10-year CV risk is above 20%, statin therapy is strongly recommended. Above 7.5%, it should be considered.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "10-year risk above 20% = statins strongly recommended. Above 7.5% = consider them.",
+          "shareText": "10-year heart risk above 20%? Statins are strongly recommended by guidelines.",
+          "correctPct": 35
+        },
+        {
+          "question": "What do 2023 European guidelines recommend for LDL in high-risk patients?",
+          "choices": [
+            "Below 100 mg/dL",
+            "Below 70 mg/dL",
+            "Below 55 mg/dL",
+            "Below 40 mg/dL"
+          ],
+          "answer": "Below 55 mg/dL",
+          "explanation": "The 2023 European guidelines recommend LDL below 55 mg/dL for high-risk patients — lower is better with no floor.",
+          "difficulty": "Hard",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "European guidelines say high-risk patients should get LDL below 55. Lower is better, no floor.",
+          "shareText": "Europe says: LDL below 55 for high risk. And there's NO such thing as 'too low'.",
+          "correctPct": 18
+        },
+        {
+          "question": "What statin side effect risk is about 1 extra case per 255 patients over 4 years?",
+          "choices": [
+            "Liver failure",
+            "Diabetes",
+            "Memory loss",
+            "Kidney damage"
+          ],
+          "answer": "Diabetes",
+          "explanation": "Statins slightly increase diabetes risk: ~1 extra case per 255 patients over 4 years. CV benefits far outweigh this risk.",
+          "difficulty": "Hard",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Statins slightly raise diabetes risk (1 in 255 over 4 years) but heart benefits far outweigh it.",
+          "shareText": "Statin diabetes risk: 1 in 255 over 4 years. Heart attack reduction: 25-35%. Easy math.",
+          "correctPct": 20
+        },
+        {
+          "question": "How many patients have been studied in statin randomized trials?",
+          "choices": [
+            "10,000",
+            "50,000",
+            "100,000",
+            "Over 170,000"
+          ],
+          "answer": "Over 170,000",
+          "explanation": "Statins have been tested in over 170,000 patients in randomized trials — one of the most studied drugs in history.",
+          "difficulty": "Hard",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "170,000+ patients in statin trials. Few drugs have been studied this thoroughly.",
+          "shareText": "Statins: tested in 170,000+ patients. One of the most studied drugs in ALL of medicine.",
+          "correctPct": 22
+        }
+      ]
+    },
+    {
+      "title": "High Priestess Risk",
+      "guest": "High Priestess Risk",
+      "category": "Prevention",
+      "chapter": 6,
+      "role": "quizmaster",
+      "greeting": "I am the High Priestess of Risk. All paths lead to this question: how much danger are you in?",
+      "cliffhanger": "Calcium the Seer can look directly into your arteries...",
+      "knowledgeCard": "Heart disease is #1 killer worldwide (17.9M deaths/year). But up to 80% of premature cases are PREVENTABLE.",
+      "dialogue": [
+        {
+          "text": "Heart disease kills 17.9 million people every year. It is the number one killer worldwide."
+        },
+        {
+          "text": "But here's the truth the curse doesn't want you to know: up to 80% is preventable."
+        },
+        {
+          "text": "Do you know the major risk factors?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/prevention",
+      "questions": [
+        {
+          "question": "What percentage of premature heart disease is preventable?",
+          "choices": [
+            "20%",
+            "40%",
+            "60%",
+            "Up to 80%"
+          ],
+          "answer": "Up to 80%",
+          "explanation": "Up to 80% of premature heart disease is preventable through lifestyle changes and proper medical treatment.",
+          "difficulty": "Medium",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "80% of premature heart disease is PREVENTABLE. Most heart attacks don't have to happen.",
+          "shareText": "80% of premature heart disease is preventable. EIGHTY PERCENT. Knowledge is power.",
+          "correctPct": 35
+        },
+        {
+          "question": "What is the #1 killer worldwide?",
+          "choices": [
+            "Cancer",
+            "Heart disease",
+            "Diabetes",
+            "Stroke alone"
+          ],
+          "answer": "Heart disease",
+          "explanation": "Heart disease causes about 17.9 million deaths per year worldwide — more than any other cause.",
+          "difficulty": "Easy",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Heart disease kills 17.9 million people per year — more than all cancers combined.",
+          "shareText": "Heart disease: 17.9M deaths/year. The #1 killer worldwide. Know your numbers.",
+          "correctPct": 68
+        },
+        {
+          "question": "Which risk factor is the PRIMARY driver of atherosclerosis?",
+          "choices": [
+            "High blood pressure",
+            "High LDL cholesterol",
+            "Smoking",
+            "Diabetes"
+          ],
+          "answer": "High LDL cholesterol",
+          "explanation": "High LDL is the primary driver of atherosclerosis. Other factors accelerate the process, but LDL is the root cause.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "LDL is THE primary driver of atherosclerosis. Everything else accelerates it.",
+          "shareText": "LDL cholesterol is the ROOT CAUSE of atherosclerosis. Everything else makes it worse.",
+          "correctPct": 40
+        },
+        {
+          "question": "At what age does risk increase for men?",
+          "choices": [
+            "35+",
+            "45+",
+            "55+",
+            "65+"
+          ],
+          "answer": "45+",
+          "explanation": "Heart disease risk increases with age: men at 45+ and women at 55+.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Heart risk climbs after 45 for men, 55 for women. But prevention should start much earlier.",
+          "shareText": "Heart risk increases at 45 (men) and 55 (women). Start prevention BEFORE then.",
+          "correctPct": 55
+        },
+        {
+          "question": "How much does a sedentary lifestyle increase heart disease risk?",
+          "choices": [
+            "25%",
+            "50%",
+            "Doubles it",
+            "Triples it"
+          ],
+          "answer": "Doubles it",
+          "explanation": "Physical inactivity doubles your heart disease risk. Even modest walking significantly reduces this.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Being sedentary DOUBLES your heart disease risk. Just walking can cut it significantly.",
+          "shareText": "Sitting all day DOUBLES your heart disease risk. A daily walk can fix that.",
+          "correctPct": 32
+        }
+      ]
+    },
+    {
+      "title": "Calcium the Seer",
+      "guest": "Calcium the Seer",
+      "category": "Prevention",
+      "chapter": 6,
+      "role": "healer",
+      "greeting": "I can see into your arteries. A CAC scan reveals what blood tests cannot.",
+      "cliffhanger": "The Lifestyle Oracle knows the specific actions that change everything...",
+      "knowledgeCard": "CAC scan: 10 min, $75-150, non-contrast CT. Score of 0 = very low risk. Score 400+ = urgent treatment needed.",
+      "dialogue": [
+        {
+          "text": "Blood tests tell you what's in your blood. But I can see what's already in your artery WALLS."
+        },
+        {
+          "text": "A coronary artery calcium scan takes 10 minutes and costs less than dinner for two."
+        },
+        {
+          "text": "The number it gives you could save your life. Do you know what it means?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/prevention",
+      "questions": [
+        {
+          "question": "What does a CAC scan measure?",
+          "choices": [
+            "Blood flow speed",
+            "Calcified plaque in coronary arteries",
+            "Heart muscle strength",
+            "Valve function"
+          ],
+          "answer": "Calcified plaque in coronary arteries",
+          "explanation": "A CAC scan is a non-contrast CT that measures calcified plaque in your coronary arteries. Takes ~10 minutes.",
+          "difficulty": "Easy",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "A 10-minute CT scan can literally show you the plaque inside your heart's arteries.",
+          "shareText": "A 10-minute scan can show plaque in your arteries. $75-150. No contrast dye needed.",
+          "correctPct": 50
+        },
+        {
+          "question": "What does a CAC score of 0 mean?",
+          "choices": [
+            "You need immediate treatment",
+            "Very low risk for next 5-10 years",
+            "The scan failed",
+            "Moderate risk"
+          ],
+          "answer": "Very low risk for next 5-10 years",
+          "explanation": "CAC score of 0 means no calcified plaque. Your 10-year risk of a heart event is less than 2%, even with other risk factors.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "CAC score of zero = less than 2% risk of heart event in 10 years. Very reassuring.",
+          "shareText": "CAC score of 0 means <2% heart event risk in 10 years. Get scanned for peace of mind.",
+          "correctPct": 42
+        },
+        {
+          "question": "What does a CAC score of 400+ indicate?",
+          "choices": [
+            "Normal aging",
+            "Extensive plaque, high risk",
+            "Mild plaque",
+            "Scan error"
+          ],
+          "answer": "Extensive plaque, high risk",
+          "explanation": "CAC 400+ means extensive plaque and high risk. Treatment is urgent even with 'normal' cholesterol.",
+          "difficulty": "Easy",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "CAC score 400+: treatment is urgent even if your cholesterol numbers look 'normal'.",
+          "shareText": "CAC score 400+ means extensive plaque. Urgent treatment needed even with 'normal' cholesterol.",
+          "correctPct": 55
+        },
+        {
+          "question": "Who benefits most from getting a CAC scan?",
+          "choices": [
+            "Everyone",
+            "People in the intermediate risk gray zone",
+            "Only high-risk patients",
+            "Only athletes"
+          ],
+          "answer": "People in the intermediate risk gray zone",
+          "explanation": "CAC is best for people in the 'gray zone' where the decision to start medication is unclear. Not needed for clearly low or high risk.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "CAC scans are most useful when you're in the 'maybe' zone for medication decisions.",
+          "shareText": "CAC scans are most useful when your risk is unclear — the gray zone between low and high.",
+          "correctPct": 35
+        },
+        {
+          "question": "How much does a CAC scan typically cost?",
+          "choices": [
+            "$500-1000",
+            "$250-500",
+            "$75-150",
+            "Free with insurance"
+          ],
+          "answer": "$75-150",
+          "explanation": "A CAC scan costs $75-150 and usually isn't covered by insurance. It takes about 10 minutes with no contrast dye.",
+          "difficulty": "Easy",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "A potentially life-saving heart scan costs just $75-150. Cheaper than a nice dinner.",
+          "shareText": "$75-150 to see inside your arteries. The best deal in medicine.",
+          "correctPct": 38
+        }
+      ]
+    },
+    {
+      "title": "The Lifestyle Oracle",
+      "guest": "The Lifestyle Oracle",
+      "category": "Prevention",
+      "chapter": 6,
+      "role": "scholar",
+      "greeting": "I see all possible futures. The INTERHEART study revealed 9 keys to destiny.",
+      "cliffhanger": "Aspirin the Fallen has a cautionary tale about a remedy that fell from grace...",
+      "knowledgeCard": "INTERHEART study: 9 modifiable factors account for 90% of heart attack risk. Addressing ALL can reduce risk by 90%.",
+      "dialogue": [
+        {
+          "text": "A great study once mapped the causes of heart attacks worldwide."
+        },
+        {
+          "text": "Nine modifiable factors account for 90% of all heart attack risk."
+        },
+        {
+          "text": "If you address all nine, you can cut your risk by 90%. Let me test your knowledge."
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/prevention",
+      "questions": [
+        {
+          "question": "How many modifiable risk factors account for 90% of heart attack risk (INTERHEART)?",
+          "choices": [
+            "3",
+            "5",
+            "7",
+            "9"
+          ],
+          "answer": "9",
+          "explanation": "The INTERHEART study found 9 modifiable factors account for 90% of heart attack risk worldwide.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Just 9 changeable factors control 90% of heart attack risk. You can change your fate.",
+          "shareText": "9 modifiable factors = 90% of heart attack risk. Change them = change your future.",
+          "correctPct": 30
+        },
+        {
+          "question": "What is hs-CRP used to measure?",
+          "choices": [
+            "Cholesterol",
+            "Inflammation",
+            "Blood sugar",
+            "Kidney function"
+          ],
+          "answer": "Inflammation",
+          "explanation": "High-sensitivity C-reactive protein (hs-CRP) measures inflammation, increasingly recognized as a key driver of heart disease.",
+          "difficulty": "Medium",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "hs-CRP measures inflammation — the 'new frontier' of heart disease prevention.",
+          "shareText": "hs-CRP: a blood test for inflammation, the hidden driver of heart disease.",
+          "correctPct": 40
+        },
+        {
+          "question": "What hs-CRP level indicates high cardiovascular risk?",
+          "choices": [
+            "Below 1 mg/L",
+            "1-3 mg/L",
+            "Above 3 mg/L",
+            "Above 10 mg/L"
+          ],
+          "answer": "Above 3 mg/L",
+          "explanation": "hs-CRP above 3 mg/L indicates high risk. Below 1 is low risk, 1-3 is average risk.",
+          "difficulty": "Hard",
+          "surpriseFactor": 5,
+          "didYouKnowFact": "hs-CRP above 3 = high inflammation risk. Below 1 = low risk. Simple blood test.",
+          "shareText": "hs-CRP: below 1 = low risk, above 3 = high risk. Ask your doctor about this test.",
+          "correctPct": 25
+        },
+        {
+          "question": "What did the CANTOS trial prove?",
+          "choices": [
+            "Statins work",
+            "Reducing inflammation alone reduces heart attacks",
+            "Exercise is better than medication",
+            "HDL drugs work"
+          ],
+          "answer": "Reducing inflammation alone reduces heart attacks",
+          "explanation": "CANTOS showed that reducing inflammation (with an anti-inflammatory drug) reduced heart attacks even WITHOUT changing cholesterol.",
+          "difficulty": "Hard",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "CANTOS proved: reduce inflammation alone (not cholesterol) and heart attacks still drop.",
+          "shareText": "Groundbreaking: CANTOS proved reducing inflammation alone cuts heart attacks. No cholesterol change needed.",
+          "correctPct": 15
+        },
+        {
+          "question": "By how much can addressing all 9 INTERHEART risk factors reduce your risk?",
+          "choices": [
+            "30%",
+            "50%",
+            "70%",
+            "Up to 90%"
+          ],
+          "answer": "Up to 90%",
+          "explanation": "Addressing ALL nine modifiable risk factors from INTERHEART can reduce heart attack risk by up to 90%.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Address all 9 risk factors = up to 90% less heart attacks. Prevention is incredibly powerful.",
+          "shareText": "90% of heart attacks are preventable by addressing 9 known risk factors. 90%!",
+          "correctPct": 32
+        }
+      ]
+    },
+    {
+      "title": "Aspirin the Fallen",
+      "guest": "Aspirin the Fallen",
+      "category": "Prevention",
+      "chapter": 6,
+      "role": "guide",
+      "greeting": "I was once the hero of prevention. Now... guidelines have changed about me.",
+      "cliffhanger": "Inflammation the Shadow guards the Temple exit. The final battle awaits...",
+      "knowledgeCard": "Aspirin: NO longer recommended for primary prevention in most people. Still essential after a heart attack (secondary prevention).",
+      "dialogue": [
+        {
+          "text": "For decades, doctors told everyone to take a daily aspirin. I was the hero."
+        },
+        {
+          "text": "But new evidence showed I was causing as much harm as good in many people."
+        },
+        {
+          "text": "Do you understand why the guidelines changed?"
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/prevention",
+      "questions": [
+        {
+          "question": "Is low-dose aspirin still recommended for primary prevention in most people?",
+          "choices": [
+            "Yes, for everyone over 40",
+            "No, bleeding risk outweighs benefits for most",
+            "Yes, but only for men",
+            "Only with doctor approval"
+          ],
+          "answer": "No, bleeding risk outweighs benefits for most",
+          "explanation": "Current guidelines say aspirin is NOT recommended for primary prevention in most people — bleeding risk outweighs benefits.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Daily aspirin for prevention is OUT. For most people, bleeding risk outweighs heart benefits.",
+          "shareText": "Plot twist: daily aspirin for heart prevention is no longer recommended for most people.",
+          "correctPct": 35
+        },
+        {
+          "question": "When IS aspirin still recommended?",
+          "choices": [
+            "For everyone",
+            "Only for secondary prevention (after heart attack/stroke)",
+            "Only for diabetics",
+            "Only for people over 70"
+          ],
+          "answer": "Only for secondary prevention (after heart attack/stroke)",
+          "explanation": "Aspirin is still recommended for people who have already had a heart attack or stroke (secondary prevention).",
+          "difficulty": "Easy",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Had a heart attack or stroke? Keep taking aspirin. Haven't? Probably don't start.",
+          "shareText": "Aspirin after a heart attack: YES. Aspirin to prevent one: probably NOT anymore.",
+          "correctPct": 52
+        },
+        {
+          "question": "What blood pressure target significantly reduces heart disease risk?",
+          "choices": [
+            "Below 140/90",
+            "Below 130/80",
+            "Below 120/70",
+            "Below 110/60"
+          ],
+          "answer": "Below 130/80",
+          "explanation": "Controlling blood pressure to below 130/80 significantly reduces risk. Even 5-10 mmHg reductions are meaningful.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "Blood pressure below 130/80 is the target. Even small drops of 5-10 points help.",
+          "shareText": "BP target: below 130/80. Even dropping 5-10 points makes a real difference.",
+          "correctPct": 45
+        },
+        {
+          "question": "How does high blood pressure accelerate heart disease?",
+          "choices": [
+            "It increases cholesterol production",
+            "It damages artery lining, making LDL penetration easier",
+            "It lowers HDL",
+            "It raises triglycerides"
+          ],
+          "answer": "It damages artery lining, making LDL penetration easier",
+          "explanation": "High blood pressure damages the inner lining of arteries, making it easier for LDL to penetrate and form plaque.",
+          "difficulty": "Medium",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "High BP damages artery walls, creating entry points for LDL. The two work together.",
+          "shareText": "High blood pressure + high LDL = dangerous duo. BP damages arteries, LDL fills the cracks.",
+          "correctPct": 38
+        },
+        {
+          "question": "Within how long of quitting smoking does heart rate drop?",
+          "choices": [
+            "20 minutes",
+            "24 hours",
+            "1 week",
+            "1 month"
+          ],
+          "answer": "20 minutes",
+          "explanation": "Within 20 minutes of quitting smoking, heart rate drops. Within 1 year, heart disease risk is cut in half.",
+          "difficulty": "Medium",
+          "surpriseFactor": 9,
+          "didYouKnowFact": "TWENTY MINUTES after quitting smoking, your heart rate already drops.",
+          "shareText": "20 minutes after your last cigarette, your heart rate drops. Your body starts healing IMMEDIATELY.",
+          "correctPct": 28
+        }
+      ]
+    },
+    {
+      "title": "Inflammation the Shadow",
+      "guest": "Inflammation the Shadow",
+      "category": "Prevention",
+      "chapter": 6,
+      "role": "boss",
+      "greeting": "I am Inflammation — the shadow behind the curse. Most never see me until it's too late.",
+      "cliffhanger": "You've uncovered the truth behind Heartwell's curse. But the journey to protect your heart never truly ends...",
+      "knowledgeCard": "Heart disease: LDL is the root cause, inflammation accelerates it, prevention works. Know your numbers, take action early, every year counts.",
+      "dialogue": [
+        {
+          "text": "I am the final guardian. I represent the force that makes everything worse."
+        },
+        {
+          "text": "Chronic inflammation is the accelerant. LDL is the fuel. Together, we cause the curse."
+        },
+        {
+          "text": "You've come so far. Show me you understand the complete picture of heart disease."
+        }
+      ],
+      "url": "https://lipiwiz.com/topics/prevention",
+      "questions": [
+        {
+          "question": "How do heart attacks in women often present differently?",
+          "choices": [
+            "Exactly like men",
+            "With fatigue, nausea, jaw pain — often WITHOUT chest pain",
+            "Only with arm pain",
+            "With headache only"
+          ],
+          "answer": "With fatigue, nausea, jaw pain — often WITHOUT chest pain",
+          "explanation": "Women often experience fatigue, nausea, jaw pain, and shortness of breath WITHOUT chest pain during heart attacks.",
+          "difficulty": "Medium",
+          "surpriseFactor": 8,
+          "didYouKnowFact": "Women's heart attacks often have NO chest pain. Fatigue, nausea, jaw pain instead.",
+          "shareText": "Women's heart attacks often look NOTHING like men's. No chest pain — just fatigue, nausea, jaw pain.",
+          "correctPct": 35
+        },
+        {
+          "question": "What is the 10-year risk threshold considered 'high risk'?",
+          "choices": [
+            "Above 5%",
+            "Above 10%",
+            "Above 15%",
+            "Above 20%"
+          ],
+          "answer": "Above 20%",
+          "explanation": "10-year cardiovascular risk above 20% is considered high risk. 7.5-20% is intermediate, 5-7.5% borderline.",
+          "difficulty": "Medium",
+          "surpriseFactor": 4,
+          "didYouKnowFact": "10-year risk above 20% = high risk. Know your number and talk to your doctor.",
+          "shareText": "What's your 10-year heart risk? Above 20% = high risk. Ask your doctor to calculate it.",
+          "correctPct": 40
+        },
+        {
+          "question": "Which lifestyle factors fight inflammation?",
+          "choices": [
+            "Fast food and energy drinks",
+            "Mediterranean diet, exercise, sleep, stress management",
+            "Supplements only",
+            "Just medication"
+          ],
+          "answer": "Mediterranean diet, exercise, sleep, stress management",
+          "explanation": "Anti-inflammatory lifestyle: Mediterranean diet, regular exercise, adequate sleep, and stress management.",
+          "difficulty": "Easy",
+          "surpriseFactor": 3,
+          "didYouKnowFact": "Diet, exercise, sleep, and stress management all fight inflammation. It's a lifestyle package.",
+          "shareText": "Fight inflammation with the big 4: Mediterranean diet, exercise, sleep, stress management.",
+          "correctPct": 65
+        },
+        {
+          "question": "What limitation does the 10-year risk calculator have?",
+          "choices": [
+            "It's always perfect",
+            "It doesn't include Lp(a), family history details, or CAC scores",
+            "It overestimates risk",
+            "It only works for men"
+          ],
+          "answer": "It doesn't include Lp(a), family history details, or CAC scores",
+          "explanation": "The ACC/AHA risk calculator doesn't include Lp(a), detailed family history, or coronary artery calcium scores.",
+          "difficulty": "Hard",
+          "surpriseFactor": 6,
+          "didYouKnowFact": "The standard risk calculator misses Lp(a), family details, and CAC. It's incomplete.",
+          "shareText": "Standard heart risk calculators miss Lp(a), family history details, and CAC. Get the full picture.",
+          "correctPct": 25
+        },
+        {
+          "question": "How long after starting exercise does HDL begin to rise?",
+          "choices": [
+            "Immediately",
+            "After 2 weeks",
+            "After 3 months",
+            "After 1 year"
+          ],
+          "answer": "After 2 weeks",
+          "explanation": "After just 2 weeks of regular exercise, HDL begins to rise. After 3 months of diet change, LDL can drop 10-15%.",
+          "difficulty": "Medium",
+          "surpriseFactor": 7,
+          "didYouKnowFact": "Just 2 weeks of exercise and your HDL starts rising. Benefits begin FAST.",
+          "shareText": "Start exercising today → HDL rising in 2 weeks. Your body responds FAST.",
+          "correctPct": 38
+        }
+      ]
+    }
+  ]
+}

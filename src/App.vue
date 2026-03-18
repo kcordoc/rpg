@@ -1,0 +1,2007 @@
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { Icon } from '@iconify/vue';
+import bookOpen from '@iconify/icons-pixelarticons/book-open';
+import trophy from '@iconify/icons-pixelarticons/trophy';
+import upload from '@iconify/icons-pixelarticons/upload';
+import volume from '@iconify/icons-pixelarticons/volume';
+import volumeX from '@iconify/icons-pixelarticons/volume-x';
+import keyboard from '@iconify/icons-pixelarticons/keyboard';
+import message from '@iconify/icons-pixelarticons/message';
+import PhaserGame from './PhaserGame.vue';
+import BattleScreen from './components/BattleScreen.vue';
+import CollectionScreen from './components/CollectionScreen.vue';
+import EncounterDialog from './components/EncounterDialog.vue';
+import ShareModal from './components/ShareModal.vue';
+import LevelComplete from './components/LevelComplete.vue';
+import GameOver from './components/GameOver.vue';
+import TutorialModal from './components/TutorialModal.vue';
+import LeaderboardPanel from './components/LeaderboardPanel.vue';
+import ChallengeEntry from './components/ChallengeEntry.vue';
+import { EventBus } from './game/EventBus';
+import guestDataManager from './game/GuestData';
+import { leaderboardService } from './services/supabase-leaderboard.js';
+import { getStageOpponents, STAGE_CONFIG, getTotalStages } from './game/StageConfig.js';
+import {
+  GAME_NAME, GAME_URL, MUTE_KEY, TUTORIAL_SEEN_KEY,
+  MOBILE_WARNING, CREDITS_LINK_URL, CREDITS_LINK_TEXT, CREDITS_TOOLTIP, GITHUB_URL
+} from './constants.js';
+
+// Game state
+const phaserRef = ref();
+const currentSceneName = ref('');
+const showBattle = ref(false);
+const showCollection = ref(false);
+const showEncounter = ref(false);
+const encounterNPC = ref(null);
+const showGameOver = ref(false);
+const showTutorial = ref(false);
+const showLeaderboard = ref(false);
+const showMobileMenu = ref(false);
+
+// Challenge mode (from ?challenge= URL param)
+const challengeMode = ref(false);
+const challengeNpcSlug = ref('');
+const challengeSenderName = ref('');
+const challengeSenderScore = ref(0);
+const questionsJsonData = ref(null);
+
+// Detect challenge URL on mount
+function detectChallenge() {
+  const params = new URLSearchParams(window.location.search);
+  const challenge = params.get('challenge');
+  if (challenge) {
+    challengeMode.value = true;
+    challengeNpcSlug.value = challenge;
+    challengeSenderName.value = params.get('from') || '';
+    challengeSenderScore.value = parseInt(params.get('score') || '0', 10);
+    // Load questions.json for challenge
+    fetch('/assets/questions.json')
+      .then(r => r.json())
+      .then(data => { questionsJsonData.value = data; })
+      .catch(() => { challengeMode.value = false; });
+  }
+}
+
+function exitChallenge() {
+  challengeMode.value = false;
+  // Clear URL params
+  window.history.replaceState({}, '', window.location.pathname);
+}
+
+// Player data
+const playerName = ref('Player');
+const sessionId = ref(null);
+const showShareModal = ref(false);
+
+// Audio control
+const isMuted = ref(false);
+const isMobile = ref(false);
+const isPortrait = ref(false);
+
+// Player stats
+const playerStats = ref({
+  level: 1,
+  xp: 0,
+  hp: 100,
+  maxHp: 100,
+  rightAnswers: 0,
+  wrongAnswers: 0,
+  totalBattles: 0
+});
+
+// XP per correct answer (scales with level, capped)
+const getXPPerCorrect = (level) => Math.min(10 + 5 * (level - 1), 50);
+
+// XP required to reach next level (based on current level)
+const getXPToNextLevel = (level) => {
+  if (level === 1) return 200;
+  return 24 * getXPPerCorrect(level);
+};
+
+// Cumulative unlock XP for a given level
+const getUnlockXP = (level) => {
+  let total = 0;
+  for (let i = 1; i < level; i++) {
+    total += getXPToNextLevel(i);
+  }
+  return total;
+};
+
+// Current XP needed for next level
+const xpForNextLevel = computed(() => getXPToNextLevel(playerStats.value.level));
+const nextLevelThreshold = computed(() => getUnlockXP(playerStats.value.level + 1));
+const maxLevel = computed(() => getTotalStages());
+const isMaxLevel = computed(() => playerStats.value.level >= maxLevel.value);
+const xpProgressPercent = computed(() => {
+  if (isMaxLevel.value) return 100;
+  if (xpForNextLevel.value <= 0) return 0;
+  const xpIntoLevel = Math.max(0, playerStats.value.xp - getUnlockXP(playerStats.value.level));
+  return Math.min(100, (xpIntoLevel / xpForNextLevel.value) * 100);
+});
+
+// Mock battle data
+const battleData = ref({
+  guest: {
+    id: "1",
+    name: "Shreyas Doshi",
+    sprite: null,
+    hp: 100,
+    episode: "Heart Health",
+    difficulty: "Hard"
+  },
+  questions: [
+    {
+      id: 1,
+      type: "mcq",
+      prompt: "What is the most important framework for prioritizing product features?",
+      choices: [
+        "RICE scoring",
+        "Impact vs Effort matrix",
+        "Both are equally important",
+        "Customer feedback only"
+      ],
+      correctAnswer: 1,
+      explanation: "While both frameworks are useful, the Impact vs Effort matrix is more flexible and commonly used."
+    },
+    {
+      id: 2,
+      type: "tf",
+      prompt: "Product-market fit can be measured primarily through NPS scores.",
+      choices: ["True", "False"],
+      correctAnswer: 1,
+      explanation: "PMF is better measured through retention and growth metrics, not just NPS."
+    },
+    {
+      id: 3,
+      type: "mcq",
+      prompt: "What percentage of features should be customer-driven vs vision-driven?",
+      choices: [
+        "90% customer, 10% vision",
+        "50/50 split",
+        "70% vision, 30% customer",
+        "It depends on company stage"
+      ],
+      correctAnswer: 3,
+      explanation: "The balance depends heavily on whether you're in discovery, growth, or maturity phase."
+    }
+  ]
+});
+
+// Collection data - will be populated from GuestDataManager
+const collection = ref([]);
+
+// Level system
+const currentGameLevel = ref(1);
+const enemiesPerLevel = 10;
+const showLevelComplete = ref(false);
+const levelUpQueue = ref([]);
+const levelUpInfo = ref(null);
+const currentLevelEnemiesDefeated = ref(0);
+const totalQuestionsAnswered = ref(0);
+const showLockedModal = ref(false);
+const lockedModalMessage = ref('Area locked — level up to continue');
+const currentMapInfo = ref({ level: 1, world: 1 });
+
+// Computed stats
+const capturedCount = computed(() => collection.value.filter(g => g.captured).length);
+const TOTAL_GUESTS = STAGE_CONFIG.flat().length;
+const totalGuests = computed(() => TOTAL_GUESTS);
+const accuracy = computed(() => {
+  const total = playerStats.value.rightAnswers + playerStats.value.wrongAnswers;
+  return total > 0 ? Math.round((playerStats.value.rightAnswers / total) * 100) : 0;
+});
+const remainingGuests = computed(() => totalGuests.value - capturedCount.value);
+
+// Event handlers
+function handleStartBattle() {
+  showBattle.value = true;
+}
+
+function buildBattleQuestions(guestId) {
+  const questionCount = 3;
+  const questions = guestDataManager.getRandomQuestions(guestId, questionCount);
+  if (questions.length > 0 && questions.length < questionCount) {
+    while (questions.length < questionCount) {
+      const fallback = questions[Math.floor(Math.random() * questions.length)];
+      questions.push(fallback);
+    }
+  }
+
+  if (!questions || questions.length === 0) {
+    return [];
+  }
+
+  const bonusIndex = Math.random() < 0.05 ? Math.floor(Math.random() * questionCount) : -1;
+
+  return questions.map((q, index) => ({
+    id: index + 1,
+    type: "mcq",
+    prompt: q.question,
+    choices: q.choices,
+    correctAnswer: q.choices.indexOf(q.answer),
+    explanation: q.explanation || '',
+    difficulty: q.difficulty || '',
+    isBonus: index === bonusIndex
+  }));
+}
+
+function handleCloseBattle() {
+  console.log('handleCloseBattle called in App.vue');
+  showBattle.value = false;
+  // Re-enable input in Overworld
+  EventBus.emit('battle-ended');
+  // Ensure overworld music resumes even if victory/defeat sound is still playing
+  EventBus.emit('resume-map-music');
+}
+
+function handleOpenCollection() {
+  showCollection.value = true;
+  showMobileMenu.value = false;
+}
+
+function handleCloseCollection() {
+  showCollection.value = false;
+}
+
+function handleShowEncounter(npcData) {
+  encounterNPC.value = npcData;
+  showEncounter.value = true;
+}
+
+function handleAcceptBattle() {
+  console.log('handleAcceptBattle called with encounterNPC:', encounterNPC.value);
+  showEncounter.value = false;
+
+  // Notify Overworld that battle is starting (disable NPC interaction checks)
+  EventBus.emit('battle-starting');
+
+  // Set battle data based on encounterNPC
+  if (encounterNPC.value) {
+    const guest = collection.value.find(g => g.id === encounterNPC.value.id);
+    console.log('Found guest for battle:', guest);
+    if (guest) {
+      const battleQuestions = buildBattleQuestions(guest.id);
+      if (battleQuestions.length > 0) {
+        battleData.value = {
+          guest,
+          questions: battleQuestions
+        };
+        console.log('Formatted battle questions:', battleData.value.questions);
+        totalQuestionsAnswered.value += battleQuestions.length;
+      } else {
+        console.error('No questions found for guest:', guest.id, guest.name);
+      }
+    }
+  }
+  showBattle.value = true;
+}
+
+function handleRejectBattle() {
+  showEncounter.value = false;
+  encounterNPC.value = null;
+  // Notify Phaser that battle was rejected
+  EventBus.emit('battle-rejected');
+}
+
+function handleGuestCaptured(payload) {
+  const guestId = typeof payload === 'object' ? payload.guestId : payload;
+  const xpGained = typeof payload === 'object' ? payload.xpGained : 10;
+  const guest = collection.value.find(g => g.id === guestId);
+  if (guest) {
+    guest.captured = true;
+    // Award XP for capturing a guest (battle win)
+    gainXP(xpGained);
+    playerStats.value.totalBattles++;
+
+    // Notify Overworld to remove this NPC
+    EventBus.emit('remove-npc', guestId);
+
+    // Save score to global leaderboard (async, non-blocking)
+    saveScoreToLeaderboard();
+
+  }
+}
+
+async function saveScoreToLeaderboard() {
+  try {
+    await leaderboardService.saveScore({
+      sessionId: sessionId.value,
+      name: playerName.value,
+      level: playerStats.value.level,
+      xp: playerStats.value.xp,
+      maxHp: playerStats.value.maxHp,
+      captured: capturedCount.value,
+      total: totalGuests.value,
+      accuracy: accuracy.value,
+      correct: playerStats.value.rightAnswers,
+      wrong: playerStats.value.wrongAnswers
+    });
+    console.log('✓ Score saved to leaderboard');
+  } catch (error) {
+    console.warn('Failed to save score to leaderboard:', error);
+    // Don't block gameplay if leaderboard fails
+  }
+}
+
+function showNextLevelUp() {
+  if (levelUpQueue.value.length === 0) return;
+  const next = levelUpQueue.value.shift();
+  levelUpInfo.value = next;
+  showLevelComplete.value = true;
+  showBattle.value = false;
+}
+
+function handleLevelContinue() {
+  showLevelComplete.value = false;
+  EventBus.emit('battle-ended');
+
+  if (levelUpInfo.value) {
+    currentGameLevel.value = levelUpInfo.value.level;
+    const unlockedCount = levelUpInfo.value.unlockedOpponents?.length || 0;
+    EventBus.emit('spawn-next-level', {
+      level: currentGameLevel.value,
+      enemiesCount: unlockedCount || Math.min(enemiesPerLevel, remainingGuests.value)
+    });
+  }
+
+  if (levelUpQueue.value.length > 0) {
+    showNextLevelUp();
+  } else {
+    levelUpInfo.value = null;
+  }
+}
+
+function handleAnswerResult(result) {
+  const isCorrect = typeof result === 'object' ? result.correct : result;
+  if (isCorrect) {
+    playerStats.value.rightAnswers++;
+  } else {
+    playerStats.value.wrongAnswers++;
+  }
+}
+
+function handleHPChanged(newHP) {
+  playerStats.value.hp = newHP;
+  console.log('HP updated:', newHP);
+
+  // Check for game over
+  if (newHP <= 0) {
+    console.log('HP reached 0 - Game Over!');
+    showBattle.value = false;
+    showGameOver.value = true;
+    EventBus.emit('battle-ended');
+  }
+}
+
+function handleGameRestart() {
+  // Reset all game state
+  showGameOver.value = false;
+  showBattle.value = false;
+  showEncounter.value = false;
+  encounterNPC.value = null;
+  EventBus.emit('battle-ended');
+
+  // Reset player stats
+  playerStats.value = {
+    level: 1,
+    xp: 0,
+    hp: 100,
+    maxHp: 100,
+    rightAnswers: 0,
+    wrongAnswers: 0,
+    totalBattles: 0
+  };
+
+  // Reset level progression
+  currentGameLevel.value = 1;
+  currentLevelEnemiesDefeated.value = 0;
+  totalQuestionsAnswered.value = 0;
+  levelUpQueue.value = [];
+  levelUpInfo.value = null;
+
+  // Reset collection (mark all as uncaptured)
+  collection.value.forEach(guest => {
+    guest.captured = false;
+  });
+
+  // Return to main menu
+  EventBus.emit('return-to-menu');
+}
+
+function gainXP(amount) {
+  playerStats.value.xp += amount;
+
+  // Level up when XP meets/exceeds threshold
+  const pending = [];
+  while (playerStats.value.xp >= getUnlockXP(playerStats.value.level + 1)) {
+    const oldLevel = playerStats.value.level;
+    const nextLevel = oldLevel + 1;
+    playerStats.value.level = nextLevel;
+
+    pending.push({
+      level: nextLevel,
+      oldXpPerCorrect: getXPPerCorrect(oldLevel),
+      newXpPerCorrect: getXPPerCorrect(nextLevel),
+      unlockedOpponents: getStageOpponents(nextLevel) || []
+    });
+  }
+
+  if (pending.length > 0) {
+    levelUpQueue.value.push(...pending);
+    if (!showLevelComplete.value) {
+      showNextLevelUp();
+    }
+  }
+}
+
+function handleShareStats() {
+  // Show share modal instead of immediately sharing
+  showShareModal.value = true;
+  showMobileMenu.value = false;
+}
+
+function setPlayerName(name) {
+  playerName.value = name || 'Player';
+}
+
+function toggleMute() {
+  isMuted.value = !isMuted.value;
+  // Save mute preference to localStorage
+  localStorage.setItem(MUTE_KEY, isMuted.value.toString());
+  // Emit mute state to Phaser
+  try {
+    EventBus.emit('toggle-mute', isMuted.value);
+  } catch (error) {
+    console.warn('Failed to toggle mute in game:', error);
+  }
+}
+
+function handleCloseTutorial() {
+  showTutorial.value = false;
+  // Save that the user has seen the tutorial
+  localStorage.setItem(TUTORIAL_SEEN_KEY, 'true');
+}
+
+function handleOpenLeaderboard() {
+  showLeaderboard.value = true;
+  showMobileMenu.value = false;
+}
+
+function handleCloseLeaderboard() {
+  showLeaderboard.value = false;
+}
+
+function toggleMobileMenu() {
+  showMobileMenu.value = !showMobileMenu.value;
+}
+
+function updateViewportFlags() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  isMobile.value = w <= 1024 || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
+  isPortrait.value = h > w;
+}
+
+const handleDebugKeys = (event) => {
+  const key = event.key;
+  if (key === ']' || key === '}') {
+    const nextLevel = playerStats.value.level + 1;
+    const targetXp = getUnlockXP(nextLevel);
+    if (playerStats.value.xp < targetXp) {
+      gainXP(targetXp - playerStats.value.xp);
+    }
+  }
+};
+
+onMounted(() => {
+  detectChallenge();
+
+  updateViewportFlags();
+  window.addEventListener('resize', updateViewportFlags);
+
+  window.addEventListener('keydown', handleDebugKeys);
+
+  EventBus.on('current-scene-ready', (scene) => {
+    currentSceneName.value = scene?.scene?.key || '';
+  });
+  // Listen for guests-loaded event from Preloader
+  EventBus.on('guests-loaded', () => {
+    const selectedGuests = guestDataManager.getSelectedGuests();
+    console.log('✓ Guests loaded event received:', selectedGuests.length, 'guests');
+    collection.value = selectedGuests;
+    console.log('Collection IDs:', collection.value.map(g => g.id).join(', '));
+  });
+
+  // Fallback: Initialize collection from GuestDataManager (loaded by Preloader)
+  // Try multiple times until guests are loaded
+  let attempts = 0;
+  const maxAttempts = 50; // Increased from 20
+  const checkInterval = setInterval(() => {
+    if (collection.value.length > 0) {
+      // Already loaded via event
+      clearInterval(checkInterval);
+      return;
+    }
+    attempts++;
+    const selectedGuests = guestDataManager.getSelectedGuests();
+    console.log(`Collection init attempt ${attempts}: found ${selectedGuests.length} guests`);
+    if (selectedGuests.length > 0) {
+      collection.value = selectedGuests;
+      console.log(`✓ Initialized collection with ${selectedGuests.length} guests:`, selectedGuests.map(g => `${g.id}:${g.name}`).slice(0, 5));
+      clearInterval(checkInterval);
+    } else if (attempts >= maxAttempts) {
+      console.error('❌ Failed to load guests after', attempts, 'attempts');
+      clearInterval(checkInterval);
+    }
+  }, 200); // Check every 200ms
+
+  // Load mute preference from localStorage
+  const savedMuteState = localStorage.getItem(MUTE_KEY);
+  if (savedMuteState !== null) {
+    isMuted.value = savedMuteState === 'true';
+    // Apply mute state to Phaser
+    setTimeout(() => {
+      try {
+        EventBus.emit('toggle-mute', isMuted.value);
+      } catch (error) {
+        console.warn('Failed to apply initial mute state:', error);
+      }
+    }, 1000); // Wait for game to initialize
+  }
+
+  // Show encounter dialog when approaching NPC
+  EventBus.on('show-encounter-dialog', (data) => {
+    console.log('App.vue received show-encounter-dialog event:', data);
+    console.log('Collection length:', collection.value.length);
+    if (data && data.id) {
+      const guest = collection.value.find(g => g.id === data.id);
+      console.log('Found guest for encounter:', guest);
+      if (guest) {
+        handleShowEncounter(guest);
+        console.log('showEncounter set to:', showEncounter.value);
+      } else {
+        console.warn('Guest not found in collection. Guest ID:', data.id, 'Collection IDs:', collection.value.map(g => g.id).join(', '));
+      }
+    }
+  });
+
+  // Hide encounter dialog when walking away
+  EventBus.on('hide-encounter-dialog', () => {
+    showEncounter.value = false;
+    encounterNPC.value = null;
+  });
+
+  // Start battle directly (skip encounter dialog)
+  EventBus.on('start-battle', (data) => {
+    console.log('start-battle event received:', data);
+    if (data && data.guestId) {
+      const guest = collection.value.find(g => g.id === data.guestId);
+      console.log('Found guest for battle:', guest);
+      if (guest) {
+        const battleQuestions = buildBattleQuestions(data.guestId);
+        if (battleQuestions.length > 0) {
+          battleData.value = {
+            guest,
+            questions: battleQuestions
+          };
+          console.log('Formatted battle questions:', battleData.value.questions);
+          totalQuestionsAnswered.value += battleQuestions.length;
+        }
+        showBattle.value = true;
+      }
+    }
+  });
+
+  EventBus.on('open-collection', handleOpenCollection);
+  EventBus.on('locked-area', ({ message }) => {
+    lockedModalMessage.value = message || 'Area locked — level up to continue';
+    showLockedModal.value = true;
+  });
+  EventBus.on('map-level-changed', ({ level, worldIndex }) => {
+    currentMapInfo.value = {
+      level: level || playerStats.value.level,
+      world: (worldIndex ?? 0) + 1
+    };
+  });
+  EventBus.on('player-name-set', (name) => {
+    setPlayerName(name);
+
+    // Check if this is the first time playing
+    const hasSeenTutorial = localStorage.getItem(TUTORIAL_SEEN_KEY);
+    if (!hasSeenTutorial) {
+      // Show tutorial modal after a brief delay
+      setTimeout(() => {
+        showTutorial.value = true;
+      }, 500);
+    }
+  });
+
+  EventBus.on('session-started', (newSessionId) => {
+    sessionId.value = newSessionId;
+    console.log('Session started in App.vue:', newSessionId);
+  });
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateViewportFlags);
+  window.removeEventListener('keydown', handleDebugKeys);
+  EventBus.off('guests-loaded');
+  EventBus.off('show-encounter-dialog');
+  EventBus.off('hide-encounter-dialog');
+  EventBus.off('start-battle');
+  EventBus.off('open-collection', handleOpenCollection);
+  EventBus.off('player-name-set');
+  EventBus.off('locked-area');
+  EventBus.off('map-level-changed');
+});
+</script>
+
+<template>
+  <div id="app" :class="{ 'mobile-view': isMobile, 'battle-active': showBattle }">
+    <!-- Challenge Mode -->
+    <ChallengeEntry
+      v-if="challengeMode && questionsJsonData"
+      :npcSlug="challengeNpcSlug"
+      :senderName="challengeSenderName"
+      :senderScore="challengeSenderScore"
+      :questionsData="questionsJsonData"
+      @explore="exitChallenge"
+    />
+
+    <div v-if="isMobile && isPortrait" class="orientation-lock">
+      <div class="orientation-card">
+        <div class="orientation-title">Best on desktop</div>
+        <div class="orientation-subtitle">
+          {{ MOBILE_WARNING }}
+        </div>
+        <a
+          class="orientation-link"
+          :href="CREDITS_LINK_URL"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ CREDITS_LINK_TEXT }} →
+        </a>
+      </div>
+    </div>
+    <div v-if="showLockedModal" class="locked-overlay" @click="showLockedModal = false">
+      <div class="locked-card" @click.stop>
+        <div class="locked-title">Area Locked</div>
+        <div class="locked-message">{{ lockedModalMessage }}</div>
+        <div class="locked-actions">
+          <button class="locked-btn" @click="showLockedModal = false">OK</button>
+        </div>
+      </div>
+    </div>
+    <button
+      class="mobile-menu-btn"
+      v-if="isMobile && currentSceneName === 'Overworld' && !showBattle"
+      @click="toggleMobileMenu"
+      :aria-expanded="showMobileMenu"
+      aria-label="Open menu"
+    >
+      ☰
+    </button>
+    <div v-if="showMobileMenu" class="mobile-menu-overlay" @click="toggleMobileMenu"></div>
+    <div v-if="showMobileMenu" class="mobile-menu-panel">
+      <div class="mobile-menu-header">
+        <div class="mobile-menu-title">Menu</div>
+        <button class="mobile-menu-close" @click="toggleMobileMenu" aria-label="Close menu">✕</button>
+      </div>
+      <div class="mobile-menu-section">
+        <div class="action-buttons mobile-actions">
+          <button class="action-btn collection-btn" @click="handleOpenCollection">
+            <Icon class="btn-icon" :icon="bookOpen" />
+            Collection
+          </button>
+          <button class="action-btn leaderboard-btn" @click="handleOpenLeaderboard">
+            <Icon class="btn-icon" :icon="trophy" />
+            Leaderboard
+          </button>
+          <button class="action-btn share-btn" @click="handleShareStats">
+            <Icon class="btn-icon" :icon="upload" />
+            Share Stats
+          </button>
+          <button class="action-btn mute-btn" @click="toggleMute" :title="isMuted ? 'Unmute' : 'Mute'">
+            <Icon class="btn-icon" :icon="isMuted ? volumeX : volume" />
+            {{ isMuted ? 'Unmute' : 'Mute' }}
+          </button>
+        </div>
+      </div>
+      <div class="mobile-menu-section footer-container mobile-footer" style="width: 100%;">
+        <div class="footer-column controls-column">
+          <div class="controls-title">How to Play:</div>
+          <div class="controls-list">
+            <div class="control-item">
+              <Icon class="control-icon" :icon="keyboard" />
+              Arrow Keys or WASD to move
+            </div>
+            <div class="control-item">
+              <Icon class="control-icon" :icon="message" />
+              Walk near guests to battle
+            </div>
+            <div class="control-item">
+              <Icon class="control-icon" :icon="bookOpen" />
+              Press C to view collection
+            </div>
+          </div>
+        </div>
+        <div class="footer-column credits-column mobile-credits">
+          <div class="credits-title">About this game:</div>
+          <div class="credits-content">
+            <div class="credits-line credits-inspiration">
+              <span>Powered by</span>
+              <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-avatar-link" :data-tooltip="CREDITS_TOOLTIP">
+                <img class="credits-avatar" src="/assets/favicon.png" alt="Heart Quest" />
+              </a>
+              <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-lenny" :data-tooltip="CREDITS_TOOLTIP">{{ CREDITS_LINK_TEXT }}</a>
+            </div>
+            <div class="credits-line credits-row">
+              <span>By <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-link">CORDOC LLC</a></span>
+              <span class="credits-separator">•</span>
+              <a :href="GITHUB_URL" target="_blank" rel="noopener noreferrer" class="credits-github" title="View on GitHub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                View on GitHub
+              </a>
+            </div>
+            <div class="credits-line credits-disclaimer">
+              Educational heart health game by CORDOC LLC. Some art is AI-generated.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-header">
+      <h1 class="game-title">{{ GAME_NAME }}</h1>
+      <p class="game-subtitle">The Lipid Adventure</p>
+    </div>
+
+    <div class="game-wrapper">
+      <div class="stats-bar" v-if="currentSceneName === 'Overworld' || !isMobile">
+        <div class="stat-item level-stat">
+          <span class="stat-label">Level {{ playerStats.level }}</span>
+          <div class="xp-bar-container">
+            <div class="xp-bar" :style="{ width: xpProgressPercent + '%' }"></div>
+          </div>
+          <span class="stat-value-small" v-if="!isMaxLevel">{{ playerStats.xp }}/{{ nextLevelThreshold }} XP</span>
+          <span class="stat-value-small" v-else>{{ playerStats.xp }} XP</span>
+        </div>
+        <div class="stat-item hp-stat">
+          <span class="stat-label">HP</span>
+          <div class="hp-bar-container">
+            <div class="hp-bar" :style="{ width: (playerStats.hp / playerStats.maxHp * 100) + '%' }"></div>
+          </div>
+          <span class="stat-value">{{ playerStats.hp }}/{{ playerStats.maxHp }}</span>
+        </div>
+        <div class="stat-item collection-stat">
+          <span class="stat-label">Captured</span>
+          <span class="stat-value">{{ capturedCount }}/{{ totalGuests }}</span>
+        </div>
+      </div>
+
+      <div class="game-stage">
+        <PhaserGame ref="phaserRef" />
+        <div
+          class="map-indicator"
+          v-if="currentSceneName === 'Overworld'"
+        >
+          Map {{ currentMapInfo.level }}
+        </div>
+      </div>
+
+      <div class="action-buttons" v-if="currentSceneName === 'Overworld' || !isMobile">
+        <button class="action-btn collection-btn" @click="handleOpenCollection">
+          <Icon class="btn-icon" :icon="bookOpen" />
+          Collection
+        </button>
+        <button class="action-btn leaderboard-btn" @click="handleOpenLeaderboard">
+          <Icon class="btn-icon" :icon="trophy" />
+          Leaderboard
+        </button>
+        <button class="action-btn share-btn" @click="handleShareStats">
+          <Icon class="btn-icon" :icon="upload" />
+          Share Stats
+        </button>
+        <button class="action-btn mute-btn" @click="toggleMute" :title="isMuted ? 'Unmute' : 'Mute'">
+          <Icon class="btn-icon" :icon="isMuted ? volumeX : volume" />
+          {{ isMuted ? 'Unmute' : 'Mute' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="game-footer" v-if="currentSceneName === 'Overworld' || !isMobile">
+      <div class="footer-container">
+        <div class="footer-column controls-column">
+          <div class="controls-title">How to Play:</div>
+          <div class="controls-list">
+            <div class="control-item">
+              <Icon class="control-icon" :icon="keyboard" />
+              Arrow Keys or WASD to move
+            </div>
+            <div class="control-item">
+              <Icon class="control-icon" :icon="message" />
+              Walk near guests to battle
+            </div>
+            <div class="control-item">
+              <Icon class="control-icon" :icon="bookOpen" />
+              Press C to view collection
+            </div>
+          </div>
+        </div>
+        <div class="footer-column credits-column">
+          <div class="credits-title">About this game:</div>
+          <div class="credits-content">
+            <div class="credits-line credits-inspiration">
+              <span>Powered by</span>
+              <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-avatar-link" :data-tooltip="CREDITS_TOOLTIP">
+                <img class="credits-avatar" src="/assets/favicon.png" alt="Heart Quest" />
+              </a>
+              <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-lenny" :data-tooltip="CREDITS_TOOLTIP">{{ CREDITS_LINK_TEXT }}</a>
+            </div>
+            <div class="credits-line credits-row">
+              <span>By <a :href="CREDITS_LINK_URL" target="_blank" rel="noopener noreferrer" class="credits-link">CORDOC LLC</a></span>
+              <span class="credits-separator">•</span>
+              <a :href="GITHUB_URL" target="_blank" rel="noopener noreferrer" class="credits-github" title="View on GitHub">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                View on GitHub
+              </a>
+            </div>
+            <div class="credits-line credits-disclaimer">
+              Educational heart health game by CORDOC LLC. Some art is AI-generated.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <EncounterDialog
+      :isActive="showEncounter"
+      :npcData="encounterNPC || {}"
+      @accept="handleAcceptBattle"
+      @reject="handleRejectBattle"
+    />
+
+    <BattleScreen
+      :isActive="showBattle"
+      :battleData="battleData"
+      :playerName="playerName"
+      :playerStats="playerStats"
+      @close="handleCloseBattle"
+      @guest-captured="handleGuestCaptured"
+      @answer-submitted="handleAnswerResult"
+      @hp-changed="handleHPChanged"
+    />
+
+    <CollectionScreen
+      :isActive="showCollection"
+      :collection="collection"
+      :totalGuests="totalGuests"
+      @close="handleCloseCollection"
+    />
+
+    <ShareModal
+      :isActive="showShareModal"
+      :playerName="playerName"
+      :stats="playerStats"
+      :collection="collection"
+      :capturedCount="capturedCount"
+      :totalGuests="totalGuests"
+      :accuracy="accuracy"
+      @close="showShareModal = false"
+    />
+
+    <LevelComplete
+      :show="showLevelComplete"
+      :currentLevel="levelUpInfo?.level || playerStats.level"
+      :oldXpPerCorrect="levelUpInfo?.oldXpPerCorrect || getXPPerCorrect(playerStats.level)"
+      :newXpPerCorrect="levelUpInfo?.newXpPerCorrect || getXPPerCorrect(playerStats.level + 1)"
+      :unlockedOpponents="levelUpInfo?.unlockedOpponents || []"
+      @continue="handleLevelContinue"
+    />
+
+    <GameOver
+      :show="showGameOver"
+      :guestsCaptured="capturedCount"
+      :questionsAnswered="totalQuestionsAnswered"
+      :correctAnswers="playerStats.rightAnswers"
+      :wrongAnswers="playerStats.wrongAnswers"
+      :accuracy="accuracy"
+      :totalXp="playerStats.xp"
+      @restart="handleGameRestart"
+      @share="handleShareStats"
+    />
+
+    <TutorialModal
+      :show="showTutorial"
+      @close="handleCloseTutorial"
+    />
+
+    <LeaderboardPanel
+      :isActive="showLeaderboard"
+      :currentPlayer="{
+        sessionId: sessionId,
+        name: playerName,
+        level: playerStats.level,
+        maxHp: playerStats.maxHp,
+        captured: capturedCount,
+        total: totalGuests,
+        accuracy: accuracy
+      }"
+      @close="handleCloseLeaderboard"
+    />
+  </div>
+</template>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: #e3d18f;
+  background-image:
+    radial-gradient(circle at 10% 12%, rgba(120, 110, 90, 0.2) 0.6px, transparent 0.7px),
+    radial-gradient(circle at 70% 35%, rgba(120, 110, 90, 0.18) 0.6px, transparent 0.7px),
+    radial-gradient(circle at 30% 80%, rgba(120, 110, 90, 0.16) 0.6px, transparent 0.7px),
+    radial-gradient(circle at 80% 75%, rgba(120, 110, 90, 0.14) 0.6px, transparent 0.7px),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.05) 0,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1px,
+      transparent 5px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.04) 0,
+      rgba(0, 0, 0, 0.04) 1px,
+      transparent 1px,
+      transparent 6px
+    ),
+    linear-gradient(180deg, #f0e2a6 0%, #d4bb73 100%);
+  background-size:
+    22px 22px,
+    26px 26px,
+    24px 24px,
+    28px 28px,
+    5px 5px,
+    6px 6px,
+    100% 100%;
+  background-blend-mode: multiply, multiply, multiply, multiply, soft-light, soft-light, normal;
+}
+
+#app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  gap: 20px;
+  padding: 20px;
+}
+
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
+  z-index: 5000;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 3px solid #FFD700;
+  background: rgba(0, 0, 0, 0.85);
+  color: #FFD700;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 16px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.mobile-menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 4000;
+}
+
+.mobile-menu-panel {
+  position: fixed;
+  top: calc(80px + env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
+  left: auto;
+  z-index: 5001;
+  background: rgba(0, 0, 0, 0.92);
+  border: 3px solid #FFD700;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: min(92vw, 420px);
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.mobile-menu-title {
+  color: #FFD700;
+  font-size: 12px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+}
+
+.mobile-menu-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 2px solid #FFD700;
+  background: rgba(0, 0, 0, 0.7);
+  color: #FFD700;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+.mobile-menu-close:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.mobile-menu-section + .mobile-menu-section {
+  margin-top: 12px;
+}
+
+.mobile-footer {
+  background: rgba(0, 0, 0, 0.6);
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+}
+
+.mobile-actions {
+  flex-direction: column;
+  min-width: auto;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+.mobile-footer {
+  width: 100%;
+  max-width: none;
+  border: none;
+  padding: 12px;
+  grid-template-columns: 1fr;
+}
+
+.mobile-footer .controls-column {
+  border: none;
+  padding-right: 0;
+}
+
+.mobile-footer .controls-list {
+  width: 100%;
+}
+
+.mobile-footer .control-item {
+  width: 100%;
+}
+
+.mobile-credits {
+  align-items: flex-start;
+}
+
+.mobile-credits .credits-row {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.mobile-credits .credits-separator {
+  display: none;
+}
+
+.mobile-footer .credits-content,
+.mobile-footer .credits-line {
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+.mobile-actions .action-btn {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 12px 14px;
+  min-height: 44px;
+}
+
+.game-header {
+  text-align: center;
+  color: #fff;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
+}
+
+.game-title {
+  font-size: 36px;
+  margin: 0 0 8px 0;
+  color: #FFD700;
+  text-shadow:
+    -1px -1px 0 rgba(0, 0, 0, 0.8),
+    1px -1px 0 rgba(0, 0, 0, 0.8),
+    -1px 1px 0 rgba(0, 0, 0, 0.8),
+    1px 1px 0 rgba(0, 0, 0, 0.8),
+    3px 3px 4px rgba(0, 0, 0, 0.5);
+}
+
+.game-subtitle {
+  font-size: 14px;
+  margin: 0;
+  letter-spacing: 2px;
+  color: #FFF;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  text-shadow:
+    -1px -1px 0 rgba(0, 0, 0, 0.7),
+    1px -1px 0 rgba(0, 0, 0, 0.7),
+    -1px 1px 0 rgba(0, 0, 0, 0.7),
+    1px 1px 0 rgba(0, 0, 0, 0.7),
+    2px 2px 3px rgba(0, 0, 0, 0.4);
+}
+
+.game-wrapper {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  flex-shrink: 0;
+  justify-content: center;
+}
+
+.game-stage {
+  position: relative;
+  display: inline-flex;
+  width: 960px;
+  max-width: 95vw;
+}
+
+.map-indicator {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 2px solid #FFD700;
+  border-radius: 6px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 10px;
+  color: #FFD700;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.stats-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 180px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 9px;
+  color: #FFD700;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 14px;
+  color: #fff;
+}
+
+.stat-value-small {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 9px;
+  color: #fff;
+}
+
+.hp-bar-container,
+.xp-bar-container {
+  width: 100%;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid #333;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.hp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #22c55e);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px rgba(74, 222, 128, 0.6);
+}
+
+.xp-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #60a5fa, #3b82f6);
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
+}
+
+#game-container {
+  flex-shrink: 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+#game-container canvas {
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 180px;
+}
+
+.action-btn {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 11px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.3);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+.btn-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.control-icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  color: #FFD700;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3);
+  background: rgba(20, 20, 20, 0.9);
+}
+
+.action-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.collection-btn {
+  border-color: #60a5fa;
+}
+
+.collection-btn:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(96, 165, 250, 0.4);
+}
+
+.share-btn {
+  border-color: #a78bfa;
+}
+
+.share-btn:hover {
+  border-color: #8b5cf6;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(167, 139, 250, 0.4);
+}
+
+.mute-btn {
+  border-color: #fbbf24;
+}
+
+.mute-btn:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.3), 0 0 20px rgba(251, 191, 36, 0.4);
+}
+
+/* Game Footer - Boxed container */
+.game-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  padding-bottom: 20px;
+}
+
+.footer-container {
+  background: rgba(0, 0, 0, 0.85);
+  border: 3px solid #FFD700;
+  border-radius: 8px;
+  padding: 16px 24px;
+  width: 960px;
+  max-width: 95vw;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.controls-column {
+  border-right: 2px solid rgba(255, 215, 0, 0.3);
+  padding-right: 32px;
+}
+
+.controls-title {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 10px;
+  color: #FFD700;
+  margin-bottom: 12px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+.controls-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-item {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 9px;
+  color: #fff;
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+}
+
+.credits-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.credits-title {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 10px;
+  color: #FFD700;
+  margin-bottom: 12px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 1600px) {
+  .game-wrapper {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 1300px) {
+  .game-wrapper {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .game-wrapper .stats-bar,
+  .game-wrapper .action-buttons {
+    flex-direction: row;
+    min-width: auto;
+    width: 100%;
+    max-width: 960px;
+    justify-content: space-around;
+  }
+
+  .stat-item {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .game-wrapper .action-buttons {
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 1024px) {
+  #app {
+    gap: 15px;
+    padding: 15px;
+  }
+
+  .game-title {
+    font-size: 28px;
+  }
+
+  .game-subtitle {
+    font-size: 12px;
+  }
+
+  .action-btn {
+    font-size: 10px;
+    padding: 12px 14px;
+  }
+
+  .footer-container {
+    padding: 14px 20px;
+    gap: 24px;
+  }
+
+  .controls-title,
+  .credits-title {
+    font-size: 9px;
+  }
+
+  .control-item {
+    font-size: 8px;
+  }
+
+  .credits-line {
+    font-size: 8px;
+  }
+
+  .credits-disclaimer {
+    font-size: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  #app {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .game-title {
+    font-size: 20px;
+  }
+
+  .game-subtitle {
+    font-size: 10px;
+  }
+
+  .stat-label {
+    font-size: 8px;
+  }
+
+  .stat-value {
+    font-size: 12px;
+  }
+
+  .action-btn {
+    font-size: 9px;
+    padding: 10px 12px;
+  }
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 12px 16px;
+  }
+
+  .controls-column {
+    border-right: none;
+    border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+    padding-right: 0;
+    padding-bottom: 16px;
+  }
+
+  .controls-title,
+  .credits-title {
+    font-size: 8px;
+  }
+
+  .control-item {
+    font-size: 7px;
+  }
+
+  .credits-line {
+    font-size: 7px;
+  }
+
+  .credits-disclaimer {
+    font-size: 6px;
+  }
+}
+
+/* Mobile fullscreen layout */
+@media (max-width: 1024px) {
+  .mobile-view {
+    padding: 0;
+    gap: 0;
+  }
+
+  .mobile-view .game-header,
+  .mobile-view .game-footer {
+    display: none;
+  }
+
+  .mobile-view .game-wrapper {
+    position: fixed;
+    inset: 0;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-view #game-container {
+    width: 100%;
+    height: 100%;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-view #game-container canvas {
+    height: 100% !important;
+    width: auto !important;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .orientation-lock {
+    position: fixed;
+    inset: 0;
+    z-index: 6000;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+  }
+
+  .orientation-card {
+    border: 3px solid #FFD700;
+    border-radius: 12px;
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.8);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+  }
+
+  .orientation-title {
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    font-size: 14px;
+    color: #FFD700;
+    margin-bottom: 10px;
+  }
+
+  .orientation-subtitle {
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    font-size: 10px;
+    color: #fff;
+    opacity: 0.9;
+  }
+
+  .orientation-link {
+    display: inline-flex;
+    margin-top: 14px;
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    font-size: 9px;
+    color: #000;
+    background: #FFD700;
+    padding: 8px 12px;
+    border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 0 #000;
+  }
+
+  .orientation-link:hover {
+    transform: translateY(-1px);
+  }
+
+  .locked-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 7000;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .locked-card {
+    width: min(420px, 90vw);
+    background: #fff;
+    border: 4px solid #000;
+    box-shadow: 0 6px 0 #000, 0 12px 20px rgba(0, 0, 0, 0.5);
+    padding: 18px 20px;
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    text-align: center;
+  }
+
+  .locked-title {
+    font-size: 14px;
+    color: #000;
+    margin-bottom: 10px;
+  }
+
+  .locked-message {
+    font-size: 10px;
+    color: #333;
+    line-height: 1.5;
+  }
+
+  .locked-actions {
+    margin-top: 14px;
+  }
+
+  .locked-btn {
+    font-family: 'Press Start 2P', monospace, sans-serif;
+    font-size: 10px;
+    background: #FFD700;
+    color: #000;
+    border: 3px solid #000;
+    padding: 8px 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #000;
+  }
+
+  .locked-btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .mobile-view .stats-bar {
+    position: fixed;
+    top: calc(8px + env(safe-area-inset-top));
+    left: calc(8px + env(safe-area-inset-left));
+    z-index: 2000;
+    padding: 6px 8px;
+    gap: 4px;
+    min-width: 100px;
+    max-width: 140px;
+    background: rgba(0, 0, 0, 0.85);
+    border-width: 2px;
+    align-items: flex-start;
+    width: auto;
+    overflow: hidden;
+    flex-direction: column;
+  }
+
+  .mobile-view .stats-bar .stat-item {
+    gap: 3px;
+    width: 100%;
+  }
+
+  .mobile-view .stats-bar .stat-label {
+    font-size: 6px;
+  }
+
+  .mobile-view .stats-bar .stat-value,
+  .mobile-view .stats-bar .stat-value-small {
+    font-size: 8px;
+  }
+
+  .mobile-view .stats-bar .xp-bar-container,
+  .mobile-view .stats-bar .stat-value-small,
+  .mobile-view .stats-bar .collection-stat {
+    display: block;
+  }
+
+  .mobile-view .stats-bar .hp-bar-container {
+    height: 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mobile-view .stats-bar .stat-value {
+    line-height: 1.2;
+  }
+
+  .mobile-view .stats-bar .hp-stat .stat-value {
+    font-size: 7px;
+  }
+
+  .mobile-view .stats-bar .xp-bar-container {
+    height: 8px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mobile-view .stats-bar .stat-value-small {
+    font-size: 7px;
+  }
+
+  .mobile-view .stats-bar .level-stat .stat-value-small {
+    margin-top: 2px;
+  }
+
+  .mobile-view .map-indicator {
+    right: 8px;
+    bottom: 8px;
+    font-size: 9px;
+    padding: 5px 7px;
+  }
+
+  .mobile-view .action-buttons {
+    display: none;
+  }
+
+  .mobile-view.battle-active .mobile-menu-btn {
+    display: none;
+  }
+
+  .mobile-view .game-wrapper .action-buttons {
+    display: none;
+  }
+}
+
+/* Keep canvas filling the viewport on mobile */
+@media (max-width: 1024px) {
+  html,
+  body,
+  #app {
+    height: 100%;
+  }
+}
+
+@media (max-width: 1024px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.credits-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.credits-inspiration {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.credits-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  image-rendering: pixelated;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+
+.credits-avatar:hover {
+  transform: scale(1.08);
+  border-color: rgba(255, 215, 0, 0.9);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+.credits-line {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 9px;
+  color: #fff;
+  line-height: 1.6;
+}
+
+.credits-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.credits-separator {
+  opacity: 0.5;
+}
+
+.credits-disclaimer {
+  opacity: 0.7;
+  font-size: 7px;
+  color: #ccc;
+  margin-top: 4px;
+}
+
+.credits-link {
+  color: #FFD700;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.credits-link:hover {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+.credits-lenny {
+  color: #a78bfa;
+  text-decoration: none;
+  position: relative;
+}
+
+.credits-avatar-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.credits-lenny:hover {
+  color: #c7b6ff;
+  text-shadow: 0 0 6px rgba(167, 139, 250, 0.6);
+}
+
+.credits-lenny:hover::after,
+.credits-avatar-link:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  width: 320px;
+  max-width: 70vw;
+  background: rgba(0, 0, 0, 0.9);
+  color: #fff;
+  padding: 10px 12px;
+  border: 2px solid #FFD700;
+  border-radius: 8px;
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: left;
+  z-index: 2000;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  white-space: normal;
+}
+
+.credits-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #60a5fa;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.credits-github:hover {
+  color: #FFD700;
+  transform: translateY(-2px);
+  background: rgba(255, 215, 0, 0.1);
+}
+
+.credits-github svg {
+  display: block;
+}
+
+/* Locked area modal (all viewports) */
+.locked-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 7000;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.locked-card {
+  width: min(420px, 90vw);
+  background: #fff;
+  border: 4px solid #000;
+  box-shadow: 0 6px 0 #000, 0 12px 20px rgba(0, 0, 0, 0.5);
+  padding: 18px 20px;
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  text-align: center;
+}
+
+.locked-title {
+  font-size: 14px;
+  color: #000;
+  margin-bottom: 10px;
+}
+
+.locked-message {
+  font-size: 10px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.locked-actions {
+  margin-top: 14px;
+}
+
+.locked-btn {
+  font-family: 'Press Start 2P', monospace, sans-serif;
+  font-size: 10px;
+  background: #FFD700;
+  color: #000;
+  border: 3px solid #000;
+  padding: 8px 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #000;
+}
+
+.locked-btn:hover {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 480px) {
+  .credits-github svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+</style>

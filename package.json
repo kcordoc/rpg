@@ -1,0 +1,43 @@
+{
+    "name": "heart-quest",
+    "description": "Heart Quest - An educational RPG about heart health. Explore the Village of Heartwell, battle NPCs, and learn about cholesterol, lipids, and cardiovascular disease prevention.",
+    "version": "0.1.0",
+    "type": "module",
+    "author": {
+        "name": "CORDOC LLC",
+        "url": "https://lipiwiz.com"
+    },
+    "homepage": "https://lipiwiz.com/play",
+    "keywords": [
+        "heart-health",
+        "cholesterol",
+        "lipid-education",
+        "educational-game",
+        "rpg",
+        "phaser",
+        "phaser3",
+        "vue",
+        "health-quiz",
+        "cardiovascular",
+        "questforge",
+        "retro-game"
+    ],
+    "scripts": {
+        "dev": "vite --config vite/config.dev.mjs",
+        "build": "vite build --config vite/config.prod.mjs"
+    },
+    "dependencies": {
+        "@iconify/icons-pixelarticons": "^1.2.5",
+        "@iconify/vue": "^5.0.0",
+        "@supabase/supabase-js": "^2.49.1",
+        "html2canvas": "^1.4.1",
+        "phaser": "^3.90.0",
+        "vue": "3.5.13",
+        "webfontloader": "^1.6.28"
+    },
+    "devDependencies": {
+        "@vitejs/plugin-vue": "^5.2.2",
+        "terser": "^5.31.0",
+        "vite": "^6.3.1"
+    }
+}
