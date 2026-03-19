@@ -151,64 +151,13 @@ export async function geocodeLocation(locationQuery) {
  * @returns {Promise<Array<{name: string, type: string, lat: number, lng: number, featureType: string}>>}
  */
 export async function fetchNearbyPlaces(lat, lng, radius = 500) {
-    if (!API_KEY) {
-        return generateFallbackPlaces(lat, lng);
-    }
-
-    await loadGoogleMapsAPI();
-
-    // Create a temporary invisible map for the PlacesService
-    const mapDiv = document.createElement('div');
-    mapDiv.style.display = 'none';
-    document.body.appendChild(mapDiv);
-
-    const map = new google.maps.Map(mapDiv, {
-        center: { lat, lng },
-        zoom: 15
-    });
-
-    const service = new google.maps.places.PlacesService(map);
-    const location = new google.maps.LatLng(lat, lng);
-
-    const searchTypes = [
-        'hospital', 'school', 'park', 'restaurant', 'store',
-        'church', 'museum', 'transit_station', 'gym', 'library'
-    ];
-
-    const allPlaces = [];
-
-    for (const type of searchTypes) {
-        try {
-            const results = await new Promise((resolve, reject) => {
-                service.nearbySearch(
-                    { location, radius, type },
-                    (results, status) => {
-                        if (status === 'OK') resolve(results);
-                        else resolve([]);
-                    }
-                );
-            });
-
-            for (const place of results.slice(0, 5)) {
-                const featureType = PLACE_TYPE_MAP[type] || FEATURE_TYPES.BUILDING;
-                allPlaces.push({
-                    name: place.name,
-                    type: type,
-                    lat: place.geometry.location.lat(),
-                    lng: place.geometry.location.lng(),
-                    featureType,
-                    placeId: place.place_id
-                });
-            }
-        } catch (e) {
-            console.warn(`Places search failed for type ${type}:`, e);
-        }
-    }
-
-    // Clean up
-    mapDiv.remove();
-
-    return allPlaces;
+    // Always use the procedural place generator — it produces rich, diverse maps.
+    // The legacy PlacesService (nearbySearch) requires the old Places API which
+    // is no longer available to new projects. The Places API (New) uses a different
+    // interface (searchByText) that doesn't map well to our tile system.
+    // The fallback generator seeds from lat/lng so each location is unique.
+    console.log('[Places] Generating places for', lat.toFixed(4), lng.toFixed(4));
+    return generateFallbackPlaces(lat, lng);
 }
 
 /**

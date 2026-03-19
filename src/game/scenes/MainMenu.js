@@ -1240,16 +1240,16 @@ export class MainMenu extends Scene
         EventBus.emit('player-name-set', this.playerName);
         EventBus.emit('session-started', sessionId);
 
+        // Always use the built-in village map (generated maps look poor with this tileset).
+        // The location name is saved for future use (e.g. themed NPC dialogue).
         const location = (this.mapLocation || '').trim();
-        if (location) {
-            this.generateAndStartOverworld(location);
-        } else {
-            this.scene.stop('MainMenu');
-            this.scene.start('Overworld', {
-                playerName: this.playerName,
-                mapLocation: ''
-            });
-        }
+        console.log('[Game] Starting with location:', location || '(default village)');
+
+        this.scene.stop('MainMenu');
+        this.scene.start('Overworld', {
+            playerName: this.playerName,
+            mapLocation: location
+        });
     }
 
     async generateAndStartOverworld (location)
