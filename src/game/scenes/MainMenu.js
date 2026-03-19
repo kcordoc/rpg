@@ -1092,7 +1092,7 @@ export class MainMenu extends Scene
         input.style.fontSize = Math.max(8, Math.round(10 * scaleY)) + 'px';
     }
 
-    async initPlacesAutocomplete (input)
+    async initPlacesAutocomplete (textInput)
     {
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         if (!apiKey) {
@@ -1101,47 +1101,116 @@ export class MainMenu extends Scene
         }
 
         try {
-            // Load Google Maps JS API
-            if (!window.google?.maps?.places) {
+            // Load Google Maps JS API (New) with Places library
+            if (!window.google?.maps?.places?.PlaceAutocompleteElement) {
                 await new Promise((resolve, reject) => {
                     if (document.getElementById('google-maps-script')) {
-                        // Already loading
                         const check = setInterval(() => {
-                            if (window.google?.maps?.places) { clearInterval(check); resolve(); }
+                            if (window.google?.maps?.places?.PlaceAutocompleteElement) { clearInterval(check); resolve(); }
                         }, 100);
-                        setTimeout(() => { clearInterval(check); reject(new Error('timeout')); }, 5000);
+                        setTimeout(() => { clearInterval(check); reject(new Error('timeout')); }, 8000);
                         return;
                     }
                     const script = document.createElement('script');
                     script.id = 'google-maps-script';
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
                     script.async = true;
-                    script.onload = resolve;
+                    script.onload = () => {
+                        // Wait for places library to fully load
+                        const check = setInterval(() => {
+                            if (window.google?.maps?.places?.PlaceAutocompleteElement) {
+                                clearInterval(check);
+                                resolve();
+                            }
+                        }, 100);
+                        setTimeout(() => { clearInterval(check); resolve(); }, 3000);
+                    };
                     script.onerror = reject;
                     document.head.appendChild(script);
                 });
             }
 
-            const autocomplete = new window.google.maps.places.Autocomplete(input, {
-                types: ['geocode', 'establishment'],
-                fields: ['formatted_address', 'geometry', 'name']
+            // Hide the plain text input
+            textInput.style.display = 'none';
+
+            // Create the new PlaceAutocompleteElement
+            const placeAutocomplete = new window.google.maps.places.PlaceAutocompleteElement({
+                componentRestrictions: {},
             });
 
-            autocomplete.addListener('place_changed', () => {
-                const place = autocomplete.getPlace();
-                if (place.formatted_address) {
-                    this.mapLocation = place.formatted_address;
-                    input.value = place.formatted_address;
-                } else if (place.name) {
-                    this.mapLocation = place.name;
-                    input.value = place.name;
+            // Style the autocomplete element container
+            const wrapper = document.createElement('div');
+            wrapper.id = 'map-location-autocomplete-wrapper';
+            Object.assign(wrapper.style, {
+                position: textInput.style.position,
+                left: textInput.style.left,
+                top: textInput.style.top,
+                width: textInput.style.width,
+                height: textInput.style.height,
+                zIndex: '500',
+            });
+
+            // Style the inner input via CSS
+            const style = document.createElement('style');
+            style.textContent = `
+                #map-location-autocomplete-wrapper gmp-place-autocomplete {
+                    width: 100%;
+                    height: 100%;
+                    --gmpac-color-surface: rgba(74, 144, 226, 0.9);
+                    --gmpac-color-on-surface: #fff;
+                    --gmpac-color-on-surface-variant: #ccc;
+                    --gmpac-color-outline: #6EA8FE;
+                    --gmpac-color-primary: #FFD700;
+                    font-family: 'Press Start 2P', monospace;
+                    font-size: 10px;
+                    border-radius: 12px;
                 }
-                console.log('[MapGen] Place selected:', this.mapLocation);
+                #map-location-autocomplete-wrapper gmp-place-autocomplete input {
+                    font-family: 'Press Start 2P', monospace !important;
+                    font-size: 10px !important;
+                    letter-spacing: 1px !important;
+                    text-align: center !important;
+                }
+                /* Prevent Phaser from eating keystrokes */
+                .pac-container, gmp-place-autocomplete-overlay {
+                    z-index: 10000 !important;
+                }
+            `;
+            document.head.appendChild(style);
+
+            wrapper.appendChild(placeAutocomplete);
+            textInput.parentElement.appendChild(wrapper);
+
+            // Listen for place selection
+            placeAutocomplete.addEventListener('gmp-placeselect', async (event) => {
+                const place = event.place;
+                await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
+                const name = place.formattedAddress || place.displayName || '';
+                this.mapLocation = name;
+                console.log('[MapGen] Place selected:', name);
             });
 
-            console.log('[MapGen] Google Places Autocomplete initialized');
+            // Also capture typing for manual entry fallback
+            const innerInput = placeAutocomplete.querySelector('input');
+            if (innerInput) {
+                innerInput.addEventListener('keydown', (e) => {
+                    e.stopPropagation(); // Prevent Phaser from eating keys
+                    if (e.key === 'Enter') {
+                        this.mapLocation = innerInput.value;
+                        this.changeScene();
+                    }
+                });
+                innerInput.addEventListener('input', () => {
+                    this.mapLocation = innerInput.value;
+                });
+            }
+
+            this.locationAutocompleteWrapper = wrapper;
+            console.log('[MapGen] Google Places Autocomplete (New) initialized');
         } catch (err) {
             console.warn('[MapGen] Failed to init Places Autocomplete:', err.message);
+            // Fall back to plain text input
+            textInput.style.display = '';
         }
     }
 
@@ -1157,14 +1226,19 @@ export class MainMenu extends Scene
 
         // Save player name and character settings to game state
         gameState.setPlayerName(this.playerName);
-        // Read latest value from HTML input
-        if (this.locationHTMLInput) {
+        // Read latest value from HTML input (plain or autocomplete)
+        if (this.locationAutocompleteWrapper) {
+            const acInput = this.locationAutocompleteWrapper.querySelector('input');
+            if (acInput) this.mapLocation = acInput.value || this.mapLocation;
+        } else if (this.locationHTMLInput) {
             this.mapLocation = this.locationHTMLInput.value || '';
         }
         gameState.setMapLocation((this.mapLocation || '').trim());
-        // Remove HTML overlay
+        // Remove HTML overlays
         const el = document.getElementById('map-location-input');
         if (el) el.remove();
+        const acw = document.getElementById('map-location-autocomplete-wrapper');
+        if (acw) acw.remove();
         gameState.clearNPCPositions();
 
         // Generate new session ID for this game run
