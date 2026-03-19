@@ -24,13 +24,9 @@ export class MainMenu extends Scene
         this.characterCards = [];
         this.characterCardBgs = [];
 
-        // Location input state
+        // Location input state (HTML overlay)
         this.mapLocation = '';
-        this.locationInputText = null;
-        this.locationInputBg = null;
-        this.locationInputCursor = null;
-        this.locationBlinkTimer = null;
-        this.isLocationFocused = false;
+        this.locationHTMLInput = null;
     }
 
     create ()
@@ -458,22 +454,11 @@ export class MainMenu extends Scene
                 width: inputWidth,
                 height: inputHeight
             };
-            const locationBounds = {
-                x: this.scale.width / 2 - 250,
-                y: 340 - 18,
-                width: 500,
-                height: 36
-            };
             const inName = pointer.x >= nameBounds.x && pointer.x <= nameBounds.x + nameBounds.width &&
                            pointer.y >= nameBounds.y && pointer.y <= nameBounds.y + nameBounds.height;
-            const inLocation = pointer.x >= locationBounds.x && pointer.x <= locationBounds.x + locationBounds.width &&
-                               pointer.y >= locationBounds.y && pointer.y <= locationBounds.y + locationBounds.height;
 
             if (!inName && this.isInputFocused) {
                 this.blurInput();
-            }
-            if (!inLocation && this.isLocationFocused) {
-                this.blurLocationInput();
             }
         });
 
@@ -652,10 +637,7 @@ export class MainMenu extends Scene
             event.preventDefault();
             if (this.isInputFocused) {
                 this.blurInput();
-                this.focusLocationInput();
-            } else if (this.isLocationFocused) {
-                this.blurLocationInput();
-                this.focusInput();
+                if (this.locationHTMLInput) this.locationHTMLInput.focus();
             } else {
                 this.focusInput();
             }
@@ -685,26 +667,7 @@ export class MainMenu extends Scene
             return;
         }
 
-        // Location input handling
-        if (this.isLocationFocused) {
-            if (event.keyCode === 13) {
-                this.changeScene();
-                return;
-            }
-            if (event.keyCode === 8) {
-                if (this.mapLocation.length > 0) {
-                    this.mapLocation = this.mapLocation.slice(0, -1);
-                    this.updateLocationText();
-                }
-                return;
-            }
-            if (event.keyCode >= 32 && event.keyCode <= 126) {
-                if (this.mapLocation.length < 200) {
-                    this.mapLocation += event.key;
-                    this.updateLocationText();
-                }
-            }
-        }
+        // Location input is handled by HTML overlay — no Phaser keyboard handling needed
     }
 
     updateInputText ()
@@ -1020,122 +983,171 @@ export class MainMenu extends Scene
         setTimeout(() => input.focus(), 100);
     }
 
-    // ─── Location Input (Google Maps) ──────────────────────────
+    // ─── Location Input (HTML overlay with Google Places Autocomplete) ───
     createLocationInput ()
     {
-        const inputX = this.scale.width / 2;
-        const inputY = 340;
-        const inputWidth = 500;
-        const inputHeight = 36;
-
         const savedLocation = gameState.getMapLocation();
         this.mapLocation = savedLocation || '';
 
-        this.locationInputBg = this.add.graphics();
-        this.drawLocationBg(false);
-
-        const placeholder = 'e.g. "Times Square, NYC" or "Tokyo Tower"';
-        this.locationInputText = this.add.text(inputX, inputY,
-            this.mapLocation || placeholder, {
-            fontFamily: '"Press Start 2P"',
-            fontSize: '10px',
-            color: this.mapLocation ? '#FFFFFF' : '#888888',
-            letterSpacing: 2,
-            align: 'center',
-            wordWrap: { width: inputWidth - 20 }
-        }).setOrigin(0.5);
-
-        this.locationInputCursor = this.add.text(inputX, inputY, '|', {
-            fontFamily: '"Press Start 2P"',
-            fontSize: '10px',
-            color: '#FFD700'
-        }).setOrigin(0.5, 0.5).setVisible(false);
-
-        const zone = this.add.rectangle(inputX, inputY, 500, 36, 0x000000, 0)
-            .setInteractive({ useHandCursor: true });
-        zone.on('pointerdown', () => {
-            this.blurInput();
-            this.focusLocationInput();
-            const isMobile = this.sys.game.device.input.touch || window.innerWidth <= 1024;
-            if (isMobile) this.createMobileLocationInput();
-        });
-    }
-
-    drawLocationBg (focused)
-    {
-        this.locationInputBg.clear();
+        // Draw a placeholder box in Phaser so the layout looks right
         const inputX = this.scale.width / 2;
         const inputY = 340;
-        const w = 500, h = 36, r = 12;
+        this.locationInputBg = this.add.graphics();
+        this.locationInputBg.fillStyle(0x4A90E2, 0.5);
+        this.locationInputBg.fillRoundedRect(inputX - 250, inputY - 18, 500, 36, 12);
+        this.locationInputBg.lineStyle(2, 0x6EA8FE, 1);
+        this.locationInputBg.strokeRoundedRect(inputX - 250, inputY - 18, 500, 36, 12);
 
-        if (focused) {
-            this.locationInputBg.fillStyle(0xFFD700, 0.3);
-            this.locationInputBg.fillRoundedRect(inputX - w/2 - 4, inputY - h/2 - 4, w + 8, h + 8, r + 2);
-        }
-        this.locationInputBg.fillStyle(0x4A90E2, focused ? 1 : 0.8);
-        this.locationInputBg.fillRoundedRect(inputX - w/2, inputY - h/2, w, h, r);
-        this.locationInputBg.lineStyle(2, focused ? 0xFFFFFF : 0x6EA8FE, 1);
-        this.locationInputBg.strokeRoundedRect(inputX - w/2, inputY - h/2, w, h, r);
+        // Create an actual HTML input overlaid on the canvas
+        this.createHTMLLocationInput();
+
+        // Reposition on resize
+        this.scale.on('resize', () => this.repositionLocationInput());
     }
 
-    focusLocationInput ()
+    createHTMLLocationInput ()
     {
-        this.isLocationFocused = true;
-        this.drawLocationBg(true);
-        this.locationInputText.setColor('#FFD700');
-        if (!this.mapLocation) this.locationInputText.setText('');
-        this.locationInputCursor.setVisible(true);
-        this.updateLocationCursorPos();
-        if (this.locationBlinkTimer) this.locationBlinkTimer.remove();
-        this.locationBlinkTimer = this.time.addEvent({
-            delay: 500, loop: true,
-            callback: () => { if (this.locationInputCursor) this.locationInputCursor.setVisible(!this.locationInputCursor.visible); }
+        // Remove if exists
+        const existing = document.getElementById('map-location-input');
+        if (existing) existing.remove();
+
+        const input = document.createElement('input');
+        input.id = 'map-location-input';
+        input.type = 'text';
+        input.value = this.mapLocation;
+        input.maxLength = 200;
+        input.placeholder = 'Search a location (e.g. "Times Square, NYC")';
+        input.autocomplete = 'off';
+
+        Object.assign(input.style, {
+            position: 'absolute',
+            fontFamily: '"Press Start 2P", monospace',
+            fontSize: '10px',
+            color: '#fff',
+            background: 'rgba(74, 144, 226, 0.85)',
+            border: '2px solid #6EA8FE',
+            borderRadius: '12px',
+            padding: '8px 14px',
+            textAlign: 'center',
+            outline: 'none',
+            zIndex: '500',
+            letterSpacing: '1px',
+            boxSizing: 'border-box',
         });
+
+        input.addEventListener('input', (e) => {
+            this.mapLocation = e.target.value;
+        });
+
+        input.addEventListener('focus', () => {
+            input.style.borderColor = '#FFD700';
+            input.style.background = 'rgba(74, 144, 226, 1)';
+            input.style.color = '#FFD700';
+        });
+
+        input.addEventListener('blur', () => {
+            input.style.borderColor = '#6EA8FE';
+            input.style.background = 'rgba(74, 144, 226, 0.85)';
+            input.style.color = '#fff';
+        });
+
+        // Prevent Phaser from eating keystrokes while input is focused
+        input.addEventListener('keydown', (e) => {
+            e.stopPropagation();
+            if (e.key === 'Enter') {
+                input.blur();
+                this.changeScene();
+            }
+        });
+
+        // Add to the game's parent container
+        const canvas = this.sys.game.canvas;
+        const parent = canvas.parentElement;
+        parent.style.position = 'relative';
+        parent.appendChild(input);
+
+        this.locationHTMLInput = input;
+        this.repositionLocationInput();
+
+        // Initialize Google Places Autocomplete if API key is available
+        this.initPlacesAutocomplete(input);
+    }
+
+    repositionLocationInput ()
+    {
+        const input = this.locationHTMLInput;
+        if (!input) return;
+
+        const canvas = this.sys.game.canvas;
+        const scaleX = canvas.clientWidth / this.scale.width;
+        const scaleY = canvas.clientHeight / this.scale.height;
+
+        const gameX = this.scale.width / 2 - 250;
+        const gameY = 340 - 18;
+
+        input.style.left = (gameX * scaleX) + 'px';
+        input.style.top = (gameY * scaleY) + 'px';
+        input.style.width = (500 * scaleX) + 'px';
+        input.style.height = (36 * scaleY) + 'px';
+        input.style.fontSize = Math.max(8, Math.round(10 * scaleY)) + 'px';
+    }
+
+    async initPlacesAutocomplete (input)
+    {
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (!apiKey) {
+            console.log('[MapGen] No Google Maps API key — autocomplete disabled');
+            return;
+        }
+
+        try {
+            // Load Google Maps JS API
+            if (!window.google?.maps?.places) {
+                await new Promise((resolve, reject) => {
+                    if (document.getElementById('google-maps-script')) {
+                        // Already loading
+                        const check = setInterval(() => {
+                            if (window.google?.maps?.places) { clearInterval(check); resolve(); }
+                        }, 100);
+                        setTimeout(() => { clearInterval(check); reject(new Error('timeout')); }, 5000);
+                        return;
+                    }
+                    const script = document.createElement('script');
+                    script.id = 'google-maps-script';
+                    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+                    script.async = true;
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+            }
+
+            const autocomplete = new window.google.maps.places.Autocomplete(input, {
+                types: ['geocode', 'establishment'],
+                fields: ['formatted_address', 'geometry', 'name']
+            });
+
+            autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace();
+                if (place.formatted_address) {
+                    this.mapLocation = place.formatted_address;
+                    input.value = place.formatted_address;
+                } else if (place.name) {
+                    this.mapLocation = place.name;
+                    input.value = place.name;
+                }
+                console.log('[MapGen] Place selected:', this.mapLocation);
+            });
+
+            console.log('[MapGen] Google Places Autocomplete initialized');
+        } catch (err) {
+            console.warn('[MapGen] Failed to init Places Autocomplete:', err.message);
+        }
     }
 
     blurLocationInput ()
     {
         this.isLocationFocused = false;
-        this.drawLocationBg(false);
-        this.locationInputText.setColor(this.mapLocation ? '#FFFFFF' : '#888888');
-        if (!this.mapLocation) this.locationInputText.setText('e.g. "Times Square, NYC" or "Tokyo Tower"');
-        if (this.locationInputCursor) this.locationInputCursor.setVisible(false);
-        if (this.locationBlinkTimer) { this.locationBlinkTimer.remove(); this.locationBlinkTimer = null; }
-    }
-
-    updateLocationCursorPos ()
-    {
-        if (!this.locationInputText || !this.locationInputCursor) return;
-        this.locationInputCursor.setX(this.scale.width / 2 + this.locationInputText.width / 2 + 3);
-    }
-
-    updateLocationText ()
-    {
-        if (!this.mapLocation) {
-            this.locationInputText.setText('e.g. "Times Square, NYC" or "Tokyo Tower"');
-            this.locationInputText.setColor('#888888');
-        } else {
-            this.locationInputText.setText(this.mapLocation);
-            this.locationInputText.setColor(this.isLocationFocused ? '#FFD700' : '#FFFFFF');
-        }
-        this.updateLocationCursorPos();
-    }
-
-    createMobileLocationInput ()
-    {
-        const existing = document.getElementById('mobile-location-input');
-        if (existing) existing.remove();
-        const input = document.createElement('input');
-        input.id = 'mobile-location-input';
-        input.type = 'text';
-        input.value = this.mapLocation;
-        input.maxLength = 200;
-        input.placeholder = 'e.g. "Times Square, NYC"';
-        Object.assign(input.style, { position: 'fixed', top: '-100px', left: '-100px', opacity: '0' });
-        document.body.appendChild(input);
-        input.addEventListener('input', (e) => { this.mapLocation = e.target.value.substring(0, 200); this.updateLocationText(); });
-        input.addEventListener('blur', () => { setTimeout(() => { const el = document.getElementById('mobile-location-input'); if (el) el.remove(); }, 100); });
-        setTimeout(() => input.focus(), 100);
     }
 
     changeScene ()
@@ -1145,7 +1157,14 @@ export class MainMenu extends Scene
 
         // Save player name and character settings to game state
         gameState.setPlayerName(this.playerName);
+        // Read latest value from HTML input
+        if (this.locationHTMLInput) {
+            this.mapLocation = this.locationHTMLInput.value || '';
+        }
         gameState.setMapLocation((this.mapLocation || '').trim());
+        // Remove HTML overlay
+        const el = document.getElementById('map-location-input');
+        if (el) el.remove();
         gameState.clearNPCPositions();
 
         // Generate new session ID for this game run
