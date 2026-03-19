@@ -632,9 +632,9 @@ export class MainMenu extends Scene
 
     handleKeyDown (event)
     {
-        // Skip if an HTML input (location autocomplete) has focus
+        // Skip if any HTML input has focus (location autocomplete, shadow DOM inputs, etc.)
         const active = document.activeElement;
-        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.closest('gmp-place-autocomplete'))) {
+        if (active && active !== document.body && active.tagName !== 'CANVAS') {
             return;
         }
 
@@ -1049,9 +1049,13 @@ export class MainMenu extends Scene
             input.style.borderColor = '#FFD700';
             input.style.background = 'rgba(74, 144, 226, 1)';
             input.style.color = '#FFD700';
+            // Disable Phaser keyboard capture while HTML input is focused
+            if (this.input?.keyboard) this.input.keyboard.enabled = false;
         });
 
         input.addEventListener('blur', () => {
+            // Re-enable Phaser keyboard
+            if (this.input?.keyboard) this.input.keyboard.enabled = true;
             input.style.borderColor = '#6EA8FE';
             input.style.background = 'rgba(74, 144, 226, 0.85)';
             input.style.color = '#fff';
@@ -1182,20 +1186,14 @@ export class MainMenu extends Scene
                 console.log('[MapGen] Place selected:', name);
             });
 
-            // Also capture typing for manual entry fallback
-            const innerInput = placeAutocomplete.querySelector('input');
-            if (innerInput) {
-                innerInput.addEventListener('keydown', (e) => {
-                    e.stopPropagation(); // Prevent Phaser from eating keys
-                    if (e.key === 'Enter') {
-                        this.mapLocation = innerInput.value;
-                        this.changeScene();
-                    }
-                });
-                innerInput.addEventListener('input', () => {
-                    this.mapLocation = innerInput.value;
-                });
-            }
+            // Disable Phaser keyboard when autocomplete is focused
+            // Use focusin/focusout which bubble from shadow DOM
+            wrapper.addEventListener('focusin', () => {
+                if (this.input?.keyboard) this.input.keyboard.enabled = false;
+            });
+            wrapper.addEventListener('focusout', () => {
+                if (this.input?.keyboard) this.input.keyboard.enabled = true;
+            });
 
             this.locationAutocompleteWrapper = wrapper;
             console.log('[MapGen] Google Places Autocomplete (New) initialized');

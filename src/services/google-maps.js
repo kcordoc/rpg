@@ -113,30 +113,50 @@ export async function geocodeLocation(locationQuery) {
     try {
         await loadGoogleMapsAPI();
 
-        if (!window.google?.maps?.Geocoder) {
-            console.warn('[Geo] Geocoder not available, using fallback');
-            return generateFallbackLocation(locationQuery);
+        // Try Places API (New) searchByText first — works with just Places API enabled
+        if (window.google?.maps?.places?.Place) {
+            console.log('[Geo] Using Places API (New) for geocoding');
+            const { places } = await window.google.maps.places.Place.searchByText({
+                textQuery: locationQuery,
+                maxResultCount: 1,
+                fields: ['location', 'displayName', 'formattedAddress'],
+            });
+
+            if (places?.length > 0) {
+                const p = places[0];
+                const loc = p.location;
+                return {
+                    lat: loc.lat(),
+                    lng: loc.lng(),
+                    formattedAddress: p.formattedAddress || p.displayName || locationQuery,
+                };
+            }
         }
 
-        return await Promise.race([
-            new Promise((resolve, reject) => {
-                const geocoder = new google.maps.Geocoder();
-                geocoder.geocode({ address: locationQuery }, (results, status) => {
-                    if (status === 'OK' && results[0]) {
-                        const loc = results[0].geometry.location;
-                        resolve({
-                            lat: loc.lat(),
-                            lng: loc.lng(),
-                            formattedAddress: results[0].formatted_address,
-                            viewport: results[0].geometry.viewport
-                        });
-                    } else {
-                        reject(new Error(`Geocoding failed: ${status}`));
-                    }
-                });
-            }),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Geocode timeout')), 4000))
-        ]);
+        // Fallback to Geocoder if Places API didn't work
+        if (window.google?.maps?.Geocoder) {
+            console.log('[Geo] Falling back to Geocoder');
+            return await Promise.race([
+                new Promise((resolve, reject) => {
+                    const geocoder = new google.maps.Geocoder();
+                    geocoder.geocode({ address: locationQuery }, (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            const loc = results[0].geometry.location;
+                            resolve({
+                                lat: loc.lat(), lng: loc.lng(),
+                                formattedAddress: results[0].formatted_address,
+                            });
+                        } else {
+                            reject(new Error(`Geocoding failed: ${status}`));
+                        }
+                    });
+                }),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Geocode timeout')), 4000))
+            ]);
+        }
+
+        console.warn('[Geo] No geocoding API available, using fallback');
+        return generateFallbackLocation(locationQuery);
     } catch (err) {
         console.warn('[Geo] Geocoding error, using fallback:', err.message);
         return generateFallbackLocation(locationQuery);
@@ -151,13 +171,53 @@ export async function geocodeLocation(locationQuery) {
  * @returns {Promise<Array<{name: string, type: string, lat: number, lng: number, featureType: string}>>}
  */
 export async function fetchNearbyPlaces(lat, lng, radius = 500) {
-    // Always use the procedural place generator — it produces rich, diverse maps.
-    // The legacy PlacesService (nearbySearch) requires the old Places API which
-    // is no longer available to new projects. The Places API (New) uses a different
-    // interface (searchByText) that doesn't map well to our tile system.
-    // The fallback generator seeds from lat/lng so each location is unique.
-    console.log('[Places] Generating places for', lat.toFixed(4), lng.toFixed(4));
-    return generateFallbackPlaces(lat, lng);
+    if (!API_KEY) {
+        return generateFallbackPlaces(lat, lng);
+    }
+
+    try {
+        await loadGoogleMapsAPI();
+
+        // Use Places API (New) searchNearby
+        if (window.google?.maps?.places?.Place) {
+            console.log('[Places] Using Places API (New) searchNearby');
+
+            const center = new google.maps.LatLng(lat, lng);
+            const { places } = await window.google.maps.places.Place.searchNearby({
+                locationRestriction: {
+                    center,
+                    radius,
+                },
+                maxResultCount: 20,
+                fields: ['location', 'displayName', 'types'],
+            });
+
+            if (places?.length > 0) {
+                console.log(`[Places] Found ${places.length} real places`);
+                return places.map((p, i) => {
+                    const types = p.types || [];
+                    let featureType = FEATURE_TYPES.BUILDING;
+                    for (const t of types) {
+                        if (PLACE_TYPE_MAP[t]) { featureType = PLACE_TYPE_MAP[t]; break; }
+                    }
+                    return {
+                        name: p.displayName || `Place ${i+1}`,
+                        type: types[0] || 'building',
+                        lat: p.location.lat(),
+                        lng: p.location.lng(),
+                        featureType,
+                        placeId: `new-${i}`,
+                    };
+                });
+            }
+        }
+
+        console.log('[Places] No results from API, using fallback');
+        return generateFallbackPlaces(lat, lng);
+    } catch (err) {
+        console.warn('[Places] API error, using fallback:', err.message);
+        return generateFallbackPlaces(lat, lng);
+    }
 }
 
 /**
