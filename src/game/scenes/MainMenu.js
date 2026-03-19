@@ -1113,9 +1113,9 @@ export class MainMenu extends Scene
         try {
             await loadGoogleMapsAPI();
 
-            // Wait for AutocompleteSuggestion to be available
-            const { AutocompleteSuggestion, AutocompleteSessionToken } =
-                await google.maps.importLibrary('places');
+            // Places library loaded via &libraries=places in the script URL
+            const AutocompleteSuggestion = window.google?.maps?.places?.AutocompleteSuggestion;
+            const AutocompleteSessionToken = window.google?.maps?.places?.AutocompleteSessionToken;
 
             if (!AutocompleteSuggestion) {
                 console.warn('[Autocomplete] AutocompleteSuggestion not available');

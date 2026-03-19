@@ -80,61 +80,31 @@ export function loadGoogleMapsAPI() {
     if (mapsAPIPromise) return mapsAPIPromise;
 
     if (!API_KEY) {
-        console.warn('Google Maps API key not set. Using procedural fallback.');
+        console.warn('[MapsAPI] No API key set. Using procedural fallback.');
         return Promise.resolve();
     }
 
-    // Use the Dynamic Library Import bootstrap (required for importLibrary)
-    // See: https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+    console.log('[MapsAPI] Loading Google Maps JS API...');
+
     mapsAPIPromise = new Promise((resolve, reject) => {
-        // Inject the bootstrap loader
-        ((g) => {
-            let h, a, k;
-            const c = "The Google Maps JavaScript API";
-            const e = "google";
-            const t = "importLibrary";
-            const s = "__ib__";
-            const o = document;
-            const b = window;
-            b[e] = b[e] || {};
-            const d = b[e].maps = b[e].maps || {};
-            const r = new Set();
-            const u = new URLSearchParams();
-            const L = "0.1s";
+        // Simple script tag approach — load with callback
+        const callbackName = '__gmapsCallback_' + Date.now();
+        window[callbackName] = () => {
+            delete window[callbackName];
+            mapsAPILoaded = true;
+            console.log('[MapsAPI] Loaded successfully');
+            resolve();
+        };
 
-            if (!d[t]) {
-                d[t] = (p, ...args) => r.add(p) && (
-                    h || (h = new Promise((res, rej) => {
-                        a = res;
-                        k = rej;
-                    }))
-                ).then(() => d[t](p, ...args));
-
-                const x = (f) => {
-                    const n = o.createElement("script");
-                    u.set("libraries", [...r] + "");
-                    for (const [q, v] of g) u.set(q, v);
-                    n.src = `https://maps.googleapis.com/maps/api/js?` + u.toString();
-                    n.async = true;
-                    n.nonce = o.querySelector("script[nonce]")?.nonce || "";
-                    o.head.append(n);
-                    d[s] = f;
-                    n.onerror = () => (h = k(Error(c + " could not load.")));
-                };
-
-                d[s] = x;
-                d[t]("core").then(
-                    () => {
-                        mapsAPILoaded = true;
-                        resolve();
-                    },
-                    (err) => reject(err)
-                );
-            } else {
-                mapsAPILoaded = true;
-                resolve();
-            }
-        })(new Map([["key", API_KEY], ["v", "weekly"]]));
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&callback=${callbackName}`;
+        script.async = true;
+        script.onerror = () => {
+            delete window[callbackName];
+            console.error('[MapsAPI] Failed to load script');
+            reject(new Error('Failed to load Google Maps API'));
+        };
+        document.head.appendChild(script);
     });
 
     return mapsAPIPromise;
