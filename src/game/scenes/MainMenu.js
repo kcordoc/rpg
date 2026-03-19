@@ -1262,6 +1262,11 @@ export class MainMenu extends Scene
 
     changeScene ()
     {
+        console.log('[changeScene] CALLED — mapLocation at entry:', JSON.stringify(this.mapLocation));
+
+        // Re-enable Phaser keyboard in case it was disabled
+        if (this.input?.keyboard) this.input.keyboard.enabled = true;
+
         // Get player name (already stored in this.playerName)
         this.playerName = this.playerName.trim() || 'Player';
 
