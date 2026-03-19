@@ -1,532 +1,348 @@
 /**
- * MapGenerator
- * Converts Google Maps location data into Phaser-compatible tilemap JSON.
+ * MapGenerator — Generates Phaser-compatible tilemaps from location data.
  *
- * Uses the existing Tuxemon tileset (tuxmon-sample-32px-extruded.png)
- * so generated maps render with the same art style as hand-crafted maps.
- *
- * Tile ID reference (from tuxmon-sample-32px-extruded, 24 tiles per row):
- *   GROUND:
- *     126 = grass
- *     174 = dirt/road center
- *     150 = road horizontal
- *     198 = road vertical
- *     149 = road corner TL, 151 = road corner TR
- *     173 = road edge L, 175 = road edge R
- *     195 = road corner BL, 197 = road end bottom
- *     171/172/196/199 = road edges/corners
- *
- *   WORLD (collision) layer:
- *     169/170/193/194 = trees (most common collision objects)
- *     266 = fence/barrier
- *     218/241/243 = rocks/walls
- *     0 = empty (walkable)
- *
- *   ABOVE PLAYER layer:
- *     305/306/332-335 = tree canopies
- *     370-379 = building roofs
- *     471-475 = tall structures
+ * Uses the Tuxemon tileset (tuxmon-sample-32px-extruded.png, 24 cols, 720 tiles).
+ * Building/tree/road patterns extracted from the hand-crafted village map.
  */
 
 import { FEATURE_TYPES } from '../services/google-maps.js';
 
-// Tile IDs from the Tuxemon tileset (1-indexed GIDs as stored in Tiled JSON)
-const TILES = {
-    // Ground layer
+// ─── Tile IDs (1-indexed GIDs) ────────────────────────────────
+const T = {
     GRASS: 126,
     DIRT: 174,
-    ROAD_H: 150,     // horizontal road
-    ROAD_V: 198,     // vertical road
-    ROAD_CENTER: 174, // intersection
-    ROAD_TL: 149,    // corner top-left
-    ROAD_TR: 151,    // corner top-right
-    ROAD_BL: 195,    // corner bottom-left
-    ROAD_BR: 199,    // corner bottom-right
-    ROAD_EDGE_L: 173,
-    ROAD_EDGE_R: 175,
-    ROAD_EDGE_T: 171,
-    ROAD_EDGE_B: 197,
-    WATER_1: 196,    // reuse for water-ish tile
-
-    // World (collision) layer
+    ROAD_H: 150,
+    ROAD_V: 198,
+    ROAD_X: 174,      // intersection
+    ROAD_TL: 149, ROAD_TR: 151,
+    ROAD_BL: 195, ROAD_BR: 199,
+    EDGE_L: 173, EDGE_R: 175,
+    EDGE_T: 171, EDGE_B: 197,
     EMPTY: 0,
-    TREE_1: 169,
-    TREE_2: 170,
-    TREE_3: 193,
-    TREE_4: 194,
-    ROCK_1: 218,
-    ROCK_2: 241,
-    ROCK_3: 243,
+    // Trees (2×2 in World layer)
+    TREE_TL: 169, TREE_TR: 170,
+    TREE_BL: 193, TREE_BR: 194,
+    ROCK: 218, ROCK2: 241, ROCK3: 243,
     FENCE: 266,
-    // Building tiles (from the tileset)
-    BUILDING_TL: 601,
-    BUILDING_TR: 602,
-    BUILDING_BL: 625,
-    BUILDING_BR: 626,
-    WALL_H: 267,
-    WALL_V: 268,
-
-    // Above player layer
-    TREE_TOP_1: 305,
-    TREE_TOP_2: 306,
-    ROOF_1: 370,
-    ROOF_2: 371,
-    ROOF_3: 372,
-    TALL_1: 471,
-    TALL_2: 472,
 };
 
-// Map feature types to visual tile patterns
-const FEATURE_TILE_PATTERNS = {
-    [FEATURE_TYPES.ROAD]: { ground: TILES.ROAD_H, world: TILES.EMPTY, above: 0 },
-    [FEATURE_TYPES.BUILDING]: { ground: TILES.DIRT, world: TILES.BUILDING_TL, above: TILES.ROOF_1 },
-    [FEATURE_TYPES.WATER]: { ground: TILES.WATER_1, world: TILES.EMPTY, above: 0 },
-    [FEATURE_TYPES.PARK]: { ground: TILES.GRASS, world: TILES.EMPTY, above: 0 },
-    [FEATURE_TYPES.FOREST]: { ground: TILES.GRASS, world: TILES.TREE_1, above: TILES.TREE_TOP_1 },
-    [FEATURE_TYPES.MOUNTAIN]: { ground: TILES.DIRT, world: TILES.ROCK_1, above: 0 },
-    [FEATURE_TYPES.HOSPITAL]: { ground: TILES.DIRT, world: TILES.BUILDING_TL, above: TILES.ROOF_2 },
-    [FEATURE_TYPES.SCHOOL]: { ground: TILES.DIRT, world: TILES.BUILDING_TL, above: TILES.ROOF_3 },
-    [FEATURE_TYPES.SHOP]: { ground: TILES.DIRT, world: TILES.BUILDING_TR, above: TILES.ROOF_1 },
-    [FEATURE_TYPES.RESTAURANT]: { ground: TILES.DIRT, world: TILES.BUILDING_BL, above: TILES.ROOF_2 },
-    [FEATURE_TYPES.CHURCH]: { ground: TILES.DIRT, world: TILES.BUILDING_BR, above: TILES.TALL_1 },
-    [FEATURE_TYPES.MONUMENT]: { ground: TILES.DIRT, world: TILES.ROCK_2, above: TILES.TALL_2 },
-    [FEATURE_TYPES.SPORTS]: { ground: TILES.GRASS, world: TILES.FENCE, above: 0 },
-    [FEATURE_TYPES.TRANSIT]: { ground: TILES.ROAD_CENTER, world: TILES.WALL_H, above: 0 },
-    [FEATURE_TYPES.PARKING]: { ground: TILES.DIRT, world: TILES.EMPTY, above: 0 },
-    [FEATURE_TYPES.RESIDENTIAL]: { ground: TILES.DIRT, world: TILES.BUILDING_TL, above: TILES.ROOF_1 },
-    [FEATURE_TYPES.COMMERCIAL]: { ground: TILES.DIRT, world: TILES.BUILDING_TR, above: TILES.ROOF_2 },
-    [FEATURE_TYPES.INTERSECTION]: { ground: TILES.ROAD_CENTER, world: TILES.EMPTY, above: 0 },
-    [FEATURE_TYPES.PATH]: { ground: TILES.DIRT, world: TILES.EMPTY, above: 0 },
-    [FEATURE_TYPES.GRASS]: { ground: TILES.GRASS, world: TILES.EMPTY, above: 0 },
-    [FEATURE_TYPES.OPEN_AREA]: { ground: TILES.GRASS, world: TILES.EMPTY, above: 0 },
-    [FEATURE_TYPES.PLAZA]: { ground: TILES.DIRT, world: TILES.EMPTY, above: 0 },
-};
+// Building templates: arrays of { world: rows×cols, above: rows×cols }
+// Extracted from the actual village map.
+const BUILDINGS = [
+    { // White office (5w × 3h)
+        w: 5, h: 3,
+        world: [601,602,603,604,605, 625,626,627,628,629, 649,650,651,652,653],
+        above: [577,578,579,580,581, 0,0,0,0,0, 0,0,0,0,0],
+    },
+    { // Yellow/grey building (6w × 3h)
+        w: 6, h: 3,
+        world: [606,607,608,609,610,611, 630,631,632,633,634,635, 654,655,656,657,658,659],
+        above: [582,583,584,585,586,587, 0,0,0,0,0,0, 0,0,0,0,0,0],
+    },
+    { // Red building (5w × 3h)
+        w: 5, h: 3,
+        world: [612,613,614,615,616, 636,637,638,639,640, 660,661,662,663,664],
+        above: [588,589,590,591,592, 0,0,0,0,0, 0,0,0,0,0],
+    },
+];
 
-/**
- * Generate a tilemap JSON from location data
- * @param {Object} locationData - Output from fetchLocationData()
- * @param {Object} options - Generation options
- * @returns {Object} Tiled-compatible JSON tilemap + metadata
- */
+// ─── Main generator ──────────────────────────────────────────
+
 export function generateTilemap(locationData, options = {}) {
-    const {
-        width = 120,
-        height = 120,
-        tileWidth = 32,
-        tileHeight = 32,
-    } = options;
-
+    const { width = 120, height = 120, tileWidth = 32, tileHeight = 32 } = options;
     const { places, roadData, location } = locationData;
 
-    // Initialize layers as flat arrays (Tiled format)
-    const belowData = new Array(width * height).fill(TILES.GRASS);
-    const worldData = new Array(width * height).fill(TILES.EMPTY);
-    const aboveData = new Array(width * height).fill(0);
+    const below = new Array(width * height).fill(T.GRASS);
+    const world = new Array(width * height).fill(T.EMPTY);
+    const above = new Array(width * height).fill(0);
+    const occupied = new Set(); // tracks all non-walkable cells
 
-    // Seed RNG from location
     const seed = hashString(`${location.lat},${location.lng}`);
     const rng = seededRandom(seed);
 
-    // Step 1: Lay down roads from the road grid
+    // ── Step 1: Roads ──────────────────────────────────────────
     const roadCells = new Set();
-    const streetLabels = []; // {x, y, name} for NPC/landmark placement
+    const streetLabels = [];
 
-    if (roadData && roadData.streetNames) {
-        const streetEntries = Array.from(roadData.streetNames.entries());
-
-        for (const [streetName, points] of streetEntries) {
-            // Determine if road is more horizontal or vertical
+    if (roadData?.streetNames) {
+        for (const [streetName, points] of roadData.streetNames.entries()) {
             if (points.length < 2) continue;
-
-            const isHorizontal = Math.abs(points[0].row - points[points.length - 1].row) <
-                                 Math.abs(points[0].col - points[points.length - 1].col);
-
-            // Add road width (3 tiles for major, 2 for minor)
-            const roadWidth = streetName.includes('Avenue') || streetName.includes('Boulevard') ? 3 : 2;
+            const isH = Math.abs(points[0].row - points[points.length-1].row) <
+                        Math.abs(points[0].col - points[points.length-1].col);
+            const roadW = streetName.includes('Avenue') || streetName.includes('Boulevard') ? 3 : 2;
 
             for (const pt of points) {
-                // Map grid coordinates to tilemap coordinates
-                const tileX = Math.floor((pt.col / 40) * (width - 10)) + 5;
-                const tileY = Math.floor((pt.row / 40) * (height - 10)) + 5;
-
-                // Draw road tiles
-                for (let w = 0; w < roadWidth; w++) {
-                    let rx, ry;
-                    if (isHorizontal) {
-                        rx = tileX;
-                        ry = tileY + w;
-                    } else {
-                        rx = tileX + w;
-                        ry = tileY;
-                    }
-
+                const tx = Math.floor((pt.col / 40) * (width - 10)) + 5;
+                const ty = Math.floor((pt.row / 40) * (height - 10)) + 5;
+                for (let w = 0; w < roadW; w++) {
+                    const rx = isH ? tx : tx + w;
+                    const ry = isH ? ty + w : ty;
                     if (rx >= 0 && rx < width && ry >= 0 && ry < height) {
                         const idx = ry * width + rx;
-
-                        // Check if this is an intersection
-                        if (roadCells.has(idx)) {
-                            belowData[idx] = TILES.ROAD_CENTER;
-                        } else {
-                            belowData[idx] = isHorizontal ? TILES.ROAD_H : TILES.ROAD_V;
-                        }
-
+                        below[idx] = roadCells.has(idx) ? T.ROAD_X : (isH ? T.ROAD_H : T.ROAD_V);
                         roadCells.add(idx);
-                        worldData[idx] = TILES.EMPTY; // Roads are always walkable
+                        world[idx] = T.EMPTY;
                     }
                 }
             }
 
-            // Pick a midpoint for the street label
-            const midPt = points[Math.floor(points.length / 2)];
-            const labelX = Math.floor((midPt.col / 40) * (width - 10)) + 5;
-            const labelY = Math.floor((midPt.row / 40) * (height - 10)) + 5;
-            streetLabels.push({ x: labelX, y: labelY, name: streetName });
-        }
-    }
-
-    // Interpolate roads: fill gaps between road points with continuous paths
-    fillRoadGaps(belowData, roadCells, width, height);
-
-    // Step 2: Place buildings and landmarks from places data
-    const placedBuildings = [];
-
-    if (places && places.length > 0) {
-        // Convert place lat/lng to tile coordinates relative to location center
-        const latRange = 0.005; // ~500m
-        const lngRange = 0.005;
-
-        for (const place of places) {
-            // Map lat/lng to tile coordinates
-            const relLat = (place.lat - location.lat) / latRange;
-            const relLng = (place.lng - location.lng) / lngRange;
-
-            let tileX = Math.floor((relLng + 0.5) * (width - 20)) + 10;
-            let tileY = Math.floor((0.5 - relLat) * (height - 20)) + 10; // Invert lat (north = up)
-
-            // Clamp to map bounds
-            tileX = Math.max(3, Math.min(width - 6, tileX));
-            tileY = Math.max(3, Math.min(height - 6, tileY));
-
-            // Snap to nearest non-road tile (buildings shouldn't overlap roads)
-            const snapped = snapToNonRoad(tileX, tileY, roadCells, width, height);
-            tileX = snapped.x;
-            tileY = snapped.y;
-
-            const pattern = FEATURE_TILE_PATTERNS[place.featureType] || FEATURE_TILE_PATTERNS[FEATURE_TYPES.BUILDING];
-
-            // Place a building cluster (3x3 or 2x2 depending on type)
-            const size = (place.featureType === FEATURE_TYPES.PARK ||
-                         place.featureType === FEATURE_TYPES.SPORTS) ? 4 : 3;
-
-            placeStructure(belowData, worldData, aboveData, tileX, tileY, size, pattern, roadCells, width, height, rng);
-
-            placedBuildings.push({
-                x: tileX,
-                y: tileY,
-                name: place.name,
-                featureType: place.featureType,
-                streetName: place.streetName || ''
+            const mid = points[Math.floor(points.length / 2)];
+            streetLabels.push({
+                x: Math.floor((mid.col / 40) * (width - 10)) + 5,
+                y: Math.floor((mid.row / 40) * (height - 10)) + 5,
+                name: streetName
             });
         }
     }
 
-    // Step 3: Fill empty areas with scenery (trees, grass patches)
-    fillScenery(belowData, worldData, aboveData, roadCells, width, height, rng);
+    // Fill road gaps
+    fillRoadGaps(below, roadCells, width, height);
 
-    // Step 4: Add border trees
-    addBorder(belowData, worldData, aboveData, width, height);
+    // Add dirt border along roads
+    for (const idx of roadCells) {
+        const x = idx % width, y = Math.floor(idx / width);
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                const ni = (y+dy) * width + (x+dx);
+                if (ni >= 0 && ni < width*height && !roadCells.has(ni) && below[ni] === T.GRASS) {
+                    below[ni] = T.DIRT;
+                }
+            }
+        }
+    }
 
-    // Determine spawnable tile IDs (road tiles for NPC placement)
-    const spawnableTileIds = [
-        TILES.ROAD_H, TILES.ROAD_V, TILES.ROAD_CENTER,
-        TILES.ROAD_TL, TILES.ROAD_TR, TILES.ROAD_BL, TILES.ROAD_BR,
-        TILES.ROAD_EDGE_L, TILES.ROAD_EDGE_R, TILES.ROAD_EDGE_T, TILES.ROAD_EDGE_B,
-        TILES.DIRT
-    ];
+    // ── Step 2: Buildings from places data ──────────────────────
+    const placedBuildings = [];
 
-    // Build Tiled-compatible JSON
+    if (places?.length > 0) {
+        const latRange = 0.005, lngRange = 0.005;
+
+        for (const place of places) {
+            const relLat = (place.lat - location.lat) / latRange;
+            const relLng = (place.lng - location.lng) / lngRange;
+            let tx = Math.floor((relLng + 0.5) * (width - 20)) + 10;
+            let ty = Math.floor((0.5 - relLat) * (height - 20)) + 10;
+            tx = Math.max(4, Math.min(width - 10, tx));
+            ty = Math.max(4, Math.min(height - 10, ty));
+
+            // Snap away from roads
+            const snap = snapAway(tx, ty, roadCells, occupied, width, height);
+            tx = snap.x; ty = snap.y;
+
+            // Pick a building template
+            const bi = Math.floor(rng() * BUILDINGS.length);
+            const bld = BUILDINGS[bi];
+
+            // Check if space is free
+            if (!canPlace(tx, ty, bld.w, bld.h + 1, roadCells, occupied, width, height)) continue;
+
+            // Place the above row (roof) — 1 row above the building
+            for (let dx = 0; dx < bld.w; dx++) {
+                const ai = (ty - 1) * width + (tx + dx);
+                if (ai >= 0 && bld.above[dx]) above[ai] = bld.above[dx];
+            }
+
+            // Place building tiles
+            for (let row = 0; row < bld.h; row++) {
+                for (let col = 0; col < bld.w; col++) {
+                    const idx = (ty + row) * width + (tx + col);
+                    if (idx >= 0 && idx < width * height) {
+                        world[idx] = bld.world[row * bld.w + col];
+                        below[idx] = T.DIRT;
+                        occupied.add(idx);
+                    }
+                }
+            }
+
+            placedBuildings.push({ x: tx, y: ty, name: place.name, featureType: place.featureType });
+        }
+    }
+
+    // ── Step 3: Scenery (trees, rocks, decorations) ────────────
+    // Place trees in clusters — 2×2 tree blocks
+    for (let y = 3; y < height - 3; y += 2) {
+        for (let x = 3; x < width - 3; x += 2) {
+            // Skip roads, buildings, and areas near roads
+            const idx = y * width + x;
+            if (roadCells.has(idx) || occupied.has(idx)) continue;
+            if (isNear(x, y, roadCells, width, 2)) continue;
+            if (isNear(x, y, occupied, width, 1)) continue;
+
+            if (rng() < 0.12) {
+                // Place 2×2 tree
+                const cells = [idx, idx+1, (y+1)*width+x, (y+1)*width+x+1];
+                const anyBlocked = cells.some(c => roadCells.has(c) || occupied.has(c) || c >= width*height);
+                if (anyBlocked) continue;
+
+                world[cells[0]] = T.TREE_TL;
+                world[cells[1]] = T.TREE_TR;
+                world[cells[2]] = T.TREE_BL;
+                world[cells[3]] = T.TREE_BR;
+                cells.forEach(c => occupied.add(c));
+            }
+        }
+    }
+
+    // Scatter rocks near roads
+    for (const idx of roadCells) {
+        if (rng() < 0.02) {
+            const x = idx % width, y = Math.floor(idx / width);
+            for (const [dx, dy] of [[2,0],[-2,0],[0,2],[0,-2]]) {
+                const ni = (y+dy) * width + (x+dx);
+                if (ni >= 0 && ni < width*height && !roadCells.has(ni) && !occupied.has(ni) && world[ni] === T.EMPTY) {
+                    world[ni] = rng() < 0.5 ? T.ROCK : T.ROCK2;
+                    occupied.add(ni);
+                    break;
+                }
+            }
+        }
+    }
+
+    // ── Step 4: Border trees ──────────────────────────────────
+    for (let x = 0; x < width; x += 2) {
+        for (let layer = 0; layer < 3; layer++) {
+            setBorder(world, occupied, layer, x, width, height, rng);
+            setBorder(world, occupied, height - 1 - layer, x, width, height, rng);
+        }
+    }
+    for (let y = 0; y < height; y++) {
+        for (let layer = 0; layer < 3; layer++) {
+            const li = y * width + layer;
+            const ri = y * width + (width - 1 - layer);
+            if (!roadCells.has(li)) { world[li] = (y % 2 === 0) ? T.TREE_TL : T.TREE_BL; occupied.add(li); }
+            if (!roadCells.has(ri)) { world[ri] = (y % 2 === 0) ? T.TREE_TR : T.TREE_BR; occupied.add(ri); }
+        }
+    }
+
+    // ── Step 5: Fences along some road edges ──────────────────
+    for (const idx of roadCells) {
+        if (rng() < 0.03) {
+            const x = idx % width, y = Math.floor(idx / width);
+            for (const [dx, dy] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+                const ni = (y+dy) * width + (x+dx);
+                if (ni >= 0 && ni < width*height && !roadCells.has(ni) && !occupied.has(ni) && world[ni] === T.EMPTY) {
+                    world[ni] = T.FENCE;
+                    occupied.add(ni);
+                    // Place a row of 2-4 fence tiles
+                    for (let f = 1; f < 2 + Math.floor(rng() * 3); f++) {
+                        const fi = (y + dy*f) * width + (x + dx*f);
+                        if (fi >= 0 && fi < width*height && !roadCells.has(fi) && !occupied.has(fi) && world[fi] === T.EMPTY) {
+                            world[fi] = T.FENCE;
+                            occupied.add(fi);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    // Spawnable tiles
+    const spawnableTileIds = [T.ROAD_H, T.ROAD_V, T.ROAD_X, T.ROAD_TL, T.ROAD_TR, T.ROAD_BL, T.ROAD_BR,
+                              T.EDGE_L, T.EDGE_R, T.EDGE_T, T.EDGE_B, T.DIRT];
+
     const tilemapJSON = {
-        height,
-        width,
-        infinite: false,
-        orientation: 'orthogonal',
-        renderorder: 'right-down',
-        tilewidth: tileWidth,
-        tileheight: tileHeight,
-        type: 'map',
-        version: '1.10',
-        tiledversion: '1.10.2',
+        height, width, infinite: false, orientation: 'orthogonal',
+        renderorder: 'right-down', tilewidth: tileWidth, tileheight: tileHeight,
+        type: 'map', version: '1.10', tiledversion: '1.10.2',
         layers: [
-            {
-                data: belowData,
-                height,
-                width,
-                id: 1,
-                name: 'Below Player',
-                type: 'tilelayer',
-                visible: true,
-                x: 0,
-                y: 0,
-                opacity: 1
-            },
-            {
-                data: worldData,
-                height,
-                width,
-                id: 2,
-                name: 'World',
-                type: 'tilelayer',
-                visible: true,
-                x: 0,
-                y: 0,
-                opacity: 1
-            },
-            {
-                data: aboveData,
-                height,
-                width,
-                id: 3,
-                name: 'Above Player',
-                type: 'tilelayer',
-                visible: true,
-                x: 0,
-                y: 0,
-                opacity: 1
-            },
-            {
-                objects: [],
-                id: 4,
-                name: 'Objects',
-                type: 'objectgroup',
-                visible: true,
-                x: 0,
-                y: 0,
-                opacity: 1
-            }
+            { data: below, height, width, id: 1, name: 'Below Player', type: 'tilelayer', visible: true, x: 0, y: 0, opacity: 1 },
+            { data: world, height, width, id: 2, name: 'World', type: 'tilelayer', visible: true, x: 0, y: 0, opacity: 1 },
+            { data: above, height, width, id: 3, name: 'Above Player', type: 'tilelayer', visible: true, x: 0, y: 0, opacity: 1 },
+            { objects: [], id: 4, name: 'Objects', type: 'objectgroup', visible: true, x: 0, y: 0, opacity: 1 },
         ],
-        tilesets: [
-            {
-                columns: 24,
-                firstgid: 1,
-                image: 'tuxmon-sample-32px-extruded.png',
-                imageheight: 1120,
-                imagewidth: 912,
-                margin: 1,
-                name: 'tuxmon-sample-32px-extruded',
-                spacing: 2,
-                tilecount: 720,
-                tileheight: 32,
-                tilewidth: 32
-            }
-        ]
+        tilesets: [{
+            columns: 24, firstgid: 1,
+            image: 'tuxmon-sample-32px-extruded.png',
+            imageheight: 1120, imagewidth: 912,
+            margin: 1, name: 'tuxmon-sample-32px-extruded',
+            spacing: 2, tilecount: 720, tileheight: 32, tilewidth: 32
+        }]
     };
 
     return {
         tilemap: tilemapJSON,
-        metadata: {
-            locationName: locationData.location.formattedAddress || locationData.query,
-            buildings: placedBuildings,
-            streetLabels,
-            spawnableTileIds
-        }
+        metadata: { locationName: location.formattedAddress || locationData.query, buildings: placedBuildings, streetLabels, spawnableTileIds }
     };
 }
 
-// ─── Helper functions ──────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────
 
-function fillRoadGaps(belowData, roadCells, width, height) {
-    // For each road cell, ensure there's a continuous path to nearby road cells
-    const roadArray = Array.from(roadCells);
-
-    for (let i = 0; i < roadArray.length; i++) {
-        const idx1 = roadArray[i];
-        const x1 = idx1 % width;
-        const y1 = Math.floor(idx1 / width);
-
-        // Find nearest road cells in each direction and fill gaps
-        for (let j = i + 1; j < Math.min(i + 10, roadArray.length); j++) {
-            const idx2 = roadArray[j];
-            const x2 = idx2 % width;
-            const y2 = Math.floor(idx2 / width);
-
-            const dist = Math.abs(x2 - x1) + Math.abs(y2 - y1);
-            if (dist > 1 && dist <= 6) {
-                // Fill horizontal then vertical
-                const startX = Math.min(x1, x2);
-                const endX = Math.max(x1, x2);
-                const startY = Math.min(y1, y2);
-                const endY = Math.max(y1, y2);
-
-                for (let x = startX; x <= endX; x++) {
-                    const idx = y1 * width + x;
-                    if (!roadCells.has(idx)) {
-                        belowData[idx] = TILES.ROAD_H;
-                        roadCells.add(idx);
-                    }
+function fillRoadGaps(below, roadCells, w, h) {
+    const arr = Array.from(roadCells);
+    for (let i = 0; i < arr.length; i++) {
+        const x1 = arr[i] % w, y1 = Math.floor(arr[i] / w);
+        for (let j = i + 1; j < Math.min(i + 8, arr.length); j++) {
+            const x2 = arr[j] % w, y2 = Math.floor(arr[j] / w);
+            if (Math.abs(x2-x1) + Math.abs(y2-y1) <= 5) {
+                for (let x = Math.min(x1,x2); x <= Math.max(x1,x2); x++) {
+                    const idx = y1 * w + x;
+                    if (!roadCells.has(idx)) { below[idx] = T.ROAD_H; roadCells.add(idx); }
                 }
-                for (let y = startY; y <= endY; y++) {
-                    const idx = y * width + x2;
-                    if (!roadCells.has(idx)) {
-                        belowData[idx] = TILES.ROAD_V;
-                        roadCells.add(idx);
-                    }
+                for (let y = Math.min(y1,y2); y <= Math.max(y1,y2); y++) {
+                    const idx = y * w + x2;
+                    if (!roadCells.has(idx)) { below[idx] = T.ROAD_V; roadCells.add(idx); }
                 }
             }
         }
     }
 }
 
-function snapToNonRoad(tileX, tileY, roadCells, width, height) {
-    const idx = tileY * width + tileX;
-    if (!roadCells.has(idx)) return { x: tileX, y: tileY };
-
-    // Search in expanding radius for a non-road tile
-    for (let r = 1; r <= 10; r++) {
+function snapAway(tx, ty, roadCells, occupied, w, h) {
+    const idx = ty * w + tx;
+    if (!roadCells.has(idx) && !occupied.has(idx)) return { x: tx, y: ty };
+    for (let r = 1; r <= 12; r++) {
         for (let dy = -r; dy <= r; dy++) {
             for (let dx = -r; dx <= r; dx++) {
                 if (Math.abs(dx) !== r && Math.abs(dy) !== r) continue;
-                const nx = tileX + dx;
-                const ny = tileY + dy;
-                if (nx >= 3 && nx < width - 3 && ny >= 3 && ny < height - 3) {
-                    if (!roadCells.has(ny * width + nx)) {
-                        return { x: nx, y: ny };
-                    }
+                const nx = tx+dx, ny = ty+dy;
+                if (nx >= 4 && nx < w-8 && ny >= 4 && ny < h-6) {
+                    const ni = ny * w + nx;
+                    if (!roadCells.has(ni) && !occupied.has(ni)) return { x: nx, y: ny };
                 }
             }
         }
     }
-    return { x: tileX, y: tileY };
+    return { x: tx, y: ty };
 }
 
-function placeStructure(belowData, worldData, aboveData, cx, cy, size, pattern, roadCells, width, height, rng) {
-    const halfSize = Math.floor(size / 2);
-
-    for (let dy = -halfSize; dy <= halfSize; dy++) {
-        for (let dx = -halfSize; dx <= halfSize; dx++) {
-            const x = cx + dx;
-            const y = cy + dy;
-            if (x < 1 || x >= width - 1 || y < 1 || y >= height - 1) continue;
-
-            const idx = y * width + x;
-            if (roadCells.has(idx)) continue; // Don't overwrite roads
-
-            // Edge tiles = walkable approach, center tiles = building
-            const isEdge = Math.abs(dx) === halfSize || Math.abs(dy) === halfSize;
-
-            if (isEdge) {
-                belowData[idx] = pattern.ground;
-                // Leave world layer empty so players can walk around the building
-            } else {
-                belowData[idx] = pattern.ground;
-                worldData[idx] = pattern.world;
-                if (pattern.above) {
-                    aboveData[idx] = pattern.above;
-                }
-            }
+function canPlace(x, y, bw, bh, roadCells, occupied, w, h) {
+    for (let dy = -1; dy < bh; dy++) {
+        for (let dx = 0; dx < bw; dx++) {
+            const idx = (y+dy) * w + (x+dx);
+            if (idx < 0 || idx >= w*h || roadCells.has(idx) || occupied.has(idx)) return false;
         }
     }
+    return true;
 }
 
-function fillScenery(belowData, worldData, aboveData, roadCells, width, height, rng) {
-    const treePairs = [
-        [TILES.TREE_1, TILES.TREE_TOP_1],
-        [TILES.TREE_2, TILES.TREE_TOP_2],
-        [TILES.TREE_3, TILES.TREE_TOP_1],
-        [TILES.TREE_4, TILES.TREE_TOP_2],
-    ];
-
-    for (let y = 2; y < height - 2; y++) {
-        for (let x = 2; x < width - 2; x++) {
-            const idx = y * width + x;
-
-            // Skip if already placed (road, building, etc)
-            if (roadCells.has(idx) || worldData[idx] !== TILES.EMPTY || belowData[idx] !== TILES.GRASS) continue;
-
-            // Randomly place trees (15% chance)
-            if (rng() < 0.15) {
-                // Check neighbors - don't cluster trees too tightly
-                const neighbors = [
-                    worldData[(y - 1) * width + x],
-                    worldData[(y + 1) * width + x],
-                    worldData[y * width + (x - 1)],
-                    worldData[y * width + (x + 1)],
-                ];
-                const treeNeighbors = neighbors.filter(n =>
-                    [TILES.TREE_1, TILES.TREE_2, TILES.TREE_3, TILES.TREE_4].includes(n)
-                ).length;
-
-                if (treeNeighbors < 2) {
-                    const [treeTile, treeTop] = treePairs[Math.floor(rng() * treePairs.length)];
-                    worldData[idx] = treeTile;
-                    aboveData[idx] = treeTop;
-                }
-            }
-            // Dirt patches near roads (5% chance)
-            else if (rng() < 0.05) {
-                const nearRoad = isNearRoad(x, y, roadCells, width, 3);
-                if (nearRoad) {
-                    belowData[idx] = TILES.DIRT;
-                }
-            }
-        }
-    }
-}
-
-function isNearRoad(x, y, roadCells, width, range) {
-    for (let dy = -range; dy <= range; dy++) {
-        for (let dx = -range; dx <= range; dx++) {
-            if (roadCells.has((y + dy) * width + (x + dx))) return true;
-        }
-    }
+function isNear(x, y, cells, w, range) {
+    for (let dy = -range; dy <= range; dy++)
+        for (let dx = -range; dx <= range; dx++)
+            if (cells.has((y+dy) * w + (x+dx))) return true;
     return false;
 }
 
-function addBorder(belowData, worldData, aboveData, width, height) {
-    // Add trees along the map edges
-    for (let x = 0; x < width; x++) {
-        for (let layer = 0; layer < 2; layer++) {
-            // Top edge
-            const topIdx = layer * width + x;
-            worldData[topIdx] = TILES.TREE_3;
-            aboveData[topIdx] = TILES.TREE_TOP_1;
-
-            // Bottom edge
-            const botIdx = (height - 1 - layer) * width + x;
-            worldData[botIdx] = TILES.TREE_4;
-            aboveData[botIdx] = TILES.TREE_TOP_2;
-        }
-    }
-
-    for (let y = 0; y < height; y++) {
-        for (let layer = 0; layer < 2; layer++) {
-            // Left edge
-            const leftIdx = y * width + layer;
-            worldData[leftIdx] = TILES.TREE_1;
-            aboveData[leftIdx] = TILES.TREE_TOP_1;
-
-            // Right edge
-            const rightIdx = y * width + (width - 1 - layer);
-            worldData[rightIdx] = TILES.TREE_2;
-            aboveData[rightIdx] = TILES.TREE_TOP_2;
+function setBorder(world, occupied, row, x, w, h, rng) {
+    const idx = row * w + x;
+    if (idx >= 0 && idx < w * h) {
+        world[idx] = (row < 2) ? T.TREE_TL : T.TREE_BL;
+        occupied.add(idx);
+        if (x+1 < w) {
+            const idx2 = row * w + x + 1;
+            world[idx2] = (row < 2) ? T.TREE_TR : T.TREE_BR;
+            occupied.add(idx2);
         }
     }
 }
 
-// ─── Utility ──────────────────────────────────────────────────
-
 function hashString(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0;
-    }
-    return Math.abs(hash);
+    let h = 0;
+    for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; }
+    return Math.abs(h);
 }
 
 function seededRandom(seed) {
     let s = seed || 1;
-    return () => {
-        s = (s * 16807 + 0) % 2147483647;
-        return (s - 1) / 2147483646;
-    };
+    return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
 }
