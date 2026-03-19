@@ -1214,8 +1214,10 @@ export class MainMenu extends Scene
         // Get player name (already stored in this.playerName)
         this.playerName = this.playerName.trim() || 'Player';
 
-        // Save player name and character settings to game state
+        // Save player name to game state (character selection removed — clear any saved type)
         gameState.setPlayerName(this.playerName);
+        gameState.setCharacterType(null);
+        gameState.setCharacterContext('');
         // Read latest value from HTML input (plain or autocomplete)
         if (this.locationAutocompleteWrapper) {
             const acInput = this.locationAutocompleteWrapper.querySelector('input');

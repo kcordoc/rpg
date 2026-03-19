@@ -225,9 +225,13 @@ export class Overworld extends Scene
             });
         }
 
-        // Set collision on World layer
+        // Set collision on World layer — use both property-based (hand-crafted maps)
+        // and tile-index-based (generated maps) collision detection
         if (worldLayer) {
             worldLayer.setCollisionByProperty({ collides: true });
+            // Also set collision on ALL non-empty tiles in the World layer
+            // (trees, buildings, rocks, fences — anything placed there is a collision)
+            worldLayer.setCollisionByExclusion([0, -1]);
         }
 
         // Store map and layer references (before creating NPCs)
