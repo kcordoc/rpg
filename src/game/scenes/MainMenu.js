@@ -1102,156 +1102,109 @@ export class MainMenu extends Scene
         input.style.fontSize = Math.max(8, Math.round(10 * scaleY)) + 'px';
     }
 
-    async initPlacesAutocomplete (textInput)
+    async initPlacesAutocomplete (input)
     {
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         if (!apiKey) {
-            console.log('[MapGen] No Google Maps API key — autocomplete disabled');
+            console.log('[Autocomplete] No Google Maps API key — disabled');
             return;
         }
 
         try {
-            // Load Google Maps JS API via shared loader (avoids duplicate script tags)
             await loadGoogleMapsAPI();
-            // Wait for PlaceAutocompleteElement to be available
-            if (!window.google?.maps?.places?.PlaceAutocompleteElement) {
-                await new Promise((resolve) => {
-                    const check = setInterval(() => {
-                        if (window.google?.maps?.places?.PlaceAutocompleteElement) { clearInterval(check); resolve(); }
-                    }, 100);
-                    setTimeout(() => { clearInterval(check); resolve(); }, 5000);
-                });
-            }
-            if (!window.google?.maps?.places?.PlaceAutocompleteElement) {
-                throw new Error('PlaceAutocompleteElement not available');
+
+            // Wait for AutocompleteSuggestion to be available
+            const { AutocompleteSuggestion, AutocompleteSessionToken } =
+                await google.maps.importLibrary('places');
+
+            if (!AutocompleteSuggestion) {
+                console.warn('[Autocomplete] AutocompleteSuggestion not available');
+                return;
             }
 
-            // Hide the plain text input
-            textInput.style.display = 'none';
+            console.log('[Autocomplete] Data API ready');
 
-            // Create the new PlaceAutocompleteElement
-            const placeAutocomplete = new window.google.maps.places.PlaceAutocompleteElement({
-                componentRestrictions: {},
+            // Create dropdown container
+            const dropdown = document.createElement('div');
+            dropdown.id = 'location-dropdown';
+            Object.assign(dropdown.style, {
+                position: 'absolute',
+                left: input.style.left,
+                width: input.style.width,
+                maxHeight: '200px',
+                overflowY: 'auto',
+                background: '#1a3010',
+                border: '2px solid #5FB859',
+                borderTop: 'none',
+                borderRadius: '0 0 10px 10px',
+                zIndex: '600',
+                display: 'none',
+                fontFamily: '"Press Start 2P", monospace',
+            });
+            input.parentElement.appendChild(dropdown);
+
+            let debounceTimer = null;
+            let sessionToken = new AutocompleteSessionToken();
+
+            input.addEventListener('input', () => {
+                this.mapLocation = input.value;
+                clearTimeout(debounceTimer);
+                if (input.value.length < 2) { dropdown.style.display = 'none'; return; }
+
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const { suggestions } = await AutocompleteSuggestion.fetchAutocompleteSuggestions({
+                            input: input.value,
+                            sessionToken,
+                        });
+
+                        dropdown.innerHTML = '';
+                        if (suggestions.length === 0) { dropdown.style.display = 'none'; return; }
+
+                        for (const s of suggestions) {
+                            const pred = s.placePrediction;
+                            const item = document.createElement('div');
+                            item.innerHTML = `<div style="color:#FFD700;font-size:9px;padding:8px 12px;cursor:pointer;border-bottom:1px solid #2d4a1e;">
+                                <div>${pred.mainText?.text || ''}</div>
+                                <div style="color:#90b050;font-size:7px;margin-top:2px;">${pred.secondaryText?.text || ''}</div>
+                            </div>`;
+                            item.addEventListener('mousedown', async (e) => {
+                                e.preventDefault();
+                                const place = pred.toPlace();
+                                await place.fetchFields({ fields: ['formattedAddress', 'displayName'] });
+                                const name = place.formattedAddress || place.displayName || pred.mainText?.text || '';
+                                input.value = name;
+                                this.mapLocation = name;
+                                dropdown.style.display = 'none';
+                                sessionToken = new AutocompleteSessionToken();
+                                console.log('[Autocomplete] Selected:', name);
+                            });
+                            item.firstChild.addEventListener('mouseover', () => {
+                                item.firstChild.style.background = '#2d4a1e';
+                            });
+                            item.firstChild.addEventListener('mouseout', () => {
+                                item.firstChild.style.background = 'transparent';
+                            });
+                            dropdown.appendChild(item);
+                        }
+                        // Position below input
+                        dropdown.style.top = (parseInt(input.style.top) + parseInt(input.style.height) + 2) + 'px';
+                        dropdown.style.display = 'block';
+                    } catch (err) {
+                        console.warn('[Autocomplete] Fetch failed:', err.message);
+                        dropdown.style.display = 'none';
+                    }
+                }, 300);
             });
 
-            // Style the autocomplete element container
-            const wrapper = document.createElement('div');
-            wrapper.id = 'map-location-autocomplete-wrapper';
-            Object.assign(wrapper.style, {
-                position: textInput.style.position,
-                left: textInput.style.left,
-                top: textInput.style.top,
-                width: textInput.style.width,
-                height: textInput.style.height,
-                zIndex: '500',
+            input.addEventListener('blur', () => {
+                setTimeout(() => { dropdown.style.display = 'none'; }, 200);
             });
 
-            // Style autocomplete to match RPG game theme
-            const style = document.createElement('style');
-            style.id = 'gmpac-rpg-theme';
-            style.textContent = `
-                /* The autocomplete input wrapper */
-                #map-location-autocomplete-wrapper gmp-place-autocomplete {
-                    width: 100%;
-                    height: 100%;
-                    /* RPG green/gold theme */
-                    --gmpac-color-surface: #2d4a1e;
-                    --gmpac-color-on-surface: #FFD700;
-                    --gmpac-color-on-surface-variant: #a0c060;
-                    --gmpac-color-outline: #5FB859;
-                    --gmpac-color-primary: #FFD700;
-                    --gmpac-color-surface-container-lowest: #1a3010;
-                    --gmpac-color-on-surface-variant: #90b050;
-                    --gmpac-color-outline-variant: #3d6a2e;
-                    font-family: 'Press Start 2P', monospace;
-                    font-size: 10px;
-                    border-radius: 12px;
-                    border: 2px solid #5FB859;
-                }
-                #map-location-autocomplete-wrapper gmp-place-autocomplete input {
-                    font-family: 'Press Start 2P', monospace !important;
-                    font-size: 10px !important;
-                    letter-spacing: 1px !important;
-                }
-
-                /* The dropdown overlay (injected at body level) */
-                .pac-container,
-                gmp-place-autocomplete-overlay,
-                [class*="gmpac"] {
-                    z-index: 10000 !important;
-                }
-
-                /* Style the dropdown suggestions list */
-                gmp-place-autocomplete::part(list) {
-                    background: #1a3010 !important;
-                    border: 2px solid #5FB859 !important;
-                    border-radius: 8px !important;
-                    font-family: 'Press Start 2P', monospace !important;
-                }
-                gmp-place-autocomplete::part(prediction-item) {
-                    color: #FFD700 !important;
-                    font-family: 'Press Start 2P', monospace !important;
-                    font-size: 9px !important;
-                    padding: 10px 12px !important;
-                    border-bottom: 1px solid #2d4a1e !important;
-                }
-                gmp-place-autocomplete::part(prediction-item):hover,
-                gmp-place-autocomplete::part(prediction-item-selected) {
-                    background: #2d4a1e !important;
-                }
-                gmp-place-autocomplete::part(prediction-item-main-text) {
-                    color: #FFD700 !important;
-                }
-                gmp-place-autocomplete::part(prediction-item-description-text) {
-                    color: #90b050 !important;
-                    font-size: 7px !important;
-                }
-                gmp-place-autocomplete::part(prediction-attribution) {
-                    background: #1a3010 !important;
-                    border-top: 1px solid #2d4a1e !important;
-                }
-            `;
-            document.head.appendChild(style);
-
-            wrapper.appendChild(placeAutocomplete);
-            textInput.parentElement.appendChild(wrapper);
-
-            // Listen for place selection from dropdown
-            placeAutocomplete.addEventListener('gmp-placeselect', async (event) => {
-                const place = event.place;
-                await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
-                const name = place.formattedAddress || place.displayName || '';
-                this.mapLocation = name;
-                // Also update hidden plain input as backup
-                if (this.locationHTMLInput) this.locationHTMLInput.value = name;
-                console.log('[MapGen] Place selected from dropdown:', name);
-            });
-
-            // Also track typing via input events on the wrapper
-            placeAutocomplete.addEventListener('gmp-input', () => {
-                // Try to read the current typed value
-                const shadowInput = placeAutocomplete.shadowRoot?.querySelector('input');
-                if (shadowInput?.value) {
-                    this.mapLocation = shadowInput.value;
-                    if (this.locationHTMLInput) this.locationHTMLInput.value = shadowInput.value;
-                }
-            });
-
-            // Disable Phaser keyboard when autocomplete is focused
-            // Use focusin/focusout which bubble from shadow DOM
-            wrapper.addEventListener('focusin', () => {
-                if (this.input?.keyboard) this.input.keyboard.enabled = false;
-            });
-            wrapper.addEventListener('focusout', () => {
-                if (this.input?.keyboard) this.input.keyboard.enabled = true;
-            });
-
-            this.locationAutocompleteWrapper = wrapper;
-            console.log('[MapGen] Google Places Autocomplete (New) initialized');
+            this.locationDropdown = dropdown;
+            console.log('[Autocomplete] Initialized with Data API');
         } catch (err) {
-            console.warn('[MapGen] Failed to init Places Autocomplete:', err.message);
-            // Fall back to plain text input
-            textInput.style.display = '';
+            console.warn('[Autocomplete] Init failed:', err.message);
         }
     }
 
@@ -1275,38 +1228,17 @@ export class MainMenu extends Scene
         gameState.setCharacterType(null);
         gameState.setCharacterContext('');
         gameState.setMapLocation(''); // Clear so next session starts fresh
-        // Read latest value from HTML input (plain or autocomplete)
-        // PlaceAutocompleteElement uses shadow DOM — querySelector won't find its input.
-        // Try multiple methods to get the typed value.
-        if (this.locationAutocompleteWrapper) {
-            // Method 1: Try shadow DOM input
-            const el = this.locationAutocompleteWrapper.querySelector('gmp-place-autocomplete');
-            const shadowInput = el?.shadowRoot?.querySelector('input');
-            if (shadowInput?.value) {
-                this.mapLocation = shadowInput.value;
-                console.log('[changeScene] Read from shadow input:', this.mapLocation);
-            }
-            // Method 2: Try regular querySelector (some versions don't use shadow DOM)
-            if (!this.mapLocation) {
-                const regularInput = this.locationAutocompleteWrapper.querySelector('input');
-                if (regularInput?.value) {
-                    this.mapLocation = regularInput.value;
-                    console.log('[changeScene] Read from regular input:', this.mapLocation);
-                }
-            }
-        }
-        // Method 3: Fall back to plain HTML input
-        if (!this.mapLocation && this.locationHTMLInput?.value) {
+        // Read from the plain HTML input (always visible, always readable)
+        if (this.locationHTMLInput?.value) {
             this.mapLocation = this.locationHTMLInput.value;
-            console.log('[changeScene] Read from plain input:', this.mapLocation);
         }
         console.log('[changeScene] Final mapLocation:', JSON.stringify(this.mapLocation));
         gameState.setMapLocation((this.mapLocation || '').trim());
         // Remove HTML overlays
         const el = document.getElementById('map-location-input');
         if (el) el.remove();
-        const acw = document.getElementById('map-location-autocomplete-wrapper');
-        if (acw) acw.remove();
+        const dd = document.getElementById('location-dropdown');
+        if (dd) dd.remove();
         gameState.clearNPCPositions();
 
         // Generate new session ID for this game run
