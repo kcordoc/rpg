@@ -992,8 +992,8 @@ export class MainMenu extends Scene
     // ─── Location Input (HTML overlay with Google Places Autocomplete) ───
     createLocationInput ()
     {
-        const savedLocation = gameState.getMapLocation();
-        this.mapLocation = savedLocation || '';
+        // Don't pre-fill from saved location — start fresh each time
+        this.mapLocation = '';
 
         // Draw a placeholder box in Phaser so the layout looks right
         const inputX = this.scale.width / 2;
@@ -1214,10 +1214,11 @@ export class MainMenu extends Scene
         // Get player name (already stored in this.playerName)
         this.playerName = this.playerName.trim() || 'Player';
 
-        // Save player name to game state (character selection removed — clear any saved type)
+        // Save player name to game state, clear stale settings
         gameState.setPlayerName(this.playerName);
         gameState.setCharacterType(null);
         gameState.setCharacterContext('');
+        gameState.setMapLocation(''); // Clear so next session starts fresh
         // Read latest value from HTML input (plain or autocomplete)
         if (this.locationAutocompleteWrapper) {
             const acInput = this.locationAutocompleteWrapper.querySelector('input');
