@@ -1146,30 +1146,69 @@ export class MainMenu extends Scene
                 zIndex: '500',
             });
 
-            // Style the inner input via CSS
+            // Style autocomplete to match RPG game theme
             const style = document.createElement('style');
+            style.id = 'gmpac-rpg-theme';
             style.textContent = `
+                /* The autocomplete input wrapper */
                 #map-location-autocomplete-wrapper gmp-place-autocomplete {
                     width: 100%;
                     height: 100%;
-                    --gmpac-color-surface: rgba(74, 144, 226, 0.9);
-                    --gmpac-color-on-surface: #fff;
-                    --gmpac-color-on-surface-variant: #ccc;
-                    --gmpac-color-outline: #6EA8FE;
+                    /* RPG green/gold theme */
+                    --gmpac-color-surface: #2d4a1e;
+                    --gmpac-color-on-surface: #FFD700;
+                    --gmpac-color-on-surface-variant: #a0c060;
+                    --gmpac-color-outline: #5FB859;
                     --gmpac-color-primary: #FFD700;
+                    --gmpac-color-surface-container-lowest: #1a3010;
+                    --gmpac-color-on-surface-variant: #90b050;
+                    --gmpac-color-outline-variant: #3d6a2e;
                     font-family: 'Press Start 2P', monospace;
                     font-size: 10px;
                     border-radius: 12px;
+                    border: 2px solid #5FB859;
                 }
                 #map-location-autocomplete-wrapper gmp-place-autocomplete input {
                     font-family: 'Press Start 2P', monospace !important;
                     font-size: 10px !important;
                     letter-spacing: 1px !important;
-                    text-align: center !important;
                 }
-                /* Prevent Phaser from eating keystrokes */
-                .pac-container, gmp-place-autocomplete-overlay {
+
+                /* The dropdown overlay (injected at body level) */
+                .pac-container,
+                gmp-place-autocomplete-overlay,
+                [class*="gmpac"] {
                     z-index: 10000 !important;
+                }
+
+                /* Style the dropdown suggestions list */
+                gmp-place-autocomplete::part(list) {
+                    background: #1a3010 !important;
+                    border: 2px solid #5FB859 !important;
+                    border-radius: 8px !important;
+                    font-family: 'Press Start 2P', monospace !important;
+                }
+                gmp-place-autocomplete::part(prediction-item) {
+                    color: #FFD700 !important;
+                    font-family: 'Press Start 2P', monospace !important;
+                    font-size: 9px !important;
+                    padding: 10px 12px !important;
+                    border-bottom: 1px solid #2d4a1e !important;
+                }
+                gmp-place-autocomplete::part(prediction-item):hover,
+                gmp-place-autocomplete::part(prediction-item-selected) {
+                    background: #2d4a1e !important;
+                }
+                gmp-place-autocomplete::part(prediction-item-main-text) {
+                    color: #FFD700 !important;
+                }
+                gmp-place-autocomplete::part(prediction-item-description-text) {
+                    color: #90b050 !important;
+                    font-size: 7px !important;
+                }
+                gmp-place-autocomplete::part(prediction-attribution) {
+                    background: #1a3010 !important;
+                    border-top: 1px solid #2d4a1e !important;
                 }
             `;
             document.head.appendChild(style);

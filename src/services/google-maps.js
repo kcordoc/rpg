@@ -114,22 +114,32 @@ export async function geocodeLocation(locationQuery) {
         await loadGoogleMapsAPI();
 
         // Try Places API (New) searchByText first — works with just Places API enabled
-        if (window.google?.maps?.places?.Place) {
-            console.log('[Geo] Using Places API (New) for geocoding');
-            const { places } = await window.google.maps.places.Place.searchByText({
-                textQuery: locationQuery,
-                maxResultCount: 1,
-                fields: ['location', 'displayName', 'formattedAddress'],
-            });
+        const hasPlaceClass = !!window.google?.maps?.places?.Place;
+        console.log('[Geo] API state: Place class =', hasPlaceClass, ', Geocoder =', !!window.google?.maps?.Geocoder);
 
-            if (places?.length > 0) {
-                const p = places[0];
-                const loc = p.location;
-                return {
-                    lat: loc.lat(),
-                    lng: loc.lng(),
-                    formattedAddress: p.formattedAddress || p.displayName || locationQuery,
-                };
+        if (hasPlaceClass) {
+            console.log('[Geo] Using Places API (New) searchByText for:', locationQuery);
+            try {
+                const { places } = await window.google.maps.places.Place.searchByText({
+                    textQuery: locationQuery,
+                    maxResultCount: 1,
+                    fields: ['location', 'displayName', 'formattedAddress'],
+                });
+                console.log('[Geo] searchByText returned', places?.length, 'results');
+
+                if (places?.length > 0) {
+                    const p = places[0];
+                    const loc = p.location;
+                    const result = {
+                        lat: loc.lat(),
+                        lng: loc.lng(),
+                        formattedAddress: p.formattedAddress || p.displayName || locationQuery,
+                    };
+                    console.log('[Geo] Geocoded to:', result.formattedAddress, `(${result.lat.toFixed(4)}, ${result.lng.toFixed(4)})`);
+                    return result;
+                }
+            } catch (searchErr) {
+                console.warn('[Geo] searchByText failed:', searchErr.message);
             }
         }
 
@@ -180,20 +190,22 @@ export async function fetchNearbyPlaces(lat, lng, radius = 500) {
 
         // Use Places API (New) searchNearby
         if (window.google?.maps?.places?.Place) {
-            console.log('[Places] Using Places API (New) searchNearby');
+            console.log(`[Places] searchNearby at (${lat.toFixed(4)}, ${lng.toFixed(4)}), radius=${radius}m`);
 
-            const center = new google.maps.LatLng(lat, lng);
-            const { places } = await window.google.maps.places.Place.searchNearby({
-                locationRestriction: {
-                    center,
-                    radius,
-                },
-                maxResultCount: 20,
-                fields: ['location', 'displayName', 'types'],
-            });
+            try {
+                const center = new google.maps.LatLng(lat, lng);
+                const { places } = await window.google.maps.places.Place.searchNearby({
+                    locationRestriction: {
+                        center,
+                        radius,
+                    },
+                    maxResultCount: 20,
+                    fields: ['location', 'displayName', 'types'],
+                });
 
-            if (places?.length > 0) {
-                console.log(`[Places] Found ${places.length} real places`);
+                if (places?.length > 0) {
+                    console.log(`[Places] Found ${places.length} real places:`);
+                    places.slice(0, 5).forEach(p => console.log(`  - ${p.displayName} (${p.types?.[0]})`));
                 return places.map((p, i) => {
                     const types = p.types || [];
                     let featureType = FEATURE_TYPES.BUILDING;
@@ -209,10 +221,17 @@ export async function fetchNearbyPlaces(lat, lng, radius = 500) {
                         placeId: `new-${i}`,
                     };
                 });
+                } else {
+                    console.log('[Places] searchNearby returned 0 places');
+                }
+            } catch (nearbyErr) {
+                console.warn('[Places] searchNearby failed:', nearbyErr.message);
             }
+        } else {
+            console.log('[Places] Place class not available');
         }
 
-        console.log('[Places] No results from API, using fallback');
+        console.log('[Places] Using procedural fallback places');
         return generateFallbackPlaces(lat, lng);
     } catch (err) {
         console.warn('[Places] API error, using fallback:', err.message);
@@ -451,12 +470,17 @@ function seededRandom(seed) {
  * Returns structured data ready for the MapGenerator
  */
 export async function fetchLocationData(locationQuery) {
+    console.log('[LocationData] Starting fetch for:', locationQuery);
     try {
         const location = await geocodeLocation(locationQuery);
+        console.log('[LocationData] Geocoded:', location.formattedAddress, `(${location.lat.toFixed(4)}, ${location.lng.toFixed(4)})`);
+
         const [places, roadData] = await Promise.all([
             fetchNearbyPlaces(location.lat, location.lng),
             fetchRoadGrid(location.lat, location.lng)
         ]);
+
+        console.log(`[LocationData] Complete: ${places.length} places, ${roadData.streetNames?.size || 0} streets`);
 
         return {
             location,
@@ -465,7 +489,7 @@ export async function fetchLocationData(locationQuery) {
             query: locationQuery
         };
     } catch (error) {
-        console.warn('Location fetch failed, using fallback:', error);
+        console.warn('[LocationData] Fetch failed, using full fallback:', error.message);
         const fallbackLoc = generateFallbackLocation(locationQuery);
         return {
             location: fallbackLoc,
