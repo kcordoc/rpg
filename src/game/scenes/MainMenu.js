@@ -1216,13 +1216,25 @@ export class MainMenu extends Scene
             wrapper.appendChild(placeAutocomplete);
             textInput.parentElement.appendChild(wrapper);
 
-            // Listen for place selection
+            // Listen for place selection from dropdown
             placeAutocomplete.addEventListener('gmp-placeselect', async (event) => {
                 const place = event.place;
                 await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location'] });
                 const name = place.formattedAddress || place.displayName || '';
                 this.mapLocation = name;
-                console.log('[MapGen] Place selected:', name);
+                // Also update hidden plain input as backup
+                if (this.locationHTMLInput) this.locationHTMLInput.value = name;
+                console.log('[MapGen] Place selected from dropdown:', name);
+            });
+
+            // Also track typing via input events on the wrapper
+            placeAutocomplete.addEventListener('gmp-input', () => {
+                // Try to read the current typed value
+                const shadowInput = placeAutocomplete.shadowRoot?.querySelector('input');
+                if (shadowInput?.value) {
+                    this.mapLocation = shadowInput.value;
+                    if (this.locationHTMLInput) this.locationHTMLInput.value = shadowInput.value;
+                }
             });
 
             // Disable Phaser keyboard when autocomplete is focused
@@ -1259,12 +1271,31 @@ export class MainMenu extends Scene
         gameState.setCharacterContext('');
         gameState.setMapLocation(''); // Clear so next session starts fresh
         // Read latest value from HTML input (plain or autocomplete)
+        // PlaceAutocompleteElement uses shadow DOM — querySelector won't find its input.
+        // Try multiple methods to get the typed value.
         if (this.locationAutocompleteWrapper) {
-            const acInput = this.locationAutocompleteWrapper.querySelector('input');
-            if (acInput) this.mapLocation = acInput.value || this.mapLocation;
-        } else if (this.locationHTMLInput) {
-            this.mapLocation = this.locationHTMLInput.value || '';
+            // Method 1: Try shadow DOM input
+            const el = this.locationAutocompleteWrapper.querySelector('gmp-place-autocomplete');
+            const shadowInput = el?.shadowRoot?.querySelector('input');
+            if (shadowInput?.value) {
+                this.mapLocation = shadowInput.value;
+                console.log('[changeScene] Read from shadow input:', this.mapLocation);
+            }
+            // Method 2: Try regular querySelector (some versions don't use shadow DOM)
+            if (!this.mapLocation) {
+                const regularInput = this.locationAutocompleteWrapper.querySelector('input');
+                if (regularInput?.value) {
+                    this.mapLocation = regularInput.value;
+                    console.log('[changeScene] Read from regular input:', this.mapLocation);
+                }
+            }
         }
+        // Method 3: Fall back to plain HTML input
+        if (!this.mapLocation && this.locationHTMLInput?.value) {
+            this.mapLocation = this.locationHTMLInput.value;
+            console.log('[changeScene] Read from plain input:', this.mapLocation);
+        }
+        console.log('[changeScene] Final mapLocation:', JSON.stringify(this.mapLocation));
         gameState.setMapLocation((this.mapLocation || '').trim());
         // Remove HTML overlays
         const el = document.getElementById('map-location-input');
