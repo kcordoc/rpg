@@ -84,17 +84,57 @@ export function loadGoogleMapsAPI() {
         return Promise.resolve();
     }
 
+    // Use the Dynamic Library Import bootstrap (required for importLibrary)
+    // See: https://developers.google.com/maps/documentation/javascript/load-maps-js-api
     mapsAPIPromise = new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&loading=async`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-            mapsAPILoaded = true;
-            resolve();
-        };
-        script.onerror = () => reject(new Error('Failed to load Google Maps API'));
-        document.head.appendChild(script);
+        // Inject the bootstrap loader
+        ((g) => {
+            let h, a, k;
+            const c = "The Google Maps JavaScript API";
+            const e = "google";
+            const t = "importLibrary";
+            const s = "__ib__";
+            const o = document;
+            const b = window;
+            b[e] = b[e] || {};
+            const d = b[e].maps = b[e].maps || {};
+            const r = new Set();
+            const u = new URLSearchParams();
+            const L = "0.1s";
+
+            if (!d[t]) {
+                d[t] = (p, ...args) => r.add(p) && (
+                    h || (h = new Promise((res, rej) => {
+                        a = res;
+                        k = rej;
+                    }))
+                ).then(() => d[t](p, ...args));
+
+                const x = (f) => {
+                    const n = o.createElement("script");
+                    u.set("libraries", [...r] + "");
+                    for (const [q, v] of g) u.set(q, v);
+                    n.src = `https://maps.googleapis.com/maps/api/js?` + u.toString();
+                    n.async = true;
+                    n.nonce = o.querySelector("script[nonce]")?.nonce || "";
+                    o.head.append(n);
+                    d[s] = f;
+                    n.onerror = () => (h = k(Error(c + " could not load.")));
+                };
+
+                d[s] = x;
+                d[t]("core").then(
+                    () => {
+                        mapsAPILoaded = true;
+                        resolve();
+                    },
+                    (err) => reject(err)
+                );
+            } else {
+                mapsAPILoaded = true;
+                resolve();
+            }
+        })(new Map([["key", API_KEY], ["v", "weekly"]]));
     });
 
     return mapsAPIPromise;
