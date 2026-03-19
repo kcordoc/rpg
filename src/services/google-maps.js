@@ -110,24 +110,37 @@ export async function geocodeLocation(locationQuery) {
         return generateFallbackLocation(locationQuery);
     }
 
-    await loadGoogleMapsAPI();
+    try {
+        await loadGoogleMapsAPI();
 
-    return new Promise((resolve, reject) => {
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ address: locationQuery }, (results, status) => {
-            if (status === 'OK' && results[0]) {
-                const loc = results[0].geometry.location;
-                resolve({
-                    lat: loc.lat(),
-                    lng: loc.lng(),
-                    formattedAddress: results[0].formatted_address,
-                    viewport: results[0].geometry.viewport
+        if (!window.google?.maps?.Geocoder) {
+            console.warn('[Geo] Geocoder not available, using fallback');
+            return generateFallbackLocation(locationQuery);
+        }
+
+        return await Promise.race([
+            new Promise((resolve, reject) => {
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ address: locationQuery }, (results, status) => {
+                    if (status === 'OK' && results[0]) {
+                        const loc = results[0].geometry.location;
+                        resolve({
+                            lat: loc.lat(),
+                            lng: loc.lng(),
+                            formattedAddress: results[0].formatted_address,
+                            viewport: results[0].geometry.viewport
+                        });
+                    } else {
+                        reject(new Error(`Geocoding failed: ${status}`));
+                    }
                 });
-            } else {
-                reject(new Error(`Geocoding failed: ${status}`));
-            }
-        });
-    });
+            }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Geocode timeout')), 4000))
+        ]);
+    } catch (err) {
+        console.warn('[Geo] Geocoding error, using fallback:', err.message);
+        return generateFallbackLocation(locationQuery);
+    }
 }
 
 /**

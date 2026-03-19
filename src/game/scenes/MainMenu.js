@@ -2,7 +2,7 @@ import { EventBus } from '../EventBus';
 import { Scene } from 'phaser';
 import gameState from '../GameState';
 import { TITLE_SCREEN_SUBTITLE, TITLE_SCREEN_TAGLINE, CHARACTER_TYPES, CHARACTER_CONTEXT_PLACEHOLDER, CHARACTER_CONTEXT_MAX_LENGTH } from '../../constants.js';
-import { fetchLocationData } from '../../services/google-maps.js';
+import { fetchLocationData, loadGoogleMapsAPI } from '../../services/google-maps.js';
 import { generateTilemap } from '../MapGenerator.js';
 
 export class MainMenu extends Scene
@@ -632,6 +632,12 @@ export class MainMenu extends Scene
 
     handleKeyDown (event)
     {
+        // Skip if an HTML input (location autocomplete) has focus
+        const active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.closest('gmp-place-autocomplete'))) {
+            return;
+        }
+
         // Handle Tab to cycle between inputs
         if (event.keyCode === 9) { // Tab
             event.preventDefault();
@@ -1101,33 +1107,19 @@ export class MainMenu extends Scene
         }
 
         try {
-            // Load Google Maps JS API (New) with Places library
+            // Load Google Maps JS API via shared loader (avoids duplicate script tags)
+            await loadGoogleMapsAPI();
+            // Wait for PlaceAutocompleteElement to be available
             if (!window.google?.maps?.places?.PlaceAutocompleteElement) {
-                await new Promise((resolve, reject) => {
-                    if (document.getElementById('google-maps-script')) {
-                        const check = setInterval(() => {
-                            if (window.google?.maps?.places?.PlaceAutocompleteElement) { clearInterval(check); resolve(); }
-                        }, 100);
-                        setTimeout(() => { clearInterval(check); reject(new Error('timeout')); }, 8000);
-                        return;
-                    }
-                    const script = document.createElement('script');
-                    script.id = 'google-maps-script';
-                    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
-                    script.async = true;
-                    script.onload = () => {
-                        // Wait for places library to fully load
-                        const check = setInterval(() => {
-                            if (window.google?.maps?.places?.PlaceAutocompleteElement) {
-                                clearInterval(check);
-                                resolve();
-                            }
-                        }, 100);
-                        setTimeout(() => { clearInterval(check); resolve(); }, 3000);
-                    };
-                    script.onerror = reject;
-                    document.head.appendChild(script);
+                await new Promise((resolve) => {
+                    const check = setInterval(() => {
+                        if (window.google?.maps?.places?.PlaceAutocompleteElement) { clearInterval(check); resolve(); }
+                    }, 100);
+                    setTimeout(() => { clearInterval(check); resolve(); }, 5000);
                 });
+            }
+            if (!window.google?.maps?.places?.PlaceAutocompleteElement) {
+                throw new Error('PlaceAutocompleteElement not available');
             }
 
             // Hide the plain text input
@@ -1274,10 +1266,10 @@ export class MainMenu extends Scene
 
         try {
             console.log('[MapGen] Fetching location data for:', location);
-            // Timeout after 10 seconds
+            // Timeout after 5 seconds
             const locationData = await Promise.race([
                 fetchLocationData(location),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('Location fetch timed out after 10s')), 10000))
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Location fetch timed out')), 5000))
             ]);
             console.log('[MapGen] Location data received:', locationData.location?.formattedAddress, '- Places:', locationData.places?.length);
 
