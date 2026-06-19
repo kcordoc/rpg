@@ -18,6 +18,7 @@ export class Vessel {
   private readonly ridgeNear: THREE.Mesh;
   private readonly ridgeFar: THREE.Mesh;
   private readonly motes: THREE.Sprite[] = [];
+  private readonly rbcs: THREE.Sprite[] = [];
   private readonly beatLight: THREE.PointLight;
   private narrowing = 0;
   private inflammation = 0;
@@ -93,8 +94,10 @@ export class Vessel {
     branch.position.set(2.5, 2.2, this.baseWallZ + 3.5);
     this.group.add(branch);
 
-    // ---- drifting plasma motes (foreground depth + motion) ----
+    // ---- depth layers: midground motes, foreground red cells, bg branches ----
     this.createMotes();
+    this.createForegroundCells();
+    this.createBackgroundScenery();
 
     this.group.add(this.depositLayer);
     scene.add(this.group);
@@ -127,16 +130,26 @@ export class Vessel {
     const beat = Math.exp(-beatPhase * 6) + 0.25 * Math.exp(-((beatPhase - 0.18) ** 2) * 60);
 
     this.flowTexture.offset.x -= delta * (0.5 + beat * 0.7);
-    this.beatLight.intensity = 0.45 + beat * 1.1;
+    this.beatLight.intensity = 0.3 + beat * 0.8;
 
     const inflame = this.inflammation;
-    this.wallMat.emissive.setRGB(0.28 + inflame * 0.5, 0.05 + beat * 0.04, 0.06);
-    this.wallMat.emissiveIntensity = 0.45 + beat * 0.35 + inflame * 0.6;
+    this.wallMat.emissive.setRGB(0.15 + inflame * 0.45, 0.03 + beat * 0.03, 0.04);
+    this.wallMat.emissiveIntensity = 0.2 + beat * 0.18 + inflame * 0.5;
 
     // drift motes downstream and recycle
     for (const mote of this.motes) {
       mote.position.x -= delta * (3 + beat * 3);
       if (mote.position.x < -TUBE_LENGTH / 2) this.recycleMote(mote);
+    }
+    // foreground red cells drift faster (parallax) and spin gently
+    for (const rbc of this.rbcs) {
+      rbc.position.x -= delta * (7 + beat * 6);
+      rbc.material.rotation += delta * 0.4;
+      if (rbc.position.x < -TUBE_LENGTH / 2) {
+        rbc.position.x = TUBE_LENGTH / 2;
+        rbc.position.z = (Math.random() - 0.5) * 10;
+        rbc.position.y = 6.5 + Math.random() * 3;
+      }
     }
   }
 
@@ -179,6 +192,62 @@ export class Vessel {
 
   private recycleMote(mote: THREE.Sprite): void {
     this.placeMote(mote, false);
+  }
+
+  private createForegroundCells(): void {
+    const tex = this.createRbcTexture();
+    for (let i = 0; i < 9; i += 1) {
+      const mat = new THREE.SpriteMaterial({ map: tex, color: '#a82128', transparent: true, opacity: 0.24, depthWrite: false });
+      const rbc = new THREE.Sprite(mat);
+      rbc.position.set((Math.random() - 0.5) * TUBE_LENGTH, 7 + Math.random() * 3, (Math.random() - 0.5) * 10);
+      rbc.scale.setScalar(1.8 + Math.random() * 1.4);
+      this.group.add(rbc);
+      this.rbcs.push(rbc);
+    }
+  }
+
+  private createBackgroundScenery(): void {
+    const mat = new THREE.MeshStandardMaterial({ color: '#5e1216', roughness: 0.9, emissive: '#240407', emissiveIntensity: 0.4, side: THREE.BackSide });
+    const defs: Array<[number, number, number, number]> = [
+      [26, 4, -10, -Math.PI / 3],
+      [-28, 3, 9, Math.PI / 4],
+      [22, 1, 14, Math.PI / 2.5],
+    ];
+    for (const [x, y, z, rot] of defs) {
+      const geo = new THREE.CylinderGeometry(3.4, 4.2, 20, 20, 4, true);
+      this.displace(geo, 0.5);
+      const branch = new THREE.Mesh(geo, mat);
+      branch.position.set(x, y, z);
+      branch.rotation.z = rot;
+      this.group.add(branch);
+    }
+  }
+
+  private createRbcTexture(): THREE.CanvasTexture {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('rbc texture context');
+    // biconcave disc: bright rim, dimpled centre
+    const outer = ctx.createRadialGradient(size / 2, size / 2, size * 0.1, size / 2, size / 2, size / 2);
+    outer.addColorStop(0, '#00000000');
+    outer.addColorStop(0.45, '#ff5a55cc');
+    outer.addColorStop(0.7, '#c2282fcc');
+    outer.addColorStop(1, '#00000000');
+    ctx.fillStyle = outer;
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.fill();
+    const dimple = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size * 0.3);
+    dimple.addColorStop(0, '#7a161bbb');
+    dimple.addColorStop(1, '#00000000');
+    ctx.fillStyle = dimple;
+    ctx.fillRect(0, 0, size, size);
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
   }
 
   private displace(geo: THREE.BufferGeometry, amount: number): void {

@@ -16,6 +16,8 @@ export interface RunStats {
 
   // upgrade levels
   upgrades: Record<UpgradeId, number>;
+  // unlocked synergy evolutions ("break the game" builds)
+  evolutions: { cyclone: boolean; macrophage: boolean; surge: boolean };
 
   // derived dials (recomputed from upgrades + persistent plaque)
   spawnRate: number; // LDL spawned per second
@@ -35,6 +37,7 @@ export function createRunStats(plaqueBurden: number): RunStats {
     ldlCleared: 0,
     foamEmbedded: 0,
     upgrades: { shear: 0, hdl: 0, antioxidant: 0, statin: 0, clearance: 0 },
+    evolutions: { cyclone: false, macrophage: false, surge: false },
     spawnRate: 0,
     fireInterval: 0,
     oxidationSeconds: 0,

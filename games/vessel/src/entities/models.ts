@@ -59,6 +59,35 @@ export function makeFoamGeometry(seed = 1): THREE.BufferGeometry {
   return geo;
 }
 
+/**
+ * Boss "Thrombus": a large clotted mass — a heavily displaced core studded with
+ * merged lumps so it reads as a menacing authored silhouette, not a sphere.
+ */
+export function makeBossGeometry(): THREE.BufferGeometry {
+  const parts: THREE.BufferGeometry[] = [];
+  const core = new THREE.IcosahedronGeometry(1.5, 3);
+  const pos = core.attributes.position as THREE.BufferAttribute;
+  const v = new THREE.Vector3();
+  for (let i = 0; i < pos.count; i += 1) {
+    v.fromBufferAttribute(pos, i);
+    const n = Math.sin(v.x * 3 + 1) * 0.5 + Math.cos(v.y * 4) * 0.3 + Math.sin(v.z * 5 + 2) * 0.2;
+    v.multiplyScalar(1 + n * 0.18);
+    pos.setXYZ(i, v.x, v.y, v.z);
+  }
+  core.computeVertexNormals();
+  parts.push(core);
+  for (let i = 0; i < 7; i += 1) {
+    const a = (i / 7) * Math.PI * 2;
+    const lump = new THREE.IcosahedronGeometry(0.5 + Math.random() * 0.35, 1);
+    lump.translate(Math.cos(a) * 1.4, (Math.random() - 0.5) * 1.6, Math.sin(a) * 1.4);
+    parts.push(lump);
+  }
+  const merged = mergeGeometries(parts, false);
+  for (const p of parts) p.dispose();
+  merged.computeVertexNormals();
+  return merged;
+}
+
 /** A soft additive glow sprite for cores, used to push bloom on hero elements. */
 export function makeGlowTexture(color = '#9ffff0'): THREE.CanvasTexture {
   const size = 128;

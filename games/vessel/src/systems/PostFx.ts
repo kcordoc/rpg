@@ -25,13 +25,25 @@ const VignetteShader = {
     uniform float pulse;
     varying vec2 vUv;
     void main() {
-      vec4 color = texture2D(tDiffuse, vUv);
       vec2 d = vUv - 0.5;
+      float dist = length(d);
+      // chromatic aberration: subtle at the edges, strong during a rupture flash
+      float ca = (0.0016 + pulse * 0.01) * dist;
+      vec2 dir = normalize(d + 1e-5);
+      vec3 color;
+      color.r = texture2D(tDiffuse, vUv - dir * ca).r;
+      color.g = texture2D(tDiffuse, vUv).g;
+      color.b = texture2D(tDiffuse, vUv + dir * ca).b;
+      // grade: gentle contrast + saturation for a richer, filmic look
+      color = (color - 0.5) * 1.08 + 0.5;
+      float luma = dot(color, vec3(0.299, 0.587, 0.114));
+      color = mix(vec3(luma), color, 1.18);
+      // vignette
       float vig = smoothstep(0.85, 0.2, dot(d, d) * strength * 2.6);
-      color.rgb *= mix(0.55, 1.0, vig);
-      // damage flash: lift reds toward the edges
-      color.rgb += vec3(0.7, 0.05, 0.08) * pulse * (1.0 - vig);
-      gl_FragColor = color;
+      color *= mix(0.5, 1.0, vig);
+      // damage flash lifts reds toward the edges
+      color += vec3(0.7, 0.05, 0.08) * pulse * (1.0 - vig);
+      gl_FragColor = vec4(color, 1.0);
     }
   `,
 };
@@ -50,7 +62,7 @@ export class PostFx {
     this.composer.addPass(new RenderPass(scene, camera));
 
     // half-resolution bloom: most of the cost with little visible loss
-    this.bloom = new UnrealBloomPass(size.clone().multiplyScalar(0.5), 0.55, 0.6, 0.85);
+    this.bloom = new UnrealBloomPass(size.clone().multiplyScalar(0.5), 0.5, 0.6, 0.9);
     this.composer.addPass(this.bloom);
 
     this.vignette = new ShaderPass(VignetteShader);
