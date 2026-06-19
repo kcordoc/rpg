@@ -1,143 +1,253 @@
 import * as THREE from 'three';
 import { RUN } from '../game/content';
 
-// The world: a length of artery seen from just inside the lumen. Blood flows
-// along -X. The two banks (walls) are where LDL embeds; as plaque builds, the
-// walls visibly close in — that narrowing IS the stenosis the end card reports.
+const TUBE_RADIUS = 13;
+const TUBE_CY = 11.8; // centre height so we sit in the lower lumen
+const TUBE_LENGTH = 66;
+
+// The world: the inside of a living blood vessel. One large organic tube (seen
+// from within), endothelial walls with displacement, plaque ridges that grow
+// along the banks, drifting plasma motes, and a heartbeat that drives the flow.
+// Authored geometry — not a flat plane with fog over it.
 export class Vessel {
   readonly group = new THREE.Group();
-  /** foam-cell deposits get parented here so they ride with the wall */
   readonly depositLayer = new THREE.Group();
 
-  private readonly wallNear: THREE.Mesh;
-  private readonly wallFar: THREE.Mesh;
-  private readonly flowTexture: THREE.CanvasTexture;
   private readonly wallMat: THREE.MeshStandardMaterial;
+  private readonly flowTexture: THREE.CanvasTexture;
+  private readonly ridgeNear: THREE.Mesh;
+  private readonly ridgeFar: THREE.Mesh;
+  private readonly motes: THREE.Sprite[] = [];
+  private readonly beatLight: THREE.PointLight;
   private narrowing = 0;
+  private inflammation = 0;
+  private clock = 0;
   private readonly baseWallZ = RUN.wallZ;
 
   constructor(scene: THREE.Scene) {
-    scene.background = new THREE.Color('#2a0608');
-    scene.fog = new THREE.Fog('#2a0608', 18, 40);
+    scene.background = new THREE.Color('#1c0305');
+    scene.fog = new THREE.Fog('#240407', 16, 46);
 
-    const hemi = new THREE.HemisphereLight('#ff8f86', '#3a0a0d', 1.4);
+    // ---- lighting stack: key / fill / rim + a pulsing practical ----
+    const hemi = new THREE.HemisphereLight('#ff9a8c', '#260406', 1.1);
     scene.add(hemi);
-    const key = new THREE.DirectionalLight('#ffd2c2', 2.1);
-    key.position.set(-4, 11, 5);
+    const key = new THREE.DirectionalLight('#ffd9c8', 1.9);
+    key.position.set(-5, 13, 5);
     key.castShadow = true;
     key.shadow.mapSize.set(1024, 1024);
     key.shadow.camera.near = 0.5;
-    key.shadow.camera.far = 36;
-    key.shadow.camera.left = -16;
-    key.shadow.camera.right = 16;
-    key.shadow.camera.top = 10;
-    key.shadow.camera.bottom = -10;
+    key.shadow.camera.far = 40;
+    key.shadow.camera.left = -18;
+    key.shadow.camera.right = 18;
+    key.shadow.camera.top = 12;
+    key.shadow.camera.bottom = -12;
     scene.add(key);
-    const rim = new THREE.PointLight('#ff5a52', 0.8, 30);
-    rim.position.set(6, 4, -6);
+    const rim = new THREE.DirectionalLight('#ff5a66', 0.8);
+    rim.position.set(6, 4, -10);
     scene.add(rim);
+    this.beatLight = new THREE.PointLight('#ff6b6b', 0.6, 44, 1.6);
+    this.beatLight.position.set(0, 6, 0);
+    scene.add(this.beatLight);
 
-    // Lumen floor (the bloodstream) with a scrolling flow texture.
-    this.flowTexture = this.createFlowTexture();
-    this.flowTexture.wrapS = THREE.RepeatWrapping;
-    this.flowTexture.wrapT = THREE.RepeatWrapping;
-    this.flowTexture.repeat.set(6, 2);
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(RUN.arena.halfWidth * 2 + 6, RUN.arena.halfDepth * 2 + 6),
-      new THREE.MeshStandardMaterial({
-        color: '#7a0f16',
-        map: this.flowTexture,
-        roughness: 0.5,
-        metalness: 0.05,
-        emissive: '#3a060a',
-        emissiveIntensity: 0.5,
-      }),
-    );
-    floor.rotation.x = -Math.PI / 2;
-    floor.position.y = -0.02;
-    floor.receiveShadow = true;
-    this.group.add(floor);
-
-    // The two artery walls (banks).
+    // ---- endothelial tube ----
     this.wallMat = new THREE.MeshStandardMaterial({
-      color: '#b23a3f',
-      roughness: 0.85,
+      color: '#9c2b30',
+      map: this.createWallTexture(),
+      roughness: 0.82,
       metalness: 0.0,
-      emissive: '#3c0d10',
-      emissiveIntensity: 0.4,
+      emissive: '#48070c',
+      emissiveIntensity: 0.5,
+      side: THREE.BackSide,
     });
-    const wallGeo = new THREE.BoxGeometry(RUN.arena.halfWidth * 2 + 6, 3.2, 2.4);
-    this.wallNear = new THREE.Mesh(wallGeo, this.wallMat);
-    this.wallFar = new THREE.Mesh(wallGeo, this.wallMat);
-    this.wallNear.receiveShadow = true;
-    this.wallFar.receiveShadow = true;
-    this.group.add(this.wallNear, this.wallFar);
+    const tubeGeo = new THREE.CylinderGeometry(TUBE_RADIUS, TUBE_RADIUS, TUBE_LENGTH, 30, 40, true);
+    this.displace(tubeGeo, 0.55);
+    tubeGeo.rotateZ(Math.PI / 2); // axis along X
+    const tube = new THREE.Mesh(tubeGeo, this.wallMat);
+    tube.position.y = TUBE_CY;
+    tube.receiveShadow = true;
+    this.group.add(tube);
 
-    // A branch notch — the curiosity cue: plaque starts where flow is disturbed.
-    const branchMat = new THREE.MeshStandardMaterial({ color: '#8e2329', roughness: 0.9, emissive: '#2c080a', emissiveIntensity: 0.3 });
-    const branch = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 2.1, 2.4, 20, 1, true), branchMat);
-    branch.rotation.x = Math.PI / 2;
-    branch.position.set(1.5, 0.4, this.baseWallZ + 1.4);
+    // ---- plaque ridges along both banks (the visible stenosis) ----
+    const ridgeMat = new THREE.MeshStandardMaterial({
+      color: '#c9a23e',
+      roughness: 0.95,
+      metalness: 0.0,
+      emissive: '#3a2c08',
+      emissiveIntensity: 0.25,
+    });
+    const ridgeGeo = new THREE.CylinderGeometry(0.9, 1.25, RUN.arena.halfWidth * 2 + 8, 7, 24);
+    this.displace(ridgeGeo, 0.28);
+    ridgeGeo.rotateZ(Math.PI / 2);
+    this.ridgeNear = new THREE.Mesh(ridgeGeo, ridgeMat);
+    this.ridgeFar = new THREE.Mesh(ridgeGeo, ridgeMat);
+    this.ridgeNear.receiveShadow = true;
+    this.ridgeFar.receiveShadow = true;
+    this.group.add(this.ridgeNear, this.ridgeFar);
+
+    // ---- a branching side-vessel: the curiosity cue (plaque starts at branches) ----
+    const branchGeo = new THREE.CylinderGeometry(2.4, 3.0, 9, 28, 6, true);
+    this.displace(branchGeo, 0.4);
+    const branchMat = new THREE.MeshStandardMaterial({ color: '#7e2026', roughness: 0.85, emissive: '#360609', emissiveIntensity: 0.4, side: THREE.BackSide });
+    const branch = new THREE.Mesh(branchGeo, branchMat);
+    branch.rotation.x = -Math.PI / 3.2;
+    branch.position.set(2.5, 2.2, this.baseWallZ + 3.5);
     this.group.add(branch);
+
+    // ---- drifting plasma motes (foreground depth + motion) ----
+    this.createMotes();
 
     this.group.add(this.depositLayer);
     scene.add(this.group);
-    this.applyWalls();
+
+    this.flowTexture = this.wallMat.map as THREE.CanvasTexture;
+    this.applyRidges();
   }
 
-  /** wall Z position for the nearest bank a particle can embed on, given a side */
   wallZ(side: 1 | -1): number {
-    return side * (this.baseWallZ - this.narrowing);
+    return side * (this.baseWallZ - this.narrowing * 1.4);
   }
 
-  /** 0..1 — how closed the lumen is right now */
   setNarrowing(frac: number): void {
-    this.narrowing = THREE.MathUtils.clamp(frac, 0, 1) * 3.0;
-    this.applyWalls();
+    this.narrowing = THREE.MathUtils.clamp(frac, 0, 1);
+    this.applyRidges();
   }
 
-  /** 0..100 percent narrowing for reporting */
   narrowingPercent(): number {
-    return Math.round((this.narrowing / 3.0) * 100);
+    return Math.round(this.narrowing * 100);
   }
 
-  /** flag the wall as inflamed/unstable (visual feedback for danger) */
   setInflammation(frac: number): void {
-    const t = THREE.MathUtils.clamp(frac, 0, 1);
-    this.wallMat.emissive.setRGB(0.24 + t * 0.55, 0.05, 0.06);
-    this.wallMat.emissiveIntensity = 0.4 + t * 0.9;
+    this.inflammation = THREE.MathUtils.clamp(frac, 0, 1);
   }
 
   update(delta: number): void {
-    this.flowTexture.offset.x -= delta * 0.55;
+    this.clock += delta;
+    // heartbeat: a sharp systolic surge then decay, ~once per second
+    const beatPhase = (this.clock * 1.1) % 1;
+    const beat = Math.exp(-beatPhase * 6) + 0.25 * Math.exp(-((beatPhase - 0.18) ** 2) * 60);
+
+    this.flowTexture.offset.x -= delta * (0.5 + beat * 0.7);
+    this.beatLight.intensity = 0.45 + beat * 1.1;
+
+    const inflame = this.inflammation;
+    this.wallMat.emissive.setRGB(0.28 + inflame * 0.5, 0.05 + beat * 0.04, 0.06);
+    this.wallMat.emissiveIntensity = 0.45 + beat * 0.35 + inflame * 0.6;
+
+    // drift motes downstream and recycle
+    for (const mote of this.motes) {
+      mote.position.x -= delta * (3 + beat * 3);
+      if (mote.position.x < -TUBE_LENGTH / 2) this.recycleMote(mote);
+    }
   }
 
-  private applyWalls(): void {
-    const z = this.baseWallZ - this.narrowing;
-    this.wallNear.position.set(0, 1.0, z + 1.2);
-    this.wallFar.position.set(0, 1.0, -(z + 1.2));
+  dispose(): void {
+    this.flowTexture.dispose();
   }
 
-  private createFlowTexture(): THREE.CanvasTexture {
-    const size = 256;
+  private applyRidges(): void {
+    const z = this.baseWallZ + 0.6;
+    const height = 0.5 + this.narrowing * 2.4;
+    const spread = 1 + this.narrowing * 1.2;
+    this.ridgeNear.position.set(0, 0.0, z - this.narrowing * 1.2);
+    this.ridgeFar.position.set(0, 0.0, -(z - this.narrowing * 1.2));
+    this.ridgeNear.scale.set(1, height, spread);
+    this.ridgeFar.scale.set(1, height, spread);
+  }
+
+  private createMotes(): void {
+    const tex = this.createMoteTexture();
+    const mat = new THREE.SpriteMaterial({ map: tex, color: '#c8323a', transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false });
+    for (let i = 0; i < 70; i += 1) {
+      const mote = new THREE.Sprite(mat.clone());
+      this.placeMote(mote, true);
+      this.group.add(mote);
+      this.motes.push(mote);
+    }
+  }
+
+  private placeMote(mote: THREE.Sprite, anywhere: boolean): void {
+    const angle = Math.random() * Math.PI * 2;
+    const r = (0.3 + Math.random() * 0.7) * (TUBE_RADIUS - 3);
+    mote.position.set(
+      anywhere ? (Math.random() - 0.5) * TUBE_LENGTH : TUBE_LENGTH / 2,
+      TUBE_CY + Math.sin(angle) * r * 0.5 - 4,
+      Math.cos(angle) * r,
+    );
+    const s = 0.4 + Math.random() * 1.1;
+    mote.scale.setScalar(s);
+  }
+
+  private recycleMote(mote: THREE.Sprite): void {
+    this.placeMote(mote, false);
+  }
+
+  private displace(geo: THREE.BufferGeometry, amount: number): void {
+    const pos = geo.attributes.position as THREE.BufferAttribute;
+    const v = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i += 1) {
+      v.fromBufferAttribute(pos, i);
+      const n =
+        Math.sin(v.x * 1.3 + v.y * 0.7) * 0.5 +
+        Math.cos(v.y * 1.1 + v.z * 1.4) * 0.3 +
+        Math.sin(v.z * 1.7 + v.x * 0.9) * 0.2;
+      const dir = v.clone().normalize();
+      v.addScaledVector(dir, n * amount);
+      pos.setXYZ(i, v.x, v.y, v.z);
+    }
+    geo.computeVertexNormals();
+  }
+
+  private createWallTexture(): THREE.CanvasTexture {
+    const size = 512;
     const canvas = document.createElement('canvas');
     canvas.width = size;
     canvas.height = size;
     const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('flow texture context');
-    ctx.fillStyle = '#6c0d14';
+    if (!ctx) throw new Error('wall texture context');
+    ctx.fillStyle = '#7e1e24';
     ctx.fillRect(0, 0, size, size);
-    for (let i = 0; i < 90; i += 1) {
-      const y = Math.random() * size;
-      const len = 30 + Math.random() * 120;
+    // mottled endothelial cells
+    for (let i = 0; i < 520; i += 1) {
       const x = Math.random() * size;
-      ctx.strokeStyle = `rgba(${200 + Math.random() * 40 | 0}, ${40 + Math.random() * 30 | 0}, ${50 + Math.random() * 30 | 0}, ${0.15 + Math.random() * 0.25})`;
-      ctx.lineWidth = 1 + Math.random() * 2;
+      const y = Math.random() * size;
+      const r = 8 + Math.random() * 28;
+      const shade = 110 + Math.random() * 70;
+      ctx.fillStyle = `rgba(${shade}, ${24 + Math.random() * 20}, ${28 + Math.random() * 18}, ${0.12 + Math.random() * 0.18})`;
       ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + len, y);
+      ctx.ellipse(x, y, r, r * (0.6 + Math.random() * 0.6), Math.random() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // faint vessels / striations
+    ctx.strokeStyle = 'rgba(60, 8, 12, 0.4)';
+    for (let i = 0; i < 40; i += 1) {
+      ctx.lineWidth = 0.5 + Math.random() * 1.5;
+      ctx.beginPath();
+      const y = Math.random() * size;
+      ctx.moveTo(0, y);
+      ctx.bezierCurveTo(size * 0.3, y + (Math.random() - 0.5) * 60, size * 0.6, y + (Math.random() - 0.5) * 60, size, y + (Math.random() - 0.5) * 40);
       ctx.stroke();
     }
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(5, 3);
+    return tex;
+  }
+
+  private createMoteTexture(): THREE.CanvasTexture {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('mote texture context');
+    const grad = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    grad.addColorStop(0, '#ff8a8a');
+    grad.addColorStop(0.5, '#c8323a88');
+    grad.addColorStop(1, '#00000000');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
     return tex;

@@ -9,6 +9,8 @@ import { Enemies } from '../systems/Enemies';
 import { Weapons } from '../systems/Weapons';
 import { GameHud } from '../systems/GameHud';
 import { Overlays, type EndSummary } from '../systems/Overlays';
+import { PostFx } from '../systems/PostFx';
+import { Vfx } from '../systems/Vfx';
 import { RUN, UPGRADES, WAVE_BEATS, STICKY_FACT, type UpgradeCard } from './content';
 import { createRunStats, recomputeDials, type RunStats } from './types';
 import { loadArtery, saveArtery, resetArtery, type ArteryState } from './storage';
@@ -30,9 +32,13 @@ export class Game {
   private readonly weapons: Weapons;
   private readonly hud = new GameHud();
   private readonly overlays = new Overlays();
+  private readonly vfx: Vfx;
+  private postfx!: PostFx;
+  private readonly drawBuffer = new THREE.Vector2();
+  private lastDelta = 0;
   private readonly loop = new Loop(
     (delta, elapsed) => this.update(delta, elapsed),
-    () => this.renderer.render(this.scene, this.camera),
+    () => this.postfx.render(this.lastDelta),
   );
 
   private artery: ArteryState;
@@ -55,7 +61,13 @@ export class Game {
 
     this.vessel = new Vessel(this.scene);
     this.scene.add(this.guardian.group);
-    this.enemies = new Enemies(this.scene, this.vessel, () => this.onClear(), () => this.onEmbed());
+    this.vfx = new Vfx(this.scene);
+    this.enemies = new Enemies(
+      this.scene,
+      this.vessel,
+      (pos) => this.onClear(pos),
+      (pos) => this.onEmbed(pos),
+    );
     this.weapons = new Weapons(this.scene, this.guardian, this.enemies);
 
     this.artery = loadArtery();
@@ -63,6 +75,8 @@ export class Game {
 
     this.cameraRig.snapTo(this.guardian.group.position);
     resizeRenderer(this.renderer, this.camera);
+    this.renderer.getDrawingBufferSize(this.drawBuffer);
+    this.postfx = new PostFx(this.renderer, this.scene, this.camera, this.drawBuffer);
     this.beginRun();
     this.publishDiagnostics();
   }
@@ -76,6 +90,8 @@ export class Game {
     this.input.dispose();
     this.enemies.dispose();
     this.weapons.dispose();
+    this.vfx.dispose();
+    this.vessel.dispose();
     this.guardian.dispose();
     this.renderer.dispose();
     window.__THREE_GAME_DIAGNOSTICS__ = undefined;
@@ -94,8 +110,13 @@ export class Game {
 
   private update(delta: number, elapsed: number): void {
     this.frame += 1;
-    resizeRenderer(this.renderer, this.camera);
+    this.lastDelta = delta;
+    if (resizeRenderer(this.renderer, this.camera)) {
+      this.renderer.getDrawingBufferSize(this.drawBuffer);
+      this.postfx.setSize(this.drawBuffer.x, this.drawBuffer.y);
+    }
     this.vessel.update(delta);
+    this.vfx.update(delta);
 
     if (this.mode === 'playing') {
       this.elapsed += delta;
@@ -153,12 +174,16 @@ export class Game {
     }
   }
 
-  private onClear(): void {
+  private onClear(pos: THREE.Vector3): void {
     this.stats.ldlCleared += 1;
     this.stats.xp += 1;
+    this.vfx.burst(pos, '#9ffff0', 5, 4.5, 0.4);
   }
 
-  private onEmbed(): void {
+  private onEmbed(pos: THREE.Vector3): void {
+    this.vfx.burst(pos, '#ff7a2e', 9, 5, 0.55);
+    this.cameraRig.impulse(0.28);
+    this.postfx.flashDamage(0.35);
     if (this.stats.wallIntegrity < 35) {
       this.overlays.toast('Vulnerable plaque — the cap is thinning.', 'info', 2600);
     }
@@ -189,6 +214,12 @@ export class Game {
     const narrowing = Math.round(this.currentNarrowing());
     const lateRupture = !ruptured && this.stats.capStability < 32 && this.stats.inflammation > 62;
     const didRupture = ruptured || lateRupture;
+
+    if (didRupture) {
+      this.postfx.flashDamage(1);
+      this.cameraRig.impulse(0.9);
+      this.vfx.burst(this.guardian.group.position, '#ff3a2a', 24, 8, 0.7);
+    }
 
     // cumulative exposure: plaque you let embed carries into the next run
     this.artery = {

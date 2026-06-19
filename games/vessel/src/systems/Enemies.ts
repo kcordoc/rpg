@@ -2,10 +2,12 @@ import * as THREE from 'three';
 import type { RunStats } from '../game/types';
 import { RUN } from '../game/content';
 import type { Vessel } from './Vessel';
+import { makeLdlGeometry, makeFoamGeometry } from '../entities/models';
 
 export interface Ldl {
   mesh: THREE.Mesh;
   vel: THREE.Vector3;
+  spin: THREE.Vector3;
   side: 1 | -1;
   targetX: number;
   state: 'drift' | 'sticking';
@@ -14,23 +16,25 @@ export interface Ldl {
   alive: boolean;
 }
 
-const LDL_BASE_COLOR = new THREE.Color('#ffd34d');
-const LDL_OX_COLOR = new THREE.Color('#ff6a2b');
+const LDL_BASE_COLOR = new THREE.Color('#e8c24a');
+const LDL_OX_COLOR = new THREE.Color('#ff5a1e');
 
-// LDL particles: spawn upstream, seek the nearest wall, and — if not cleared in
-// time — oxidise and embed as a foam cell (permanent plaque + wall damage).
+// LDL particles: authored lipid globules that drift in, seek a bank, oxidise
+// (waxy yellow -> molten emissive orange), and embed as lumpy foam-cell plaque.
+// Three readable states: fresh, oxidising, embedded.
 export class Enemies {
   spawnEnabled = false;
 
   private readonly ldls: Ldl[] = [];
   private readonly deposits: THREE.Mesh[] = [];
   private spawnTimer = 0;
-  private readonly geo = new THREE.SphereGeometry(0.34, 10, 10);
-  private readonly depositGeo = new THREE.DodecahedronGeometry(0.42, 0);
+  private readonly geo = makeLdlGeometry();
+  private readonly foamGeos = [makeFoamGeometry(1), makeFoamGeometry(2), makeFoamGeometry(3)];
   private readonly depositMat = new THREE.MeshStandardMaterial({
-    color: '#caa23a',
-    roughness: 0.95,
-    emissive: '#3a2a06',
+    color: '#cdab46',
+    roughness: 0.96,
+    metalness: 0.0,
+    emissive: '#2e2206',
     emissiveIntensity: 0.3,
   });
   private readonly tmp = new THREE.Vector3();
@@ -38,8 +42,8 @@ export class Enemies {
   constructor(
     private readonly scene: THREE.Scene,
     private readonly vessel: Vessel,
-    private readonly onClear: () => void,
-    private readonly onEmbed: () => void,
+    private readonly onClear: (pos: THREE.Vector3) => void,
+    private readonly onEmbed: (pos: THREE.Vector3) => void,
   ) {}
 
   get activeCount(): number {
@@ -63,38 +67,38 @@ export class Enemies {
     for (const ldl of this.ldls) {
       if (!ldl.alive) continue;
       const p = ldl.mesh.position;
+      ldl.mesh.rotation.x += ldl.spin.x * delta;
+      ldl.mesh.rotation.y += ldl.spin.y * delta;
 
       if (ldl.state === 'drift') {
         const targetZ = this.vessel.wallZ(ldl.side);
         this.tmp.set(ldl.targetX, p.y, targetZ).sub(p);
         const dist = this.tmp.length();
-        if (dist < 0.45) {
+        if (dist < 0.5) {
           ldl.state = 'sticking';
           ldl.vel.set(0, 0, 0);
         } else {
           this.tmp.normalize();
-          // overall blood flow drags everything gently downstream (-X) too
           ldl.vel.copy(this.tmp).multiplyScalar(2.4);
-          ldl.vel.x -= 0.8;
+          ldl.vel.x -= 0.8; // blood flow drags downstream
           p.addScaledVector(ldl.vel, delta);
         }
       } else {
-        // stuck to the wall, oxidising
         ldl.oxidation += delta;
         const t = Math.min(1, ldl.oxidation / stats.oxidationSeconds);
-        (ldl.mesh.material as THREE.MeshStandardMaterial).color.copy(LDL_BASE_COLOR).lerp(LDL_OX_COLOR, t);
-        ldl.mesh.scale.setScalar(1 + t * 0.35);
-        if (ldl.oxidation >= stats.oxidationSeconds) {
-          this.embed(ldl, stats);
-        }
+        const mat = ldl.mesh.material as THREE.MeshStandardMaterial;
+        mat.color.copy(LDL_BASE_COLOR).lerp(LDL_OX_COLOR, t);
+        mat.emissive.copy(LDL_OX_COLOR);
+        mat.emissiveIntensity = t * 1.8;
+        ldl.mesh.scale.setScalar(1 + t * 0.4);
+        ldl.spin.y = 1.5 + t * 6;
+        if (ldl.oxidation >= stats.oxidationSeconds) this.embed(ldl, stats);
       }
 
-      // flowed all the way through without embedding: cleared from blood naturally
       if (p.x < -RUN.arena.halfWidth - 2) this.kill(ldl);
     }
   }
 
-  /** weapons call this to damage the LDL nearest to a point within range */
   damageNearest(point: THREE.Vector3, range: number, amount: number): boolean {
     let best: Ldl | null = null;
     let bestDist = range * range;
@@ -109,28 +113,26 @@ export class Enemies {
     if (!best) return false;
     best.hp -= amount;
     if (best.hp <= 0) {
+      this.onClear(best.mesh.position);
       this.kill(best);
-      this.onClear();
     }
     return true;
   }
 
-  /** HDL escort / collision clear: kill any LDL touching a point */
   clearTouching(point: THREE.Vector3, radius: number): number {
     let cleared = 0;
     const r2 = radius * radius;
     for (const ldl of this.ldls) {
       if (!ldl.alive) continue;
       if (ldl.mesh.position.distanceToSquared(point) < r2) {
+        this.onClear(ldl.mesh.position);
         this.kill(ldl);
-        this.onClear();
         cleared += 1;
       }
     }
     return cleared;
   }
 
-  /** shear wave: knock sticking LDL back into the flow, resetting oxidation */
   shearFrom(center: THREE.Vector3, radius: number): void {
     const r2 = radius * radius;
     for (const ldl of this.ldls) {
@@ -140,6 +142,9 @@ export class Enemies {
         ldl.oxidation = 0;
         ldl.targetX = ldl.mesh.position.x - 3 - Math.random() * 3;
         ldl.mesh.scale.setScalar(1);
+        const mat = ldl.mesh.material as THREE.MeshStandardMaterial;
+        mat.color.copy(LDL_BASE_COLOR);
+        mat.emissiveIntensity = 0;
       }
     }
   }
@@ -157,27 +162,32 @@ export class Enemies {
     for (const d of this.deposits) this.vessel.depositLayer.remove(d);
     this.deposits.length = 0;
     this.geo.dispose();
-    this.depositGeo.dispose();
+    for (const g of this.foamGeos) g.dispose();
     this.depositMat.dispose();
   }
 
   private spawn(): void {
-    // cap concurrent LDL for mobile perf
     if (this.activeCount > 90) return;
     const recycled = this.ldls.find((l) => !l.alive);
     const side: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
     const z = side * (RUN.arena.halfDepth * (0.1 + Math.random() * 0.4));
     const mesh = recycled
       ? recycled.mesh
-      : new THREE.Mesh(this.geo, new THREE.MeshStandardMaterial({ roughness: 0.4, metalness: 0.1, emissive: '#5a3a00', emissiveIntensity: 0.4 }));
+      : new THREE.Mesh(this.geo, new THREE.MeshStandardMaterial({ roughness: 0.45, metalness: 0.05 }));
     mesh.position.set(RUN.arena.halfWidth + 1.5, 0.9, z);
-    mesh.scale.setScalar(1);
+    mesh.scale.setScalar(0.85 + Math.random() * 0.4);
+    mesh.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
     mesh.castShadow = true;
-    (mesh.material as THREE.MeshStandardMaterial).color.copy(LDL_BASE_COLOR);
+    const mat = mesh.material as THREE.MeshStandardMaterial;
+    mat.color.copy(LDL_BASE_COLOR);
+    mat.emissive.copy(LDL_OX_COLOR);
+    mat.emissiveIntensity = 0;
 
     const data: Ldl = recycled ?? ({} as Ldl);
     data.mesh = mesh;
     data.vel = data.vel ?? new THREE.Vector3();
+    data.spin = data.spin ?? new THREE.Vector3();
+    data.spin.set(Math.random() * 1.4, Math.random() * 1.4, 0);
     data.side = side;
     data.targetX = -RUN.arena.halfWidth + 1 + Math.random() * (RUN.arena.halfWidth * 1.6);
     data.state = 'drift';
@@ -185,12 +195,8 @@ export class Enemies {
     data.hp = 2;
     data.alive = true;
 
-    if (!recycled) {
-      this.ldls.push(data);
-      this.scene.add(mesh);
-    } else {
-      this.scene.add(mesh);
-    }
+    if (!recycled) this.ldls.push(data);
+    this.scene.add(mesh);
   }
 
   private kill(ldl: Ldl): void {
@@ -199,20 +205,27 @@ export class Enemies {
   }
 
   private embed(ldl: Ldl, stats: RunStats): void {
-    const deposit = new THREE.Mesh(this.depositGeo, this.depositMat);
-    deposit.position.copy(ldl.mesh.position);
-    deposit.position.y = 0.5;
-    deposit.scale.setScalar(0.7 + Math.random() * 0.5);
-    deposit.castShadow = true;
-    this.vessel.depositLayer.add(deposit);
-    this.deposits.push(deposit);
+    const cluster = 1 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < cluster; i += 1) {
+      const geo = this.foamGeos[Math.floor(Math.random() * this.foamGeos.length)];
+      const deposit = new THREE.Mesh(geo, this.depositMat);
+      deposit.position.copy(ldl.mesh.position);
+      deposit.position.x += (Math.random() - 0.5) * 0.8;
+      deposit.position.z += ldl.side * Math.random() * 0.4;
+      deposit.position.y = 0.4 + Math.random() * 0.3;
+      deposit.scale.setScalar(0.6 + Math.random() * 0.6);
+      deposit.rotation.set(Math.random() * 3, Math.random() * 3, Math.random() * 3);
+      deposit.castShadow = true;
+      this.vessel.depositLayer.add(deposit);
+      this.deposits.push(deposit);
+    }
 
     stats.foamEmbedded += 1;
     stats.wallIntegrity = Math.max(0, stats.wallIntegrity - 5.5);
     stats.capStability = Math.max(0, stats.capStability - 2.2);
     stats.inflammation = Math.min(100, stats.inflammation + 5);
 
+    this.onEmbed(ldl.mesh.position);
     this.kill(ldl);
-    this.onEmbed();
   }
 }
